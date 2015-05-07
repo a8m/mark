@@ -2,6 +2,7 @@ package mark
 
 import (
 	"go/token"
+	"unicode/utf8"
 )
 
 // itemType identifies the type of lex items.
@@ -54,7 +55,7 @@ type lexer struct {
 	name       string    // the name of the input; used only for error reports
 	input      string    // the string being scanned
 	state      stateFn   // the next lexing function to enter
-	posPos     token.Pos // current position in the input
+	pos        token.Pos // current position in the input
 	start      token.Pos // start position of this item
 	width      token.Pos // width of last rune read from input
 	lastPos    token.Pos // position of most recent item returned by nextItem
@@ -80,7 +81,23 @@ func (l *lexer) run() {
 	}
 }
 
+// next return the next rune in the input
+func (l *lexer) next() rune {
+	if !l.done && int(l.pos) >= len(l.input) {
+		l.width = 0
+		return itemEOF
+	}
+	r, w := utf8.DecodeRuneInString(l.input[l.pos:])
+	l.width = token.Pos(w)
+	l.pos += l.width
+	return r
+}
+
 // lexAny scans non-space items.
 func lexAny(l *lexer) stateFn {
-
+	switch r := l.next(); {
+	default:
+		fmt.Println("unrecognized character: %#U", r)
+		return lexAny
+	}
 }
