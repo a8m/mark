@@ -3,6 +3,7 @@ package mark
 type Tree struct {
 	text string
 	lex  *lexer
+	// TODO: add NodeList
 }
 
 func Parse(text string) (err error) {
