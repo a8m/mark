@@ -2,6 +2,7 @@ package mark
 
 import (
 	"fmt"
+	"regexp"
 	"unicode/utf8"
 )
 
@@ -43,6 +44,11 @@ const (
 	itemCode
 	itemImages
 )
+
+// Block Grammer
+var block = map[string]*regexp.Regexp{
+	"heading": regexp.MustCompile("^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)"),
+}
 
 // stateFn represents the state of the scanner as a function that returns the next state.
 type stateFn func(*lexer) stateFn
@@ -96,8 +102,38 @@ func lexAny(l *lexer) stateFn {
 	switch r := l.next(); {
 	case r == eof:
 		return nil
+	case r == '#':
+		l.backup()
+		return lexHeading
 	default:
 		fmt.Printf("unrecognized character: %#U\n", r)
 		return lexAny
 	}
+}
+
+// lexHeading scans heading items.
+func lexHeading(l *lexer) stateFn {
+	if block["heading"].MatchString(l.input[l.pos:]) {
+		match := block["heading"].FindString(l.input[l.pos:])
+		l.pos += Pos(len(match))
+		l.emit(itemHeading)
+		return lexAny
+	}
+	return lexText
+}
+
+// lexText scans until eol(\n)
+func lexText(l *lexer) stateFn {
+	return lexAny
+}
+
+// backup steps back one rune. Can only be called once per call of next.
+func (l *lexer) backup() {
+	l.pos -= l.width
+}
+
+// emit passes an item back to the client.
+func (l *lexer) emit(t itemType) {
+	l.items <- item{t, l.start, l.input[l.start:l.pos]}
+	l.start = l.pos
 }

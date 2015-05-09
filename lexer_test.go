@@ -6,6 +6,8 @@ import (
 )
 
 func TestBasic(t *testing.T) {
-	l := lex("foo", "#head \ndsadasd")
-	fmt.Println(<-l.items)
+	l := lex("foo", "#headder \n#bar")
+	for item := range l.items {
+		fmt.Println(item)
+	}
 }
