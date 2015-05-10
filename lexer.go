@@ -48,6 +48,7 @@ const (
 // Block Grammer
 var block = map[string]*regexp.Regexp{
 	"heading": regexp.MustCompile("^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)"),
+	"hr":      regexp.MustCompile("^( *[-*_]){3,} *(?:\n+|$)"),
 }
 
 // stateFn represents the state of the scanner as a function that returns the next state.
