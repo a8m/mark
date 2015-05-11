@@ -103,6 +103,9 @@ func lexAny(l *lexer) stateFn {
 	switch r := l.next(); {
 	case r == eof:
 		return nil
+	case r == '*' || r == '-':
+		l.backup()
+		return lexHr
 	case r == '#':
 		l.backup()
 		return lexHeading
@@ -123,14 +126,56 @@ func lexHeading(l *lexer) stateFn {
 	return lexText
 }
 
+// lexHr scans horizontal rules items.
+func lexHr(l *lexer) stateFn {
+	if block["hr"].MatchString(l.input[l.pos:]) {
+		match := block["hr"].FindString(l.input[l.pos:])
+		l.pos += Pos(len(match))
+		l.emit(itemHr)
+		return lexAny
+	}
+	return lexText
+}
+
 // lexText scans until eol(\n)
 func lexText(l *lexer) stateFn {
+	/*
+	 * Conclusion: Maybe we can understad from the inputs about the inline things
+	 * and if to concat two or more paragraph(if we have new-line) between them
+	 */
+	for {
+		switch r := l.next(); r {
+		case '\n':
+			if l.peek() == '\n' {
+				// emit new line, but paragraph before
+				// and return lexAny
+			}
+			fallthrough
+		case ' ':
+			if l.peek() == ' ' {
+				// emit new line, but paragraph before
+				// and return lexAny
+			}
+		// if it's start as an emphasis
+		case '`', '_', '~', '*':
+			// test with regex which of them(if not, fallthrough)
+		default:
+			// emit text
+		}
+	}
 	return lexAny
 }
 
 // backup steps back one rune. Can only be called once per call of next.
 func (l *lexer) backup() {
 	l.pos -= l.width
+}
+
+// peek returns but does not consume the next rune in the input.
+func (l *lexer) peek() rune {
+	r := l.next()
+	l.backup()
+	return r
 }
 
 // emit passes an item back to the client.
