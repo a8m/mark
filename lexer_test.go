@@ -10,7 +10,7 @@ var tokenNames = map[itemType]string{
 	0:  "itemError",
 	1:  "itemNewLine",
 	2:  "itemHTML",
-	3:  "itemParagraph",
+	3:  "itemText",
 	4:  "itemLineBreak",
 	5:  "itemHeading",
 	6:  "itemLHeading",
@@ -48,7 +48,7 @@ func TestBasic(t *testing.T) {
 	}
 	// Test round 3
 	printRound(3)
-	l = lex("3", "one  two\n\nthree  ")
+	l = lex("3", "one  two\n\nthree  #header\n\nparagraph  ```js\ncodeblock```")
 	for item := range l.items {
 		fmt.Println(tokenNames[item.typ], "--->\n"+item.val)
 	}

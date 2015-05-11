@@ -27,7 +27,7 @@ const (
 	itemNewLine
 	itemHTML
 	// Block Elements
-	itemParagraph
+	itemText
 	itemLineBreak
 	itemHeading
 	itemLHeading
@@ -160,7 +160,6 @@ func lexHr(l *lexer) stateFn {
 
 // lexGfmCode scans GFM code block.
 func lexGfmCode(l *lexer) stateFn {
-	fmt.Println("Inside gfm")
 	re := block["gfm-code-1"]
 	// if it's the ~ version
 	if l.peek() == '~' {
@@ -191,10 +190,10 @@ Loop:
 		case r == '\n' && l.peek() == '\n' || r == ' ' && l.peek() == ' ':
 			// if we inside a paragraph(drain it before we emit new-line)
 			if l.pos > l.start {
-				l.emit(itemParagraph)
+				l.emit(itemText)
 			}
 			// length of new-line
-			l.pos += Pos(1)
+			l.pos++
 			l.emit(itemNewLine)
 			break Loop
 		// if it's start as an emphasis
