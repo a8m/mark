@@ -16,18 +16,19 @@ var tokenNames = map[itemType]string{
 	7:  "itemBlockQuote",
 	8:  "itemList",
 	9:  "itemCodeBlock",
-	10: "itemHr",
-	11: "itemTable",
-	12: "itemLinks",
-	13: "itemEmphasis",
-	14: "itemItalic",
-	15: "itemStrike",
-	16: "itemCode",
-	17: "itemImages",
+	10: "itemGfmCodeBlock",
+	11: "itemHr",
+	12: "itemTable",
+	13: "itemLinks",
+	14: "itemEmphasis",
+	15: "itemItalic",
+	16: "itemStrike",
+	17: "itemCode",
+	18: "itemImages",
 }
 
 func TestBasic(t *testing.T) {
-	l := lex("foo", "#headder \n#bar \n*** \n---")
+	l := lex("foo", "#headder \n#bar \n*** \n---\n```js\nfunction(){}\n```")
 	for item := range l.items {
 		fmt.Println(tokenNames[item.typ], "--->", item.val)
 	}

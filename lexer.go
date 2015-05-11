@@ -34,6 +34,7 @@ const (
 	itemBlockQuote
 	itemList
 	itemCodeBlock
+	itemGfmCodeBlock
 	itemHr
 	itemTable
 	// Span Elements
@@ -49,6 +50,10 @@ const (
 var block = map[string]*regexp.Regexp{
 	"heading": regexp.MustCompile("^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)"),
 	"hr":      regexp.MustCompile("^( *[-*_]){3,} *(?:\n+|$)"),
+	// Backreferences is unavailable
+	// TODO(Ariel): it's ugly, remove this duplicate
+	"gfm-code-1": regexp.MustCompile("^`{3,} *(\\S+)? *\n([\\s\\S]+?)\\s*`{3,}$ *(?:\n+|$)"),
+	"gfm-code-2": regexp.MustCompile("^~{3,} *(\\S+)? *\n([\\s\\S]+?)\\s*~{3,}$ *(?:\n+|$)"),
 }
 
 // stateFn represents the state of the scanner as a function that returns the next state.
@@ -103,12 +108,20 @@ func lexAny(l *lexer) stateFn {
 	switch r := l.next(); {
 	case r == eof:
 		return nil
-	case r == '*' || r == '-':
+	case r == '*', r == '-':
 		l.backup()
 		return lexHr
 	case r == '#':
 		l.backup()
 		return lexHeading
+	case r == '`', r == '~':
+		// if it's gfm-code
+		c := l.input[l.pos : l.pos+2]
+		if c == "``" || c == "~~" {
+			l.backup()
+			return lexGfmCode
+		}
+		fallthrough
 	default:
 		fmt.Printf("unrecognized character: %#U\n", r)
 		return lexAny
@@ -132,6 +145,22 @@ func lexHr(l *lexer) stateFn {
 		match := block["hr"].FindString(l.input[l.pos:])
 		l.pos += Pos(len(match))
 		l.emit(itemHr)
+		return lexAny
+	}
+	return lexText
+}
+
+// lexGfmCode scans GFM code block.
+func lexGfmCode(l *lexer) stateFn {
+	re := block["gfm-code-1"]
+	// if it's the ~ version
+	if l.peek() == '~' {
+		re = block["gfm-code-2"]
+	}
+	if re.MatchString(l.input[l.pos:]) {
+		match := re.FindString(l.input[l.pos:])
+		l.pos += Pos(len(match))
+		l.emit(itemGfmCodeBlock)
 		return lexAny
 	}
 	return lexText
