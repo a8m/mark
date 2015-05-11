@@ -28,8 +28,11 @@ var tokenNames = map[itemType]string{
 }
 
 func TestBasic(t *testing.T) {
-	l := lex("foo", "#headder \n#bar \n*** \n---\n```js\nfunction(){}\n```")
+	// Test round 1
+	l := lex("foo", "#header\n#bar\n***\n---\n```js\nfunction(){}```\n~~~html\n<foo/>~~~\n##header\n```go\nmain(){}\n```")
 	for item := range l.items {
 		fmt.Println(tokenNames[item.typ], "--->", item.val)
 	}
+	// Test round 2
+
 }

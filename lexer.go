@@ -52,8 +52,8 @@ var block = map[string]*regexp.Regexp{
 	"hr":      regexp.MustCompile("^( *[-*_]){3,} *(?:\n+|$)"),
 	// Backreferences is unavailable
 	// TODO(Ariel): it's ugly, remove this duplicate
-	"gfm-code-1": regexp.MustCompile("^`{3,} *(\\S+)? *\n([\\s\\S]+?)\\s*`{3,}$ *(?:\n+|$)"),
-	"gfm-code-2": regexp.MustCompile("^~{3,} *(\\S+)? *\n([\\s\\S]+?)\\s*~{3,}$ *(?:\n+|$)"),
+	"gfm-code-1": regexp.MustCompile("^`{3,} *(\\S+)? *\n([\\s\\S]+?)\\s*`{3,}$*(?:\n+|$)"),
+	"gfm-code-2": regexp.MustCompile("^~{3,} *(\\S+)? *\n([\\s\\S]+?)\\s*~{3,}$*(?:\n+|$)"),
 }
 
 // stateFn represents the state of the scanner as a function that returns the next state.
@@ -105,16 +105,16 @@ func (l *lexer) next() rune {
 
 // lexAny scans non-space items.
 func lexAny(l *lexer) stateFn {
-	switch r := l.next(); {
-	case r == eof:
+	switch r := l.next(); r {
+	case eof:
 		return nil
-	case r == '*', r == '-':
+	case '*', '-':
 		l.backup()
 		return lexHr
-	case r == '#':
+	case '#':
 		l.backup()
 		return lexHeading
-	case r == '`', r == '~':
+	case '`', '~':
 		// if it's gfm-code
 		c := l.input[l.pos : l.pos+2]
 		if c == "``" || c == "~~" {
@@ -152,6 +152,7 @@ func lexHr(l *lexer) stateFn {
 
 // lexGfmCode scans GFM code block.
 func lexGfmCode(l *lexer) stateFn {
+	fmt.Println("Inside gfm")
 	re := block["gfm-code-1"]
 	// if it's the ~ version
 	if l.peek() == '~' {
