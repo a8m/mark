@@ -50,6 +50,7 @@ const (
 var block = map[string]*regexp.Regexp{
 	"heading": regexp.MustCompile("^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)"),
 	"hr":      regexp.MustCompile("^( *[-*_]){3,} *(?:\n+|$)"),
+	"code":    regexp.MustCompile("^( {4}[^\n]+\n*)+"),
 	// Backreferences is unavailable
 	// TODO(Ariel): it's ugly, remove this duplicate
 	"gfm-code-1": regexp.MustCompile("^`{3,} *(\\S+)? *\n([\\s\\S]+?)\\s*`{3,}$*(?:\n+|$)"),
@@ -114,6 +115,13 @@ func lexAny(l *lexer) stateFn {
 	case '#':
 		l.backup()
 		return lexHeading
+	case ' ':
+		// Should be here ?
+		if block["code"].MatchString(l.input[l.pos-1:]) {
+			l.backup()
+			return lexCode
+		}
+		fallthrough
 	case '`', '~':
 		// if it's gfm-code
 		c := l.input[l.pos : l.pos+2]
@@ -165,6 +173,14 @@ func lexGfmCode(l *lexer) stateFn {
 		return lexAny
 	}
 	return lexText
+}
+
+// lexCode scans code block.
+func lexCode(l *lexer) stateFn {
+	match := block["code"].FindString(l.input[l.pos:])
+	l.pos += Pos(len(match))
+	l.emit(itemCodeBlock)
+	return lexAny
 }
 
 // lexText scans until eol(\n)
