@@ -131,8 +131,8 @@ func lexAny(l *lexer) stateFn {
 		}
 		fallthrough
 	default:
-		fmt.Printf("unrecognized character: %#U\n", r)
-		return lexAny
+		l.backup()
+		return lexText
 	}
 }
 
@@ -202,11 +202,10 @@ func lexText(l *lexer) stateFn {
 				// emit new line, but paragraph before
 				// and return lexAny
 			}
+			fallthrough
 		// if it's start as an emphasis
 		case '`', '_', '~', '*':
 			// test with regex which of them(if not, fallthrough)
-		default:
-			// emit text
 		}
 	}
 	return lexAny
