@@ -57,6 +57,11 @@ var block = map[string]*regexp.Regexp{
 	"gfm-code-2": regexp.MustCompile("^~{3,} *(\\S+)? *\n([\\s\\S]+?)\\s*~{3,}$*(?:\n+|$)"),
 }
 
+// Inline Grammer
+var span = map[string]*regexp.RegExp{
+	"strong": regexp.MustCompile("^_{2}([\\s\\S]+?)_{2}|^\\*{2}([\\s\\S]+?)\\*{2}"),
+}
+
 // stateFn represents the state of the scanner as a function that returns the next state.
 type stateFn func(*lexer) stateFn
 
