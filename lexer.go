@@ -185,27 +185,26 @@ func lexCode(l *lexer) stateFn {
 
 // lexText scans until eol(\n)
 func lexText(l *lexer) stateFn {
-	/*
-	 * Conclusion: Maybe we can understad from the inputs about the inline things
-	 * and if to concat two or more paragraph(if we have new-line) between them
-	 */
+Loop:
 	for {
-		switch r := l.next(); r {
-		case '\n':
-			if l.peek() == '\n' {
-				// emit new line, but paragraph before
-				// and return lexAny
+		switch r := l.next(); {
+		case r == '\n' && l.peek() == '\n' || r == ' ' && l.peek() == ' ':
+			// if we inside a paragraph(drain it before we emit new-line)
+			if l.pos > l.start {
+				l.emit(itemParagraph)
 			}
-			fallthrough
-		case ' ':
-			if l.peek() == ' ' {
-				// emit new line, but paragraph before
-				// and return lexAny
-			}
-			fallthrough
+			// length of new-line
+			l.pos += Pos(1)
+			l.emit(itemNewLine)
+			break Loop
 		// if it's start as an emphasis
-		case '`', '_', '~', '*':
+		case r == '`', r == '_', r == '~', r == '*':
 			// test with regex which of them(if not, fallthrough)
+		case r == eof:
+			fmt.Println("end of file")
+			break Loop
+		default:
+			// mm..
 		}
 	}
 	return lexAny
