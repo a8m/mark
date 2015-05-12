@@ -46,19 +46,21 @@ const (
 	itemImages
 )
 
+var (
+	reGfmCode = "^%s{3,} *(\\S+)? *\n([\\s\\S]+?)\\s*%s{3,}$*(?:\n+|$)"
+)
+
 // Block Grammer
-var block = map[string]*regexp.Regexp{
-	"heading": regexp.MustCompile("^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)"),
-	"hr":      regexp.MustCompile("^( *[-*_]){3,} *(?:\n+|$)"),
-	"code":    regexp.MustCompile("^( {4}[^\n]+\n*)+"),
+var block = map[itemType]*regexp.Regexp{
+	itemHeading:   regexp.MustCompile("^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)"),
+	itemHr:        regexp.MustCompile("^( *[-*_]){3,} *(?:\n+|$)"),
+	itemCodeBlock: regexp.MustCompile("^( {4}[^\n]+\n*)+"),
 	// Backreferences is unavailable
-	// TODO(Ariel): it's ugly, remove this duplicate
-	"gfm-code-1": regexp.MustCompile("^`{3,} *(\\S+)? *\n([\\s\\S]+?)\\s*`{3,}$*(?:\n+|$)"),
-	"gfm-code-2": regexp.MustCompile("^~{3,} *(\\S+)? *\n([\\s\\S]+?)\\s*~{3,}$*(?:\n+|$)"),
+	itemGfmCodeBlock: regexp.MustCompile(fmt.Sprintf(reGfmCode, "`", "`") + "|" + fmt.Sprintf(reGfmCode, "~", "~")),
 }
 
 // Inline Grammer
-var span = map[string]*regexp.RegExp{
+var span = map[string]*regexp.Regexp{
 	"strong": regexp.MustCompile("^_{2}([\\s\\S]+?)_{2}|^\\*{2}([\\s\\S]+?)\\*{2}"),
 }
 
@@ -122,7 +124,7 @@ func lexAny(l *lexer) stateFn {
 		return lexHeading
 	case ' ':
 		// Should be here ?
-		if block["code"].MatchString(l.input[l.pos-1:]) {
+		if block[itemCodeBlock].MatchString(l.input[l.pos-1:]) {
 			l.backup()
 			return lexCode
 		}
@@ -143,8 +145,8 @@ func lexAny(l *lexer) stateFn {
 
 // lexHeading scans heading items.
 func lexHeading(l *lexer) stateFn {
-	if block["heading"].MatchString(l.input[l.pos:]) {
-		match := block["heading"].FindString(l.input[l.pos:])
+	if block[itemHeading].MatchString(l.input[l.pos:]) {
+		match := block[itemHeading].FindString(l.input[l.pos:])
 		l.pos += Pos(len(match))
 		l.emit(itemHeading)
 		return lexAny
@@ -154,8 +156,8 @@ func lexHeading(l *lexer) stateFn {
 
 // lexHr scans horizontal rules items.
 func lexHr(l *lexer) stateFn {
-	if block["hr"].MatchString(l.input[l.pos:]) {
-		match := block["hr"].FindString(l.input[l.pos:])
+	if block[itemHr].MatchString(l.input[l.pos:]) {
+		match := block[itemHr].FindString(l.input[l.pos:])
 		l.pos += Pos(len(match))
 		l.emit(itemHr)
 		return lexAny
@@ -165,11 +167,7 @@ func lexHr(l *lexer) stateFn {
 
 // lexGfmCode scans GFM code block.
 func lexGfmCode(l *lexer) stateFn {
-	re := block["gfm-code-1"]
-	// if it's the ~ version
-	if l.peek() == '~' {
-		re = block["gfm-code-2"]
-	}
+	re := block[itemGfmCodeBlock]
 	if re.MatchString(l.input[l.pos:]) {
 		match := re.FindString(l.input[l.pos:])
 		l.pos += Pos(len(match))
@@ -181,7 +179,7 @@ func lexGfmCode(l *lexer) stateFn {
 
 // lexCode scans code block.
 func lexCode(l *lexer) stateFn {
-	match := block["code"].FindString(l.input[l.pos:])
+	match := block[itemCodeBlock].FindString(l.input[l.pos:])
 	l.pos += Pos(len(match))
 	l.emit(itemCodeBlock)
 	return lexAny
