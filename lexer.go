@@ -39,7 +39,7 @@ const (
 	itemTable
 	// Span Elements
 	itemLinks
-	itemEmphasis
+	itemStrong
 	itemItalic
 	itemStrike
 	itemCode
@@ -47,7 +47,8 @@ const (
 )
 
 var (
-	reGfmCode = "^%s{3,} *(\\S+)? *\n([\\s\\S]+?)\\s*%s{3,}$*(?:\n+|$)"
+	reEmphasise = "^_{%[1]d}([\\s\\S]+?)_{%[1]d}|^\\*{%[1]d}([\\s\\S]+?)\\*{%[1]d}"
+	reGfmCode   = "^%s{3,} *(\\S+)? *\n([\\s\\S]+?)\\s*%s{3,}$*(?:\n+|$)"
 )
 
 // Block Grammer
@@ -60,8 +61,11 @@ var block = map[itemType]*regexp.Regexp{
 }
 
 // Inline Grammer
-var span = map[string]*regexp.Regexp{
-	"strong": regexp.MustCompile("^_{2}([\\s\\S]+?)_{2}|^\\*{2}([\\s\\S]+?)\\*{2}"),
+var span = map[itemType]*regexp.Regexp{
+	itemItalic: regexp.MustCompile(fmt.Sprintf(reEmphasise, 1)),
+	itemStrong: regexp.MustCompile(fmt.Sprintf(reEmphasise, 2)),
+	itemStrike: regexp.MustCompile("^~{2}([\\s\\S]+?)~{2}"),
+	// itemMixed(e.g: ***str***, ~~*str*~~) will be part of the parser
 }
 
 // stateFn represents the state of the scanner as a function that returns the next state.
@@ -201,6 +205,8 @@ Loop:
 			break Loop
 		// if it's start as an emphasis
 		case r == '`', r == '_', r == '~', r == '*':
+			// Strong
+			// Italic
 			// test with regex which of them(if not, fallthrough)
 		case r == eof:
 			fmt.Println("end of file")
