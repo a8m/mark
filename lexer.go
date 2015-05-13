@@ -66,6 +66,7 @@ var span = map[itemType]*regexp.Regexp{
 	itemStrong: regexp.MustCompile(fmt.Sprintf(reEmphasise, 2)),
 	itemStrike: regexp.MustCompile("^~{2}([\\s\\S]+?)~{2}"),
 	// itemMixed(e.g: ***str***, ~~*str*~~) will be part of the parser
+	itemCode: regexp.MustCompile("^`{1,2}\\s*([\\s\\S]*?[^`])\\s*`{1,2}"),
 }
 
 // stateFn represents the state of the scanner as a function that returns the next state.
@@ -200,7 +201,7 @@ Loop:
 			l.emit(itemNewLine)
 			break Loop
 		// if it's start as an emphasis
-		case r == '_', r == '*', r == '~':
+		case r == '_', r == '*', r == '~', r == '`':
 			l.backup()
 			input := l.input[l.pos:]
 			// Strong
@@ -219,6 +220,12 @@ Loop:
 			if m := span[itemStrike].FindString(input); m != "" {
 				l.pos += Pos(len(m))
 				l.emit(itemStrike)
+				break
+			}
+			// InlineCode
+			if m := span[itemCode].FindString(input); m != "" {
+				l.pos += Pos(len(m))
+				l.emit(itemCode)
 				break
 			}
 			fallthrough

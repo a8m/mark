@@ -59,4 +59,10 @@ func TestBasic(t *testing.T) {
 	for item := range l.items {
 		fmt.Println(tokenNames[item.typ], "--->\n"+item.val)
 	}
+
+	printRound(5)
+	l = lex("5", "one ``code``  two `code`  three  ```code``  four ``code```  done")
+	for item := range l.items {
+		fmt.Println(tokenNames[item.typ], "--->\n"+item.val)
+	}
 }
