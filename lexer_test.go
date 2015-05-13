@@ -7,6 +7,7 @@ import (
 )
 
 var tokenNames = map[itemType]string{
+	-1: "itemEOF",
 	0:  "itemError",
 	1:  "itemNewLine",
 	2:  "itemHTML",
@@ -49,6 +50,12 @@ func TestBasic(t *testing.T) {
 	// Test round 3
 	printRound(3)
 	l = lex("3", "one  two\n\nthree  #header\n\nparagraph  ```js\ncodeblock```")
+	for item := range l.items {
+		fmt.Println(tokenNames[item.typ], "--->\n"+item.val)
+	}
+
+	printRound(4)
+	l = lex("4", "one ~~strike~~  two **bold**  three _italic_")
 	for item := range l.items {
 		fmt.Println(tokenNames[item.typ], "--->\n"+item.val)
 	}

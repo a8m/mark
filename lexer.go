@@ -195,24 +195,37 @@ Loop:
 	for {
 		switch r := l.next(); {
 		case r == '\n' && l.peek() == '\n' || r == ' ' && l.peek() == ' ':
-			// if we inside a paragraph(drain it before we emit new-line)
-			if l.pos > l.start {
-				l.emit(itemText)
-			}
 			// length of new-line
 			l.pos++
 			l.emit(itemNewLine)
 			break Loop
 		// if it's start as an emphasis
-		case r == '`', r == '_', r == '~', r == '*':
+		case r == '_', r == '*', r == '~':
+			l.backup()
+			input := l.input[l.pos:]
 			// Strong
+			if m := span[itemStrong].FindString(input); m != "" {
+				l.pos += Pos(len(m))
+				l.emit(itemStrong)
+				break
+			}
 			// Italic
-			// test with regex which of them(if not, fallthrough)
+			if m := span[itemItalic].FindString(input); m != "" {
+				l.pos += Pos(len(m))
+				l.emit(itemItalic)
+				break
+			}
+			// Strike
+			if m := span[itemStrike].FindString(input); m != "" {
+				l.pos += Pos(len(m))
+				l.emit(itemStrike)
+				break
+			}
+			fallthrough
 		case r == eof:
-			fmt.Println("end of file")
 			break Loop
 		default:
-			// mm..
+			l.emit(itemText)
 		}
 	}
 	return lexAny
