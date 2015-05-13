@@ -195,6 +195,8 @@ func lexText(l *lexer) stateFn {
 Loop:
 	for {
 		switch r := l.next(); {
+		case r == eof:
+			break Loop
 		case r == '\n' && l.peek() == '\n' || r == ' ' && l.peek() == ' ':
 			// length of new-line
 			l.pos++
@@ -228,9 +230,9 @@ Loop:
 				l.emit(itemCode)
 				break
 			}
+			// ~backup()
+			l.pos += l.width
 			fallthrough
-		case r == eof:
-			break Loop
 		default:
 			l.emit(itemText)
 		}
