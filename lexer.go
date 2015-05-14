@@ -122,8 +122,13 @@ func lexAny(l *lexer) stateFn {
 	case eof:
 		return nil
 	case '*', '-':
-		l.backup()
-		return lexHr
+		if l.peek() == '*' || l.peek() == '-' {
+			l.backup()
+			return lexHr
+		} else {
+			l.backup()
+			return lexList
+		}
 	case '#':
 		l.backup()
 		return lexHeading
@@ -188,6 +193,12 @@ func lexCode(l *lexer) stateFn {
 	l.pos += Pos(len(match))
 	l.emit(itemCodeBlock)
 	return lexAny
+}
+
+// lexList scans ordered and unordered lists.
+func lexList(l *lexer) stateFn {
+	// ...
+	return lexText
 }
 
 // lexText scans until eol(\n)
