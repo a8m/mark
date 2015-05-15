@@ -44,6 +44,7 @@ const (
 	itemStrike
 	itemCode
 	itemImages
+	itemBr
 )
 
 var (
@@ -218,10 +219,16 @@ Loop:
 		switch r := l.next(); {
 		case r == eof:
 			break Loop
+		case r == '\n':
+			if l.peek() != '\n' {
+				l.emit(itemNewLine)
+				break Loop
+			}
+			fallthrough
 		case r == '\n' && l.peek() == '\n' || r == ' ' && l.peek() == ' ':
 			// length of new-line
 			l.pos++
-			l.emit(itemNewLine)
+			l.emit(itemBr)
 			break Loop
 		// if it's start as an emphasis
 		case r == '_', r == '*', r == '~', r == '`':

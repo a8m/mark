@@ -27,6 +27,7 @@ var tokenNames = map[itemType]string{
 	16: "itemStrike",
 	17: "itemCode",
 	18: "itemImages",
+	19: "itemBr",
 }
 
 func printRound(i int) {
@@ -65,4 +66,11 @@ func TestBasic(t *testing.T) {
 	for item := range l.items {
 		fmt.Println(tokenNames[item.typ], "--->\n"+item.val)
 	}
+
+	printRound(6)
+	l = lex("6", "- foo bar\n- baz")
+	for item := range l.items {
+		fmt.Println(tokenNames[item.typ], "--->\n"+item.val)
+	}
+
 }
