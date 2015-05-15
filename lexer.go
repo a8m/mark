@@ -119,10 +119,10 @@ func (l *lexer) next() rune {
 
 // lexAny scans non-space items.
 func lexAny(l *lexer) stateFn {
-	switch r := l.next(); r {
-	case eof:
+	switch r := l.next(); {
+	case r == eof:
 		return nil
-	case '*', '-':
+	case r == '*' || r == '-':
 		if l.peek() == '*' || l.peek() == '-' {
 			l.backup()
 			return lexHr
@@ -130,17 +130,23 @@ func lexAny(l *lexer) stateFn {
 			l.backup()
 			return lexList
 		}
-	case '#':
+	case '0' <= r && r <= '9':
+		l.backup()
+		return lexList
+	case r == '>':
+		l.emit(itemBlockQuote)
+		return lexText
+	case r == '#':
 		l.backup()
 		return lexHeading
-	case ' ':
+	case r == ' ':
 		// Should be here ?
 		if block[itemCodeBlock].MatchString(l.input[l.pos-1:]) {
 			l.backup()
 			return lexCode
 		}
 		fallthrough
-	case '`', '~':
+	case r == '`' || r == '~':
 		// if it's gfm-code
 		c := l.input[l.pos : l.pos+2]
 		if c == "``" || c == "~~" {
@@ -198,7 +204,10 @@ func lexCode(l *lexer) stateFn {
 
 // lexList scans ordered and unordered lists.
 func lexList(l *lexer) stateFn {
-	// ...
+	if m := block[itemList].FindString(l.input[l.pos:]); m != "" {
+		l.pos += Pos(len(m))
+		l.emit(itemList)
+	}
 	return lexText
 }
 
