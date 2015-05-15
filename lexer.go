@@ -58,6 +58,7 @@ var block = map[itemType]*regexp.Regexp{
 	itemCodeBlock: regexp.MustCompile("^( {4}[^\n]+\n*)+"),
 	// Backreferences is unavailable
 	itemGfmCodeBlock: regexp.MustCompile(fmt.Sprintf(reGfmCode, "`", "`") + "|" + fmt.Sprintf(reGfmCode, "~", "~")),
+	itemList:         regexp.MustCompile("(?:[*+-]|\\d+\\.)"),
 }
 
 // Inline Grammer
