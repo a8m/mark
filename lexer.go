@@ -285,3 +285,10 @@ func (l *lexer) emit(t itemType) {
 	l.items <- item{t, l.start, l.input[l.start:l.pos]}
 	l.start = l.pos
 }
+
+// lexItem return the next item token, clled by the parser.
+func (l *lexer) nextItem() item {
+	item := <-l.items
+	l.lastPos = l.pos
+	return item
+}

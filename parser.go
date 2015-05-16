@@ -3,21 +3,17 @@ package mark
 type Tree struct {
 	text string
 	lex  *lexer
-	// TODO: add NodeList
+	// Parsing only
+	token     [3]item // three-token lookahead for parser
+	peekCount int
 }
 
-func Parse(text string) (err error) {
-	// Create TreeSet
-	t := &Tree{text, new(lexer)}
-	err = t.Parse()
-	return
-}
-
-func (t *Tree) Parse() error {
-	t.parse()
-	return nil
-}
-
-func (t *Tree) parse() {
-
+// next returns the next token
+func (t *Tree) next() item {
+	if t.peekCount > 0 {
+		t.peekCount--
+	} else {
+		t.token[0] = t.lex.nextItem()
+	}
+	return t.token[peekCount]
 }
