@@ -15,5 +15,15 @@ func (t *Tree) next() item {
 	} else {
 		t.token[0] = t.lex.nextItem()
 	}
-	return t.token[peekCount]
+	return t.token[t.peekCount]
+}
+
+// peek returns but does not consume the next token.
+func (t *Tree) peek() item {
+	if t.peekCount > 0 {
+		return t.token[t.peekCount-1]
+	}
+	t.peekCount = 1
+	t.token[0] = t.lex.nextItem()
+	return t.token[0]
 }
