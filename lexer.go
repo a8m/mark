@@ -64,7 +64,7 @@ var block = map[itemType]*regexp.Regexp{
 
 // Inline Grammer
 var span = map[itemType]*regexp.Regexp{
-	// TODO(Ariel): itemText
+	itemText:   regexp.MustCompile("^([\\s\\S]+?)([_*`~]| {2,}\n|\n|$)"),
 	itemItalic: regexp.MustCompile(fmt.Sprintf(reEmphasise, 1)),
 	itemStrong: regexp.MustCompile(fmt.Sprintf(reEmphasise, 2)),
 	itemStrike: regexp.MustCompile("^~{2}([\\s\\S]+?)~{2}"),
@@ -263,6 +263,12 @@ Loop:
 			l.pos += l.width
 			fallthrough
 		default:
+			// TODO(Ariel): I'll research more tomorrow how `lookahead`
+			// works on re2
+			subMatch := span[itemText].FindStringSubmatch(l.input[l.pos:])
+			if len(subMatch) > 1 {
+				l.pos += Pos(len(subMatch[1]))
+			}
 			l.emit(itemText)
 		}
 	}
