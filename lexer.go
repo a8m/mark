@@ -64,6 +64,7 @@ var block = map[itemType]*regexp.Regexp{
 
 // Inline Grammer
 var span = map[itemType]*regexp.Regexp{
+	// TODO(Ariel): itemText
 	itemItalic: regexp.MustCompile(fmt.Sprintf(reEmphasise, 1)),
 	itemStrong: regexp.MustCompile(fmt.Sprintf(reEmphasise, 2)),
 	itemStrike: regexp.MustCompile("^~{2}([\\s\\S]+?)~{2}"),
