@@ -17,6 +17,7 @@ func (t NodeType) Type() NodeType {
 const (
 	NodeText NodeType = iota // Plain text.
 	NodeParagraph
+	NodeNewLine
 	NodeList
 )
 
@@ -45,4 +46,14 @@ type TextNode struct {
 
 func (t *Tree) newText(pos Pos, text string) *TextNode {
 	return &TextNode{NodeType: NodeText, Pos: pos, Text: []byte(text)}
+}
+
+// NewLineNode represent simple `\n`
+type NewLineNode struct {
+	NodeType
+	Pos
+}
+
+func (t *Tree) newLine(pos Pos) *NewLineNode {
+	return &NewLineNode{NodeType: NodeNewLine, Pos: pos}
 }

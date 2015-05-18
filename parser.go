@@ -62,6 +62,8 @@ Loop:
 		switch token.typ {
 		case eof, itemError, itemBr:
 			break Loop
+		case itemNewLine:
+			p.append(t.newLine(token.pos))
 		case itemText:
 			p.append(t.newText(token.pos, token.val))
 		}

@@ -16,7 +16,7 @@ func TestParser(t *testing.T) {
 	fmt.Println(tokenNames[item.typ], "-->", item.val)
 }
 
-func ParseFn(*testing.T) {
+func TestParseFn(*testing.T) {
 	l := lex("2", `hello world
 	nice to meet.`)
 	p := &Tree{lex: l}
