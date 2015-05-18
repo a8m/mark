@@ -70,6 +70,7 @@ var span = map[itemType]*regexp.Regexp{
 	itemStrike: regexp.MustCompile("^~{2}([\\s\\S]+?)~{2}"),
 	// itemMixed(e.g: ***str***, ~~*str*~~) will be part of the parser
 	itemCode: regexp.MustCompile("^`{1,2}\\s*([\\s\\S]*?[^`])\\s*`{1,2}"),
+	itemBr:   regexp.MustCompile("^ {2,}\n"),
 }
 
 // stateFn represents the state of the scanner as a function that returns the next state.
@@ -223,14 +224,18 @@ Loop:
 		case r == '\n':
 			if l.peek() != '\n' {
 				l.emit(itemNewLine)
+			} else {
+				l.pos++
+				l.emit(itemBr)
+			}
+			break Loop
+		case r == ' ':
+			if m := span[itemBr].FindString(l.input[l.pos:]); m != "" {
+				// length of new-line
+				l.pos += Pos(len(m))
+				l.emit(itemBr)
 				break Loop
 			}
-			fallthrough
-		case r == '\n' && l.peek() == '\n' || r == ' ' && l.peek() == ' ':
-			// length of new-line
-			l.pos++
-			l.emit(itemBr)
-			break Loop
 		// if it's start as an emphasis
 		case r == '_', r == '*', r == '~', r == '`':
 			l.backup()

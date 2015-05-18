@@ -23,9 +23,14 @@ Loop:
 		case itemText, itemStrong, itemItalic, itemStrike, itemCode:
 			t.parseParagraph()
 		default:
-			fmt.Println("Nothing to do")
+			fmt.Println("Nothing to do", p)
 		}
 	}
+}
+
+// append new node to nodes-list
+func (t *Tree) append(n Node) {
+	t.Nodes = append(t.Nodes, n)
 }
 
 // next returns the next token
@@ -58,15 +63,9 @@ Loop:
 		case eof, itemError, itemBr:
 			break Loop
 		case itemText:
-			fmt.Println(token)
-			// Yeah, refactor later
-			p.Nodes = append(p.Nodes, t.newText(token.pos, token.val))
+			p.append(t.newText(token.pos, token.val))
 		}
 		token = t.next()
 	}
-	t.Nodes = append(t.Nodes, p)
-	// for loop
-	// if eof;
-	// if br; append to tree
-	// always text... and push emphasis to it.
+	t.append(p)
 }

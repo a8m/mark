@@ -26,7 +26,10 @@ type ParagraphNode struct {
 	NodeType
 	Pos
 	Nodes []Node
-	// tr NodeTree
+}
+
+func (t *ParagraphNode) append(n Node) {
+	t.Nodes = append(t.Nodes, n)
 }
 
 func (t *Tree) newParagraph(pos Pos) *ParagraphNode {
