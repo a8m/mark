@@ -24,13 +24,22 @@ const (
 // that may be emphasis.
 type ParagraphNode struct {
 	NodeType
+	Pos
 	Nodes []Node
 	// tr NodeTree
+}
+
+func (t *Tree) newParagraph(pos Pos) *ParagraphNode {
+	return &ParagraphNode{NodeType: NodeParagraph, Pos: pos}
 }
 
 // TextNode holds plain text.
 type TextNode struct {
 	NodeType
-	text []byte
-	// tr NodeTree
+	Pos
+	Text []byte
+}
+
+func (t *Tree) newText(pos Pos, text string) *TextNode {
+	return &TextNode{NodeType: NodeText, Pos: pos, Text: []byte(text)}
 }

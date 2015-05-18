@@ -35,7 +35,7 @@ func printRound(i int) {
 	fmt.Printf("\n\n%s Round %d %s\n\n", sep, i, sep)
 }
 
-func TestBasic(t *testing.T) {
+func Basic(t *testing.T) {
 	printRound(1)
 	// Test round 1
 	l := lex("1", "#header\n#bar\n***\n---\n```js\nfunction(){}```\n~~~html\n<foo/>~~~\n##header\n```go\nmain(){}\n```")

@@ -18,7 +18,7 @@ func (t *Tree) parse() {
 Loop:
 	for {
 		switch p := t.peek().typ; p {
-		case eof:
+		case eof, itemError:
 			break Loop
 		case itemText, itemStrong, itemItalic, itemStrike, itemCode:
 			t.parseParagraph()
@@ -50,8 +50,21 @@ func (t *Tree) peek() item {
 
 // parseParagraph scan until itemBr occur.
 func (t *Tree) parseParagraph() {
-	// New paragraph node
-
+	token := t.next()
+	p := t.newParagraph(token.pos)
+Loop:
+	for {
+		switch token.typ {
+		case eof, itemError, itemBr:
+			break Loop
+		case itemText:
+			fmt.Println(token)
+			// Yeah, refactor later
+			p.Nodes = append(p.Nodes, t.newText(token.pos, token.val))
+		}
+		token = t.next()
+	}
+	t.Nodes = append(t.Nodes, p)
 	// for loop
 	// if eof;
 	// if br; append to tree
