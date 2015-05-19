@@ -20,8 +20,8 @@ Loop:
 		switch p := t.peek().typ; p {
 		case eof, itemError:
 			break Loop
-		// case itemBr:
-		// ...
+		case itemBr:
+			t.append(t.newLine(t.next().pos))
 		case itemText, itemStrong, itemItalic, itemStrike, itemCode:
 			t.parseParagraph()
 		default:
@@ -55,22 +55,30 @@ func (t *Tree) peek() item {
 	return t.token[0]
 }
 
+// backup backs the input stream tp one token
+func (t *Tree) backup() {
+	t.peekCount++
+}
+
 // parseParagraph scan until itemBr occur.
 func (t *Tree) parseParagraph() {
 	token := t.next()
 	p := t.newParagraph(token.pos)
 Loop:
 	for {
+		var node Node
 		switch token.typ {
 		case eof, itemError, itemBr:
+			t.backup()
 			break Loop
 		case itemNewLine:
-			p.append(t.newLine(token.pos))
+			node = t.newLine(token.pos)
 		case itemText:
-			p.append(t.newText(token.pos, token.val))
-			// case emphasis...
-			// append
+			node = t.newText(token.pos, token.val)
+		case itemStrong, itemItalic, itemStrike, itemCode:
+			node = t.newEmphasis(token.pos, token.typ, token.val)
 		}
+		p.append(node)
 		token = t.next()
 	}
 	t.append(p)

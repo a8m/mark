@@ -17,8 +17,10 @@ func TestParser(t *testing.T) {
 }
 
 func TestParseFn(*testing.T) {
-	l := lex("2", `hello world
-	nice to meet.`)
+	l := lex("2", "hello\nworld. **ariel**foo  \nenter hahaha")
+	//	for item := range l.items {
+	//		pp.Println(item)
+	//	}
 	p := &Tree{lex: l}
 	p.parse()
 

@@ -230,11 +230,15 @@ Loop:
 			}
 			break Loop
 		case r == ' ':
+			l.backup()
 			if m := span[itemBr].FindString(l.input[l.pos:]); m != "" {
 				// length of new-line
 				l.pos += Pos(len(m))
 				l.emit(itemBr)
 				break Loop
+			} else {
+				// ~backup()
+				l.pos += l.width
 			}
 		// if it's start as an emphasis
 		case r == '_', r == '*', r == '~', r == '`':
@@ -268,10 +272,10 @@ Loop:
 			l.pos += l.width
 			fallthrough
 		default:
-			// TODO(Ariel): I'll research more tomorrow how `lookahead`
-			// works on re2
+			l.backup()
+			// TODO(Ariel): path for lookahead right now
 			subMatch := span[itemText].FindStringSubmatch(l.input[l.pos:])
-			if len(subMatch) > 1 {
+			if len(subMatch) >= 1 {
 				l.pos += Pos(len(subMatch[1]))
 			}
 			l.emit(itemText)
