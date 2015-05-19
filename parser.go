@@ -20,6 +20,8 @@ Loop:
 		switch p := t.peek().typ; p {
 		case eof, itemError:
 			break Loop
+		// case itemBr:
+		// ...
 		case itemText, itemStrong, itemItalic, itemStrike, itemCode:
 			t.parseParagraph()
 		default:
@@ -66,6 +68,8 @@ Loop:
 			p.append(t.newLine(token.pos))
 		case itemText:
 			p.append(t.newText(token.pos, token.val))
+			// case emphasis...
+			// append
 		}
 		token = t.next()
 	}

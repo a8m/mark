@@ -17,6 +17,7 @@ func (t NodeType) Type() NodeType {
 const (
 	NodeText NodeType = iota // Plain text.
 	NodeParagraph
+	NodeEmphasis
 	NodeNewLine
 	NodeList
 )
@@ -56,4 +57,16 @@ type NewLineNode struct {
 
 func (t *Tree) newLine(pos Pos) *NewLineNode {
 	return &NewLineNode{NodeType: NodeNewLine, Pos: pos}
+}
+
+// EmphasisNode holds text with style.
+type EmphasisNode struct {
+	NodeType
+	Pos
+	Style itemType
+	Text  []byte
+}
+
+func (t *Tree) newEmphasis(pos Pos, style itemType, text string) *EmphasisNode {
+	return &EmphasisNode{NodeType: NodeEmphasis, Pos: pos, Style: style, Text: []byte(text)}
 }
