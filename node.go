@@ -3,6 +3,7 @@ package mark
 // A Node is an element in the parse tree.
 type Node interface {
 	Type() NodeType
+	Render() string
 }
 
 // NodeType identifies the type of a parse tree node.
@@ -30,6 +31,15 @@ type ParagraphNode struct {
 	Nodes []Node
 }
 
+// Render return the html representation of ParagraphNode
+func (n *ParagraphNode) Render() string {
+	s := "<p>"
+	for _, node := range n.Nodes {
+		s += node.Render()
+	}
+	return s + "</p>"
+}
+
 func (t *ParagraphNode) append(n Node) {
 	t.Nodes = append(t.Nodes, n)
 }
@@ -45,14 +55,24 @@ type TextNode struct {
 	Text []byte
 }
 
+// Render return the string representation of TexNode
+func (n *TextNode) Render() string {
+	return string(n.Text)
+}
+
 func (t *Tree) newText(pos Pos, text string) *TextNode {
 	return &TextNode{NodeType: NodeText, Pos: pos, Text: []byte(text)}
 }
 
-// NewLineNode represent simple `\n`
+// NewLineNode represent simple `\n`.
 type NewLineNode struct {
 	NodeType
 	Pos
+}
+
+// Render return the string \n for representing new line.
+func (n *NewLineNode) Render() string {
+	return "\n"
 }
 
 func (t *Tree) newLine(pos Pos) *NewLineNode {
@@ -65,6 +85,11 @@ type EmphasisNode struct {
 	Pos
 	Style itemType
 	Text  []byte
+}
+
+// Return the html representation of emphasis text(string, italic, ..).
+func (n *EmphasisNode) Render() string {
+	return ""
 }
 
 func (t *Tree) newEmphasis(pos Pos, style itemType, text string) *EmphasisNode {
