@@ -1,5 +1,9 @@
 package mark
 
+import (
+	"fmt"
+)
+
 // A Node is an element in the parse tree.
 type Node interface {
 	Type() NodeType
@@ -32,12 +36,11 @@ type ParagraphNode struct {
 }
 
 // Render return the html representation of ParagraphNode
-func (n *ParagraphNode) Render() string {
-	s := "<p>"
+func (n *ParagraphNode) Render() (s string) {
 	for _, node := range n.Nodes {
 		s += node.Render()
 	}
-	return s + "</p>"
+	return render("p", s)
 }
 
 func (t *ParagraphNode) append(n Node) {
@@ -94,4 +97,9 @@ func (n *EmphasisNode) Render() string {
 
 func (t *Tree) newEmphasis(pos Pos, style itemType, text string) *EmphasisNode {
 	return &EmphasisNode{NodeType: NodeEmphasis, Pos: pos, Style: style, Text: []byte(text)}
+}
+
+// Wrap text with specific tag.
+func render(tag, body string) string {
+	return fmt.Sprintf("<%[1]s>%s</%[1]s>", tag, body)
 }
