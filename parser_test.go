@@ -27,5 +27,6 @@ func TestParseFn(*testing.T) {
 	pp.Printf("[Message]: Tree Node List After Compile\n\n")
 	pp.Println(p.Nodes)
 	pp.Println("Length of nodes:", len(p.Nodes))
+	pp.Println(p.Nodes[0].Render())
 	pp.Println(p.Nodes[2].Render())
 }

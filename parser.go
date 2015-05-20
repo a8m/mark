@@ -76,7 +76,9 @@ Loop:
 		case itemText:
 			node = t.newText(token.pos, token.val)
 		case itemStrong, itemItalic, itemStrike, itemCode:
-			node = t.newEmphasis(token.pos, token.typ, token.val)
+			// TODO(Ariel): Make sure that it works well with all types
+			match := span[token.typ].FindStringSubmatch(token.val)
+			node = t.newEmphasis(token.pos, token.typ, match[2])
 		}
 		p.append(node)
 		token = t.next()

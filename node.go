@@ -90,9 +90,24 @@ type EmphasisNode struct {
 	Text  []byte
 }
 
+// Tag return the tagName based on Style field
+func (n *EmphasisNode) Tag() (s string) {
+	switch n.Style {
+	case itemStrong:
+		s = "strong"
+	case itemItalic:
+		s = "em"
+	case itemStrike:
+		s = "del"
+	case itemCode:
+		s = "code"
+	}
+	return
+}
+
 // Return the html representation of emphasis text(string, italic, ..).
 func (n *EmphasisNode) Render() string {
-	return ""
+	return render(n.Tag(), string(n.Text))
 }
 
 func (t *Tree) newEmphasis(pos Pos, style itemType, text string) *EmphasisNode {
