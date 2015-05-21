@@ -17,7 +17,7 @@ func TestParser(t *testing.T) {
 }
 
 func TestParseFn(*testing.T) {
-	l := lex("2", "hello\nworld. **ariel**foo  \nenter hahaha  \n~~hello~~ world  \n~foo~  \n_bar_")
+	l := lex("2", "hello\nworld. **ariel**foo  \nenter hahaha  \n~~hello~~ world  \n~foo~  \n_bar_  \n This is my code:`javascript`")
 	p := &Tree{lex: l}
 	p.parse()
 

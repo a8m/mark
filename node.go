@@ -25,6 +25,8 @@ const (
 	NodeEmphasis
 	NodeNewLine
 	NodeList
+	NodeCode       // Code block.
+	NodeBlockQuote // Blockquote block.
 )
 
 // ParagraphNode hold simple paragraph node contains text
@@ -113,6 +115,19 @@ func (n *EmphasisNode) Render() string {
 func (t *Tree) newEmphasis(pos Pos, style itemType, text string) *EmphasisNode {
 	return &EmphasisNode{NodeType: NodeEmphasis, Pos: pos, Style: style, Text: []byte(text)}
 }
+
+// Code holds CodeBlock node with specific lang
+type CodeNode struct {
+	NodeType
+	Pos
+	Lang string
+	Text []byte
+}
+
+// new code
+// get lang
+// add attribute func(global)
+// render
 
 // Wrap text with specific tag.
 func render(tag, body string) string {
