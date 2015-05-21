@@ -5,12 +5,13 @@ import (
 )
 
 type Tree struct {
-	text string
-	lex  *lexer
+	text  string
+	lex   *lexer
+	Nodes []Node
 	// Parsing only
 	token     [3]item // three-token lookahead for parser
 	peekCount int
-	Nodes     []Node
+	output    string
 }
 
 // Parse convert the raw text to NodeTree.
@@ -27,6 +28,14 @@ Loop:
 		default:
 			fmt.Println("Nothing to do", p)
 		}
+	}
+}
+
+// Render parse nodes to the wanted output
+func (t *Tree) render() {
+	// wrap with html/xhtml/head(with options) etc..
+	for _, node := range t.Nodes {
+		t.output += node.Render()
 	}
 }
 
@@ -76,9 +85,8 @@ Loop:
 		case itemText:
 			node = t.newText(token.pos, token.val)
 		case itemStrong, itemItalic, itemStrike, itemCode:
-			// TODO(Ariel): Make sure that it works well with all types
 			match := span[token.typ].FindStringSubmatch(token.val)
-			node = t.newEmphasis(token.pos, token.typ, match[2])
+			node = t.newEmphasis(token.pos, token.typ, match[len(match)-1])
 		}
 		p.append(node)
 		token = t.next()

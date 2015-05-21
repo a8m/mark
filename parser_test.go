@@ -17,16 +17,13 @@ func TestParser(t *testing.T) {
 }
 
 func TestParseFn(*testing.T) {
-	l := lex("2", "hello\nworld. **ariel**foo  \nenter hahaha")
-	//	for item := range l.items {
-	//		pp.Println(item)
-	//	}
+	l := lex("2", "hello\nworld. **ariel**foo  \nenter hahaha  \n~~hello~~ world  \n~foo~  \n_bar_")
 	p := &Tree{lex: l}
 	p.parse()
 
 	pp.Printf("[Message]: Tree Node List After Compile\n\n")
 	pp.Println(p.Nodes)
 	pp.Println("Length of nodes:", len(p.Nodes))
-	pp.Println(p.Nodes[0].Render())
-	pp.Println(p.Nodes[2].Render())
+	p.render()
+	pp.Printf(p.output + "\n")
 }
