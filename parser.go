@@ -1,7 +1,8 @@
 package mark
 
 import (
-	"fmt"
+	fmt "github.com/k0kubun/pp"
+	"regexp"
 )
 
 type Tree struct {
@@ -25,6 +26,8 @@ Loop:
 			t.append(t.newLine(t.next().pos))
 		case itemText, itemStrong, itemItalic, itemStrike, itemCode:
 			t.parseParagraph()
+		case itemCodeBlock, itemGfmCodeBlock:
+			t.parseCodeBlock()
 		default:
 			fmt.Println("Nothing to do", p)
 		}
@@ -92,4 +95,20 @@ Loop:
 		token = t.next()
 	}
 	t.append(p)
+}
+
+// parse codeBlock
+func (t *Tree) parseCodeBlock() {
+	var lang, text string
+	token := t.next()
+	if token.typ == itemGfmCodeBlock {
+		match := block[itemGfmCodeBlock].FindStringSubmatch(token.val)
+		lang, text = match[1], match[2]
+	} else {
+		text = regexp.MustCompile("(?m) {4}").ReplaceAllLiteralString(token.val, "")
+	}
+	t.append(t.newCode(token.pos, lang, text))
+	fmt.Println(t.Nodes)
+	for {
+	}
 }

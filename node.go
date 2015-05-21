@@ -124,10 +124,17 @@ type CodeNode struct {
 	Text []byte
 }
 
-// new code
+func (n *CodeNode) Render() string {
+	return ""
+}
+
+func (t *Tree) newCode(pos Pos, lang, text string) *CodeNode {
+	return &CodeNode{NodeType: NodeCode, Pos: pos, Lang: lang, Text: []byte(text)}
+}
+
 // get lang
 // add attribute func(global)
-// render
+// renderCodeNode
 
 // Wrap text with specific tag.
 func render(tag, body string) string {

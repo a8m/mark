@@ -26,4 +26,9 @@ func TestParseFn(*testing.T) {
 	pp.Println("Length of nodes:", len(p.Nodes))
 	p.render()
 	pp.Printf(p.output + "\n")
+
+	l = lex("3", "```js\nMy Code Block\n```")
+	//	l = lex("3", "    MyCodeBlock    \n    again    ")
+	p = &Tree{lex: l}
+	p.parse()
 }
