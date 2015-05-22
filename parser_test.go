@@ -27,8 +27,9 @@ func TestParseFn(*testing.T) {
 	p.render()
 	pp.Printf(p.output + "\n")
 
-	l = lex("3", "```js\nMy Code Block\n```")
-	//	l = lex("3", "    MyCodeBlock    \n    again    ")
+	l = lex("3", "```js\nMy Code Block\nbla bla\n```\n    block code    \n    yeah with more rows    \n")
 	p = &Tree{lex: l}
 	p.parse()
+	p.render()
+	pp.Printf("\n" + p.output + "\n")
 }

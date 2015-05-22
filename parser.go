@@ -22,7 +22,7 @@ Loop:
 		switch p := t.peek().typ; p {
 		case eof, itemError:
 			break Loop
-		case itemBr:
+		case itemBr, itemNewLine:
 			t.append(t.newLine(t.next().pos))
 		case itemText, itemStrong, itemItalic, itemStrike, itemCode:
 			t.parseParagraph()
@@ -108,7 +108,4 @@ func (t *Tree) parseCodeBlock() {
 		text = regexp.MustCompile("(?m) {4}").ReplaceAllLiteralString(token.val, "")
 	}
 	t.append(t.newCode(token.pos, lang, text))
-	fmt.Println(t.Nodes)
-	for {
-	}
 }

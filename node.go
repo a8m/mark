@@ -124,17 +124,19 @@ type CodeNode struct {
 	Text []byte
 }
 
+// Return the html representation of codeBlock
 func (n *CodeNode) Render() string {
-	return ""
+	attr := fmt.Sprintf(" class=\"lang-%s\"", n.Lang)
+	if n.Lang == "" {
+		attr = ""
+	}
+	code := fmt.Sprintf("<%[1]s%s>%s</%[1]s>", "code", attr, n.Text)
+	return render("pre", code)
 }
 
 func (t *Tree) newCode(pos Pos, lang, text string) *CodeNode {
 	return &CodeNode{NodeType: NodeCode, Pos: pos, Lang: lang, Text: []byte(text)}
 }
-
-// get lang
-// add attribute func(global)
-// renderCodeNode
 
 // Wrap text with specific tag.
 func render(tag, body string) string {
