@@ -24,6 +24,8 @@ Loop:
 			break Loop
 		case itemBr, itemNewLine:
 			t.append(t.newLine(t.next().pos))
+		case itemHr:
+			t.append(t.newHr(t.next().pos))
 		case itemText, itemStrong, itemItalic, itemStrike, itemCode:
 			t.parseParagraph()
 		case itemCodeBlock, itemGfmCodeBlock:

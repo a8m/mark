@@ -24,6 +24,7 @@ const (
 	NodeParagraph
 	NodeEmphasis
 	NodeNewLine
+	NodeHr
 	NodeList
 	NodeCode       // Code block.
 	NodeBlockQuote // Blockquote block.
@@ -82,6 +83,21 @@ func (n *NewLineNode) Render() string {
 
 func (t *Tree) newLine(pos Pos) *NewLineNode {
 	return &NewLineNode{NodeType: NodeNewLine, Pos: pos}
+}
+
+// HrNode represent
+type HrNode struct {
+	NodeType
+	Pos
+}
+
+// Render return the html representation of hr.
+func (n *HrNode) Render() string {
+	return "<hr>"
+}
+
+func (t *Tree) newHr(pos Pos) *HrNode {
+	return &HrNode{NodeType: NodeHr, Pos: pos}
 }
 
 // EmphasisNode holds text with style.
