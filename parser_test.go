@@ -38,4 +38,10 @@ func TestParseFn(*testing.T) {
 	p.parse()
 	p.render()
 	pp.Printf("\n" + p.output + "\n")
+
+	l = lex("5", "#foo bar")
+	p = &Tree{lex: l}
+	p.parse()
+	p.render()
+	pp.Printf("\n" + p.output + "\n")
 }

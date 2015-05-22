@@ -28,6 +28,8 @@ Loop:
 			t.append(t.newHr(t.next().pos))
 		case itemText, itemStrong, itemItalic, itemStrike, itemCode:
 			t.parseParagraph()
+		case itemHeading:
+			t.parseHeading()
 		case itemCodeBlock, itemGfmCodeBlock:
 			t.parseCodeBlock()
 		default:
@@ -97,6 +99,14 @@ Loop:
 		token = t.next()
 	}
 	t.append(p)
+}
+
+// parse heading block
+// TODO(Ariel): itemLHeading
+func (t *Tree) parseHeading() {
+	token := t.next()
+	match := block[token.typ].FindStringSubmatch(token.val)
+	t.append(t.newHeading(token.pos, len(match[1]), match[2]))
 }
 
 // parse codeBlock

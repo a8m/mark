@@ -2,6 +2,7 @@ package mark
 
 import (
 	"fmt"
+	"strconv"
 )
 
 // A Node is an element in the parse tree.
@@ -23,6 +24,7 @@ const (
 	NodeText NodeType = iota // Plain text.
 	NodeParagraph
 	NodeEmphasis
+	NodeHeading
 	NodeNewLine
 	NodeHr
 	NodeList
@@ -130,6 +132,23 @@ func (n *EmphasisNode) Render() string {
 
 func (t *Tree) newEmphasis(pos Pos, style itemType, text string) *EmphasisNode {
 	return &EmphasisNode{NodeType: NodeEmphasis, Pos: pos, Style: style, Text: []byte(text)}
+}
+
+// Heading holds heaing node with specific level.
+type HeadingNode struct {
+	NodeType
+	Pos
+	Level int
+	Text  []byte
+}
+
+// Render return the html representation based on heading level.
+func (n *HeadingNode) Render() string {
+	return render("h"+strconv.Itoa(n.Level), string(n.Text))
+}
+
+func (t *Tree) newHeading(pos Pos, level int, text string) *HeadingNode {
+	return &HeadingNode{NodeType: NodeHeading, Pos: pos, Level: level, Text: []byte(text)}
 }
 
 // Code holds CodeBlock node with specific lang
