@@ -30,7 +30,7 @@ const (
 	itemText
 	itemLineBreak
 	itemHeading
-	itemLHeading
+	itemLHeading // Setext-style headers
 	itemBlockQuote
 	itemList
 	itemCodeBlock
@@ -55,6 +55,7 @@ var (
 // Block Grammer
 var block = map[itemType]*regexp.Regexp{
 	itemHeading:   regexp.MustCompile("^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)"),
+	itemLHeading:  regexp.MustCompile("^([^\n]+)\n *(=|-){2,} *(?:\n+|$)"),
 	itemHr:        regexp.MustCompile("^( *[-*_]){3,} *(?:\n+|$)"),
 	itemCodeBlock: regexp.MustCompile("^( {4}[^\n]+\n*)+"),
 	// Backreferences is unavailable
@@ -273,8 +274,15 @@ Loop:
 			fallthrough
 		default:
 			l.backup()
-			// TODO(Ariel): path for lookahead right now
-			subMatch := span[itemText].FindStringSubmatch(l.input[l.pos:])
+			input := l.input[l.pos:]
+			// Test for Setext-style headers
+			if m := block[itemLHeading].FindString(input); m != "" {
+				l.pos += Pos(len(m))
+				l.emit(itemLHeading)
+				break Loop
+			}
+			// Simple text
+			subMatch := span[itemText].FindStringSubmatch(input)
 			if len(subMatch) >= 1 {
 				l.pos += Pos(len(subMatch[1]))
 			}

@@ -28,7 +28,7 @@ Loop:
 			t.append(t.newHr(t.next().pos))
 		case itemText, itemStrong, itemItalic, itemStrike, itemCode:
 			t.parseParagraph()
-		case itemHeading:
+		case itemHeading, itemLHeading:
 			t.parseHeading()
 		case itemCodeBlock, itemGfmCodeBlock:
 			t.parseCodeBlock()
@@ -93,7 +93,11 @@ Loop:
 			node = t.newText(token.pos, token.val)
 		case itemStrong, itemItalic, itemStrike, itemCode:
 			match := span[token.typ].FindStringSubmatch(token.val)
-			node = t.newEmphasis(token.pos, token.typ, match[len(match)-1])
+			text := match[len(match)-1]
+			if text == "" {
+				text = match[1]
+			}
+			node = t.newEmphasis(token.pos, token.typ, text)
 		}
 		p.append(node)
 		token = t.next()
@@ -102,11 +106,17 @@ Loop:
 }
 
 // parse heading block
-// TODO(Ariel): itemLHeading
 func (t *Tree) parseHeading() {
+	var node Node
 	token := t.next()
 	match := block[token.typ].FindStringSubmatch(token.val)
-	t.append(t.newHeading(token.pos, len(match[1]), match[2]))
+	if token.typ == itemHeading {
+		node = t.newHeading(token.pos, len(match[1]), match[2])
+	} else {
+		// itemLHeading will always be in level 1.
+		node = t.newHeading(token.pos, 1, match[1])
+	}
+	t.append(node)
 }
 
 // parse codeBlock

@@ -17,7 +17,7 @@ func TestParser(t *testing.T) {
 }
 
 func TestParseFn(*testing.T) {
-	l := lex("2", "hello\nworld. **ariel**foo  \nenter hahaha  \n~~hello~~ world  \n~foo~  \n_bar_  \n This is my code:`javascript`")
+	l := lex("2", "hello\nworld. **ariel**foo  \nenter hahaha  \n~~hello~~ world  \n_bar_  \n This is my code:`javascript`")
 	p := &Tree{lex: l}
 	p.parse()
 
@@ -40,6 +40,19 @@ func TestParseFn(*testing.T) {
 	pp.Printf("\n" + p.output + "\n")
 
 	l = lex("5", "#foo bar")
+	p = &Tree{lex: l}
+	p.parse()
+	p.render()
+	pp.Printf("\n" + p.output + "\n")
+
+	l = lex("6",
+		`
+this is header
+===
+And then we have some dummy text...  
+
+## This is H2!!!
+`)
 	p = &Tree{lex: l}
 	p.parse()
 	p.render()
