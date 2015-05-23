@@ -26,7 +26,7 @@ Loop:
 			t.append(t.newLine(t.next().pos))
 		case itemHr:
 			t.append(t.newHr(t.next().pos))
-		case itemText, itemStrong, itemItalic, itemStrike, itemCode:
+		case itemText, itemStrong, itemItalic, itemStrike, itemCode, itemLink, itemAutoLink, itemGfmLink:
 			t.parseParagraph()
 		case itemHeading, itemLHeading:
 			t.parseHeading()
@@ -98,6 +98,15 @@ Loop:
 				text = match[1]
 			}
 			node = t.newEmphasis(token.pos, token.typ, text)
+		case itemLink, itemAutoLink, itemGfmLink:
+			var title, text, href string
+			match := span[token.typ].FindStringSubmatch(token.val)
+			if token.typ == itemLink {
+				text, href, title = match[1], match[2], match[3]
+			} else {
+				text, href = match[1], match[1]
+			}
+			node = t.newLink(token.pos, title, href, text)
 		}
 		p.append(node)
 		token = t.next()

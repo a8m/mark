@@ -45,13 +45,25 @@ func TestParseFn(*testing.T) {
 	p.render()
 	pp.Printf("\n" + p.output + "\n")
 
-	l = lex("6",
-		`
+	l = lex("6", `
 this is header
 ===
 And then we have some dummy text...  
 
 ## This is H2!!!
+`)
+	p = &Tree{lex: l}
+	p.parse()
+	p.render()
+	pp.Printf("\n" + p.output + "\n")
+
+	l = lex("7", `
+paragraph  
+<http://autolink.com>  
+[text](http://localhost.com "Ariel")  
+[text](http://google.com)
+done  
+https://github.link done!
 `)
 	p = &Tree{lex: l}
 	p.parse()

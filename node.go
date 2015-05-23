@@ -28,7 +28,8 @@ const (
 	NodeNewLine
 	NodeHr
 	NodeList
-	NodeCode       // Code block.
+	NodeCode // Code block.
+	NodeLink
 	NodeBlockQuote // Blockquote block.
 )
 
@@ -161,9 +162,9 @@ type CodeNode struct {
 
 // Return the html representation of codeBlock
 func (n *CodeNode) Render() string {
-	attr := fmt.Sprintf(" class=\"lang-%s\"", n.Lang)
-	if n.Lang == "" {
-		attr = ""
+	var attr string
+	if n.Lang != "" {
+		attr = fmt.Sprintf(" class=\"lang-%s\"", n.Lang)
 	}
 	code := fmt.Sprintf("<%[1]s%s>%s</%[1]s>", "code", attr, n.Text)
 	return render("pre", code)
@@ -173,6 +174,29 @@ func (t *Tree) newCode(pos Pos, lang, text string) *CodeNode {
 	return &CodeNode{NodeType: NodeCode, Pos: pos, Lang: lang, Text: []byte(text)}
 }
 
+// Link holds a tag with optional title
+type LinkNode struct {
+	NodeType
+	Pos
+	Title string
+	Href  string
+	Text  []byte
+}
+
+// Return the html representation of link tag
+func (n *LinkNode) Render() string {
+	attrs := fmt.Sprintf("href=\"%s\"", n.Href)
+	if n.Title != "" {
+		attrs += fmt.Sprintf(" title=\"%s\"", n.Title)
+	}
+	return fmt.Sprintf("<a %s>%s</a>", attrs, n.Text)
+}
+
+func (t *Tree) newLink(pos Pos, title, href, text string) *LinkNode {
+	return &LinkNode{NodeType: NodeLink, Title: title, Href: href, Text: []byte(text)}
+}
+
+// TODO(Ariel): rename to wrap()
 // Wrap text with specific tag.
 func render(tag, body string) string {
 	return fmt.Sprintf("<%[1]s>%s</%[1]s>", tag, body)
