@@ -38,7 +38,9 @@ const (
 	itemHr
 	itemTable
 	// Span Elements
-	itemLinks
+	itemLink
+	itemAutoLink
+	itemGfmLink
 	itemStrong
 	itemItalic
 	itemStrike
@@ -48,8 +50,10 @@ const (
 )
 
 var (
-	reEmphasise = "^_{%[1]d}([\\s\\S]+?)_{%[1]d}|^\\*{%[1]d}([\\s\\S]+?)\\*{%[1]d}"
-	reGfmCode   = "^%s{3,} *(\\S+)? *\n([\\s\\S]+?)\\s*%s{3,}$*(?:\n+|$)"
+	reEmphasise = `^_{%[1]d}([\s\S]+?)_{%[1]d}|^\*{%[1]d}([\s\S]+?)\*{%[1]d}`
+	reGfmCode   = `^%s{3,} *(\S+)? *\n([\s\S]+?)\s*%s{3,}$*(?:\n+|$)`
+	reLinkText  = `(?:\[[^\]]*\]|[^\[\]]|\])*`
+	reLinkHref  = `\s*<?([\s\S]*?)>?(?:\s+['"]([\s\S]*?)['"])?\s*`
 )
 
 // Block Grammer
@@ -70,8 +74,13 @@ var span = map[itemType]*regexp.Regexp{
 	itemStrong: regexp.MustCompile(fmt.Sprintf(reEmphasise, 2)),
 	itemStrike: regexp.MustCompile("^~{2}([\\s\\S]+?)~{2}"),
 	// itemMixed(e.g: ***str***, ~~*str*~~) will be part of the parser
+	// or we'll lex recuresively
 	itemCode: regexp.MustCompile("^`{1,2}\\s*([\\s\\S]*?[^`])\\s*`{1,2}"),
-	itemBr:   regexp.MustCompile("^ {2,}\n"),
+	itemBr:   regexp.MustCompile(`^ {2,}\n`),
+	// Links
+	itemLink:     regexp.MustCompile(fmt.Sprintf(`^\[(%s)\]\(%s\)`, reLinkText, reLinkHref)),
+	itemAutoLink: regexp.MustCompile(`^<([^ >]+(@|:\/)[^ >]+)>`),
+	itemGfmLink:  regexp.MustCompile(`^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])`),
 }
 
 // stateFn represents the state of the scanner as a function that returns the next state.
@@ -272,6 +281,23 @@ Loop:
 			// ~backup()
 			l.pos += l.width
 			fallthrough
+		// itemLink, itemAutoLink
+		case r == '[', r == '<':
+			l.backup()
+			input := l.input[l.pos:]
+			if m := span[itemLink].FindString(input); m != "" {
+				l.pos += Pos(len(m))
+				l.emit(itemLink)
+				break
+			}
+			if m := span[itemAutoLink].FindString(input); m != "" {
+				l.pos += Pos(len(m))
+				l.emit(itemAutoLink)
+				break
+			}
+			// ~backup()
+			l.pos += l.width
+			fallthrough
 		default:
 			l.backup()
 			input := l.input[l.pos:]
@@ -280,6 +306,12 @@ Loop:
 				l.pos += Pos(len(m))
 				l.emit(itemLHeading)
 				break Loop
+			}
+			// GfmLink
+			if m := span[itemGfmLink].FindString(input); m != "" {
+				l.pos += Pos(len(m))
+				l.emit(itemGfmLink)
+				break
 			}
 			// Simple text
 			subMatch := span[itemText].FindStringSubmatch(input)
