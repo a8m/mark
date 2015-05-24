@@ -26,7 +26,8 @@ Loop:
 			t.append(t.newLine(t.next().pos))
 		case itemHr:
 			t.append(t.newHr(t.next().pos))
-		case itemText, itemStrong, itemItalic, itemStrike, itemCode, itemLink, itemAutoLink, itemGfmLink:
+		case itemText, itemStrong, itemItalic, itemStrike, itemCode,
+			itemLink, itemAutoLink, itemGfmLink, itemImage:
 			t.parseParagraph()
 		case itemHeading, itemLHeading:
 			t.parseHeading()
@@ -107,6 +108,9 @@ Loop:
 				text, href = match[1], match[1]
 			}
 			node = t.newLink(token.pos, title, href, text)
+		case itemImage:
+			match := span[token.typ].FindStringSubmatch(token.val)
+			node = t.newImage(token.pos, match[3], match[2], match[1])
 		}
 		p.append(node)
 		token = t.next()

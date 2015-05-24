@@ -69,4 +69,14 @@ https://github.link done!
 	p.parse()
 	p.render()
 	pp.Printf("\n" + p.output + "\n")
+
+	l = lex("8", `
+![name](http://github.com/foo.gif "Title")  
+![name](http://only-url)  
+paragraph
+`)
+	p = &Tree{lex: l}
+	p.parse()
+	p.render()
+	pp.Printf("\n" + p.output + "\n")
 }

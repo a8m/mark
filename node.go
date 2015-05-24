@@ -27,6 +27,7 @@ const (
 	NodeHeading
 	NodeNewLine
 	NodeHr
+	NodeImage
 	NodeList
 	NodeCode // Code block.
 	NodeLink
@@ -183,7 +184,7 @@ type LinkNode struct {
 	Text  []byte
 }
 
-// Return the html representation of link tag
+// Return the html representation of link node
 func (n *LinkNode) Render() string {
 	attrs := fmt.Sprintf("href=\"%s\"", n.Href)
 	if n.Title != "" {
@@ -194,6 +195,28 @@ func (n *LinkNode) Render() string {
 
 func (t *Tree) newLink(pos Pos, title, href, text string) *LinkNode {
 	return &LinkNode{NodeType: NodeLink, Title: title, Href: href, Text: []byte(text)}
+}
+
+// Image holds img tag with optional title
+type ImageNode struct {
+	NodeType
+	Pos
+	Title string
+	Src   string
+	Alt   []byte
+}
+
+// Return the html representation on img node
+func (n *ImageNode) Render() string {
+	attrs := fmt.Sprintf("src=\"%s\" alt=\"%s\"", n.Src, n.Alt)
+	if n.Title != "" {
+		attrs += fmt.Sprintf(" title=\"%s\"", n.Title)
+	}
+	return fmt.Sprintf("<img %s>", attrs)
+}
+
+func (t *Tree) newImage(pos Pos, title, src, alt string) *ImageNode {
+	return &ImageNode{NodeType: NodeImage, Pos: pos, Title: title, Src: src, Alt: []byte(alt)}
 }
 
 // TODO(Ariel): rename to wrap()

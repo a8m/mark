@@ -45,7 +45,7 @@ const (
 	itemItalic
 	itemStrike
 	itemCode
-	itemImages
+	itemImage
 	itemBr
 )
 
@@ -78,9 +78,12 @@ var span = map[itemType]*regexp.Regexp{
 	itemCode: regexp.MustCompile("^`{1,2}\\s*([\\s\\S]*?[^`])\\s*`{1,2}"),
 	itemBr:   regexp.MustCompile(`^ {2,}\n`),
 	// Links
-	itemLink:     regexp.MustCompile(fmt.Sprintf(`^\[(%s)\]\(%s\)`, reLinkText, reLinkHref)),
+	itemLink:     regexp.MustCompile(fmt.Sprintf(`^!?\[(%s)\]\(%s\)`, reLinkText, reLinkHref)),
 	itemAutoLink: regexp.MustCompile(`^<([^ >]+(@|:\/)[^ >]+)>`),
 	itemGfmLink:  regexp.MustCompile(`^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])`),
+	// Image
+	// TODO(Ariel): DRY
+	itemImage: regexp.MustCompile(fmt.Sprintf(`^!?\[(%s)\]\(%s\)`, reLinkText, reLinkHref)),
 }
 
 // stateFn represents the state of the scanner as a function that returns the next state.
@@ -281,13 +284,17 @@ Loop:
 			// ~backup()
 			l.pos += l.width
 			fallthrough
-		// itemLink, itemAutoLink
-		case r == '[', r == '<':
+		// itemLink, itemAutoLink, itemImage
+		case r == '[', r == '<', r == '!':
 			l.backup()
 			input := l.input[l.pos:]
 			if m := span[itemLink].FindString(input); m != "" {
 				l.pos += Pos(len(m))
-				l.emit(itemLink)
+				if r == '[' {
+					l.emit(itemLink)
+				} else {
+					l.emit(itemImage)
+				}
 				break
 			}
 			if m := span[itemAutoLink].FindString(input); m != "" {
