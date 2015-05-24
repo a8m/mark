@@ -29,6 +29,7 @@ const (
 	NodeHr
 	NodeImage
 	NodeList
+	NodeListItem
 	NodeCode // Code block.
 	NodeLink
 	NodeBlockQuote // Blockquote block.
@@ -217,6 +218,51 @@ func (n *ImageNode) Render() string {
 
 func (t *Tree) newImage(pos Pos, title, src, alt string) *ImageNode {
 	return &ImageNode{NodeType: NodeImage, Pos: pos, Title: title, Src: src, Alt: []byte(alt)}
+}
+
+// List holds list items nodes in ordered or unordered states.
+type ListNode struct {
+	NodeType
+	Pos
+	Ordered bool
+	Items   []ListItemNode
+}
+
+// Return the html representation of list(ul|ol)
+func (n *ListNode) Render() (s string) {
+	tag := "ul"
+	if n.Ordered {
+		tag = "ol"
+	}
+	for _, item := range n.Items {
+		s += item.Render()
+	}
+	return render(tag, s)
+}
+
+func (t *Tree) newListNode(pos Pos, ordered bool) *ListNode {
+	return &ListNode{NodeType: NodeList, Pos: pos, Ordered: ordered}
+}
+
+// ListItem represent single item in ListNode that may contains nested nodes.
+type ListItemNode struct {
+	NodeType
+	Pos
+	Nodes []Node
+	Text  []byte
+}
+
+// Return the html representation of listItem
+func (n *ListItemNode) Render() string {
+	s := string(n.Text)
+	for _, node := range n.Nodes {
+		s += node.Render()
+	}
+	return render("li", s)
+}
+
+func (t *Tree) newListItem(pos Pos, text string) *ListItemNode {
+	return &ListItemNode{NodeType: NodeListItem, Pos: pos, Text: []byte(text)}
 }
 
 // TODO(Ariel): rename to wrap()
