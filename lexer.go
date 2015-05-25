@@ -238,12 +238,7 @@ Loop:
 		case r == eof:
 			break Loop
 		case r == '\n':
-			if l.peek() != '\n' {
-				l.emit(itemNewLine)
-			} else {
-				l.pos++
-				l.emit(itemBr)
-			}
+			l.emit(itemNewLine)
 			break Loop
 		case r == ' ':
 			l.backup()
@@ -255,6 +250,8 @@ Loop:
 			} else {
 				// ~backup()
 				l.pos += l.width
+				// Yeah, space it's also text.
+				l.emit(itemText)
 			}
 		// if it's start as an emphasis
 		case r == '_', r == '*', r == '~', r == '`':

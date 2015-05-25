@@ -26,6 +26,7 @@ const (
 	NodeEmphasis
 	NodeHeading
 	NodeNewLine
+	NodeBr
 	NodeHr
 	NodeImage
 	NodeList
@@ -90,7 +91,7 @@ func (t *Tree) newLine(pos Pos) *NewLineNode {
 	return &NewLineNode{NodeType: NodeNewLine, Pos: pos}
 }
 
-// HrNode represent
+// HrNode represent horizontal rule
 type HrNode struct {
 	NodeType
 	Pos
@@ -103,6 +104,21 @@ func (n *HrNode) Render() string {
 
 func (t *Tree) newHr(pos Pos) *HrNode {
 	return &HrNode{NodeType: NodeHr, Pos: pos}
+}
+
+// BrNode represent br element
+type BrNode struct {
+	NodeType
+	Pos
+}
+
+// Render return the html representation of br.
+func (n *BrNode) Render() string {
+	return "<br>"
+}
+
+func (t *Tree) newBr(pos Pos) *BrNode {
+	return &BrNode{NodeType: NodeBr, Pos: pos}
 }
 
 // EmphasisNode holds text with style.
@@ -240,7 +256,7 @@ func (n *ListNode) Render() (s string) {
 	return render(tag, s)
 }
 
-func (t *Tree) newListNode(pos Pos, ordered bool) *ListNode {
+func (t *Tree) newList(pos Pos, ordered bool) *ListNode {
 	return &ListNode{NodeType: NodeList, Pos: pos, Ordered: ordered}
 }
 

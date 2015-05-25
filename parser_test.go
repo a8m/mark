@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestParser(t *testing.T) {
+func Parser(t *testing.T) {
 	l := lex("1", "foo bar baz\nhello world")
 	p := &Tree{lex: l}
 	item := p.peek()
@@ -16,7 +16,7 @@ func TestParser(t *testing.T) {
 	fmt.Println(tokenNames[item.typ], "-->", item.val)
 }
 
-func TestParseFn(*testing.T) {
+func ParseFn(*testing.T) {
 	l := lex("2", "hello\nworld. **ariel**foo  \nenter hahaha  \n~~hello~~ world  \n_bar_  \n This is my code:`javascript`")
 	p := &Tree{lex: l}
 	p.parse()
@@ -79,4 +79,13 @@ paragraph
 	p.parse()
 	p.render()
 	pp.Printf("\n" + p.output + "\n")
+
+	l = lex("8", `
+- This is listItem
+- And another listItem
+`)
+
+	for item := range l.items {
+		pp.Println(item)
+	}
 }

@@ -3,6 +3,8 @@ package mark
 import (
 	fmt "github.com/k0kubun/pp"
 	"regexp"
+	"unicode"
+	"unicode/utf8"
 )
 
 type Tree struct {
@@ -22,8 +24,10 @@ Loop:
 		switch p := t.peek().typ; p {
 		case eof, itemError:
 			break Loop
-		case itemBr, itemNewLine:
+		case itemNewLine:
 			t.append(t.newLine(t.next().pos))
+		case itemBr:
+			t.append(t.newBr(t.next().pos))
 		case itemHr:
 			t.append(t.newHr(t.next().pos))
 		case itemText, itemStrong, itemItalic, itemStrike, itemCode,
@@ -33,6 +37,8 @@ Loop:
 			t.parseHeading()
 		case itemCodeBlock, itemGfmCodeBlock:
 			t.parseCodeBlock()
+		case itemList:
+			t.parseList()
 		default:
 			fmt.Println("Nothing to do", p)
 		}
@@ -41,7 +47,6 @@ Loop:
 
 // Render parse nodes to the wanted output
 func (t *Tree) render() {
-	// wrap with html/xhtml/head(with options) etc..
 	for _, node := range t.Nodes {
 		t.output += node.Render()
 	}
@@ -85,11 +90,17 @@ Loop:
 	for {
 		var node Node
 		switch token.typ {
-		case eof, itemError, itemBr:
+		case eof, itemError:
 			t.backup()
 			break Loop
 		case itemNewLine:
 			node = t.newLine(token.pos)
+			// Two or more lines continuosly
+			if t.peek().typ == itemNewLine {
+				break Loop
+			}
+		case itemBr:
+			node = t.newBr(token.pos)
 		case itemText:
 			node = t.newText(token.pos, token.val)
 		case itemStrong, itemItalic, itemStrike, itemCode:
@@ -143,4 +154,18 @@ func (t *Tree) parseCodeBlock() {
 		text = regexp.MustCompile("(?m)( {4}|\t)").ReplaceAllLiteralString(token.val, "")
 	}
 	t.append(t.newCode(token.pos, lang, text))
+}
+
+// parse list
+func (t *Tree) parseList() {
+	//	token := t.next()
+	//	list := t.newList(token.pos, isDigit(token.val))
+	// iterate over the list items...(recursively of course)
+	// and push to tree
+}
+
+// test if given string is digit
+func isDigit(s string) bool {
+	r, _ := utf8.DecodeRuneInString(s)
+	return unicode.IsDigit(r)
 }

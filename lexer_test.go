@@ -21,13 +21,16 @@ var tokenNames = map[itemType]string{
 	10: "itemGfmCodeBlock",
 	11: "itemHr",
 	12: "itemTable",
-	13: "itemLinks",
-	14: "itemEmphasis",
-	15: "itemItalic",
-	16: "itemStrike",
-	17: "itemCode",
-	18: "itemImages",
-	19: "itemBr",
+	13: "itemLink",
+	14: "itemAutoLink",
+	15: "itemGfmLink",
+	16: "itemStrong",
+	17: "itemItalic",
+	18: "itemStrike",
+	19: "itemCode",
+	20: "itemImage",
+	21: "itemBr",
+	22: "itemIndent",
 }
 
 func printRound(i int) {
@@ -35,42 +38,24 @@ func printRound(i int) {
 	fmt.Printf("\n\n%s Round %d %s\n\n", sep, i, sep)
 }
 
-func Basic(t *testing.T) {
-	printRound(1)
-	// Test round 1
-	l := lex("1", "#header\n#bar\n***\n---\n```js\nfunction(){}```\n~~~html\n<foo/>~~~\n##header\n```go\nmain(){}\n```")
+func TestBasic(t *testing.T) {
+	l := lex("1", "1  \n2  \n3")
 	for item := range l.items {
 		fmt.Println(tokenNames[item.typ], "--->", item.val)
 	}
-	// Test round 2
-	printRound(2)
-	l = lex("2", "#code\n    foo bar\n    bar baz\n")
-	for item := range l.items {
-		fmt.Println(tokenNames[item.typ], "--->\n"+item.val)
-	}
-	// Test round 3
-	printRound(3)
-	l = lex("3", "one  two\n\nthree  #header\n\nparagraph  ```js\ncodeblock```")
-	for item := range l.items {
-		fmt.Println(tokenNames[item.typ], "--->\n"+item.val)
-	}
+}
 
-	printRound(4)
-	l = lex("4", "one ~~strike~~  two **bold**  three _italic_")
+func List(t *testing.T) {
+	printRound(1)
+	// Test round 1
+	l := lex("1", `
+- foo
+- bar
+ - baz
+1. asda
+3. asdas
+`)
 	for item := range l.items {
-		fmt.Println(tokenNames[item.typ], "--->\n"+item.val)
+		fmt.Println(tokenNames[item.typ], "--->", item.val)
 	}
-
-	printRound(5)
-	l = lex("5", "one ``code``  two `code`  three  ```code``  four ``code```  done")
-	for item := range l.items {
-		fmt.Println(tokenNames[item.typ], "--->\n"+item.val)
-	}
-
-	printRound(6)
-	l = lex("6", "- foo bar\n- baz")
-	for item := range l.items {
-		fmt.Println(tokenNames[item.typ], "--->\n"+item.val)
-	}
-
 }
