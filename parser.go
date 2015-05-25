@@ -47,8 +47,13 @@ Loop:
 
 // Render parse nodes to the wanted output
 func (t *Tree) render() {
+	var last Node
+	last = t.newLine(0)
 	for _, node := range t.Nodes {
-		t.output += node.Render()
+		if last.Type() != NodeNewLine || node.Type() != last.Type() {
+			t.output += node.Render()
+		}
+		last = node
 	}
 }
 
@@ -82,6 +87,13 @@ func (t *Tree) backup() {
 	t.peekCount++
 }
 
+// backup2 backs the input stream up two tokens.
+// The zeroth token is already there.
+func (t *Tree) backup2(t1 item) {
+	t.token[1] = t1
+	t.peekCount = 2
+}
+
 // parseParagraph scan until itemBr occur.
 func (t *Tree) parseParagraph() {
 	token := t.next()
@@ -90,15 +102,16 @@ Loop:
 	for {
 		var node Node
 		switch token.typ {
-		case eof, itemError:
+		case eof, itemError, itemHeading:
 			t.backup()
 			break Loop
 		case itemNewLine:
-			node = t.newLine(token.pos)
-			// Two or more lines continuosly
-			if t.peek().typ == itemNewLine {
+			// Two or more lines continuosly, or block below
+			if typ := t.peek().typ; typ == itemNewLine || isBlock(typ) {
+				t.backup2(token)
 				break Loop
 			}
+			node = t.newLine(token.pos)
 		case itemBr:
 			node = t.newBr(token.pos)
 		case itemText:
@@ -168,4 +181,15 @@ func (t *Tree) parseList() {
 func isDigit(s string) bool {
 	r, _ := utf8.DecodeRuneInString(s)
 	return unicode.IsDigit(r)
+}
+
+// test if given token is type block
+func isBlock(item itemType) bool {
+	switch item {
+	case itemHeading, itemLHeading, itemCodeBlock, itemBlockQuote,
+		itemList, itemTable, itemGfmCodeBlock, itemHr:
+		return true
+	default:
+		return false
+	}
 }

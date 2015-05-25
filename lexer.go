@@ -3,6 +3,7 @@ package mark
 import (
 	"fmt"
 	"regexp"
+	"strings"
 	"unicode/utf8"
 )
 
@@ -181,9 +182,13 @@ func lexAny(l *lexer) stateFn {
 
 // lexHeading scans heading items.
 func lexHeading(l *lexer) stateFn {
-	if block[itemHeading].MatchString(l.input[l.pos:]) {
-		match := block[itemHeading].FindString(l.input[l.pos:])
-		l.pos += Pos(len(match))
+	if m := block[itemHeading].FindString(l.input[l.pos:]); m != "" {
+		// Emit without the newline(\n)
+		l.pos += Pos(len(m))
+		// TODO(Ariel): hack, fix regexp
+		if strings.HasSuffix(m, "\n") {
+			l.pos--
+		}
 		l.emit(itemHeading)
 		return lexAny
 	}

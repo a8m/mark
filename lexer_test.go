@@ -1,7 +1,7 @@
 package mark
 
 import (
-	"fmt"
+	fmt "github.com/k0kubun/pp"
 	"strings"
 	"testing"
 )
@@ -39,10 +39,15 @@ func printRound(i int) {
 }
 
 func TestBasic(t *testing.T) {
-	l := lex("1", "1  \n2  \n3")
-	for item := range l.items {
-		fmt.Println(tokenNames[item.typ], "--->", item.val)
-	}
+	l := lex("1", "#1\npasdas\n##2\n###3\n4\n===\n1\n2")
+	//	for item := range l.items {
+	//		fmt.Println(tokenNames[item.typ], "--->", item.val)
+	//	}
+	tr := &Tree{lex: l}
+	tr.parse()
+	//	fmt.Println(tr.Nodes)
+	tr.render()
+	fmt.Println(tr.output)
 }
 
 func List(t *testing.T) {
