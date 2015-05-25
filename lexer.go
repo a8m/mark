@@ -47,6 +47,8 @@ const (
 	itemCode
 	itemImage
 	itemBr
+	// Indentation
+	itemIndent
 )
 
 var (
@@ -61,7 +63,7 @@ var block = map[itemType]*regexp.Regexp{
 	itemHeading:   regexp.MustCompile("^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)"),
 	itemLHeading:  regexp.MustCompile("^([^\n]+)\n *(=|-){2,} *(?:\n+|$)"),
 	itemHr:        regexp.MustCompile("^( *[-*_]){3,} *(?:\n+|$)"),
-	itemCodeBlock: regexp.MustCompile("^( {4}[^\n]+\n*)+"),
+	itemCodeBlock: regexp.MustCompile("^(( {4}|\t)[^\n]+\n*)+"),
 	// Backreferences is unavailable
 	itemGfmCodeBlock: regexp.MustCompile(fmt.Sprintf(reGfmCode, "`", "`") + "|" + fmt.Sprintf(reGfmCode, "~", "~")),
 	itemList:         regexp.MustCompile("(?:[*+-]|\\d+\\.)"),
@@ -155,13 +157,14 @@ func lexAny(l *lexer) stateFn {
 	case r == '#':
 		l.backup()
 		return lexHeading
-	case r == ' ':
+	case r == ' ', r == '\t':
 		// Should be here ?
 		if block[itemCodeBlock].MatchString(l.input[l.pos-1:]) {
 			l.backup()
 			return lexCode
 		}
-		fallthrough
+		l.emit(itemIndent)
+		return lexAny
 	case r == '`' || r == '~':
 		// if it's gfm-code
 		c := l.input[l.pos : l.pos+2]

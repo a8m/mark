@@ -140,7 +140,7 @@ func (t *Tree) parseCodeBlock() {
 		match := block[itemGfmCodeBlock].FindStringSubmatch(token.val)
 		lang, text = match[1], match[2]
 	} else {
-		text = regexp.MustCompile("(?m) {4}").ReplaceAllLiteralString(token.val, "")
+		text = regexp.MustCompile("(?m)( {4}|\t)").ReplaceAllLiteralString(token.val, "")
 	}
 	t.append(t.newCode(token.pos, lang, text))
 }
