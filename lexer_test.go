@@ -39,15 +39,15 @@ func printRound(i int) {
 }
 
 func TestBasic(t *testing.T) {
-	l := lex("1", "#1\npasdas\n##2\n###3\n4\n===\n1\n2")
-	//	for item := range l.items {
-	//		fmt.Println(tokenNames[item.typ], "--->", item.val)
-	//	}
-	tr := &Tree{lex: l}
-	tr.parse()
+	l := lex("1", "\tfoo\n\n\nbar")
+	for item := range l.items {
+		fmt.Println(tokenNames[item.typ], "--->", item.val)
+	}
+	//tr := &Tree{lex: l}
+	//tr.parse()
 	//	fmt.Println(tr.Nodes)
-	tr.render()
-	fmt.Println(tr.output)
+	//	tr.render()
+	//	fmt.Println(tr.output)
 }
 
 func List(t *testing.T) {
