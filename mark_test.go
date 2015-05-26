@@ -43,7 +43,9 @@ func TestRender(t *testing.T) {
 		"\tfoo\n\tbar": "<pre><code>foo\nbar</code></pre>",
 		"\tfoo\nbar":   "<pre><code>foo\n</code></pre><p>bar</p>",
 		// GfmCodeBlock
-		"```js\nvar a;\n```": "<pre><code class=\"lang-js\">var a;</code></pre>",
+		"```js\nvar a;\n```":  "<pre><code class=\"lang-js\">var a;</code></pre>",
+		"~~~\nvar b;~~~":      "<pre><code>var b;</code></pre>",
+		"~~~js\nlet d = 1~~~": "<pre><code>let d = 1</code></pre>",
 	}
 	for actual, expected := range cases {
 		expect(Render(actual)).To.Equal(expected)
