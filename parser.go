@@ -21,27 +21,29 @@ type Tree struct {
 func (t *Tree) parse() {
 Loop:
 	for {
+		var n Node
 		switch p := t.peek().typ; p {
 		case eof, itemError:
 			break Loop
 		case itemNewLine:
-			t.append(t.newLine(t.next().pos))
+			n = t.newLine(t.next().pos)
 		case itemBr:
-			t.append(t.newBr(t.next().pos))
+			n = t.newBr(t.next().pos)
 		case itemHr:
-			t.append(t.newHr(t.next().pos))
+			n = t.newHr(t.next().pos)
 		case itemText, itemStrong, itemItalic, itemStrike, itemCode,
 			itemLink, itemAutoLink, itemGfmLink, itemImage:
-			t.parseParagraph()
+			n = t.parseParagraph()
 		case itemHeading, itemLHeading:
-			t.parseHeading()
+			n = t.parseHeading()
 		case itemCodeBlock, itemGfmCodeBlock:
-			t.parseCodeBlock()
+			n = t.parseCodeBlock()
 		case itemList:
 			t.parseList()
 		default:
 			fmt.Println("Nothing to do", p)
 		}
+		t.append(n)
 	}
 }
 
@@ -95,7 +97,7 @@ func (t *Tree) backup2(t1 item) {
 }
 
 // parseParagraph scan until itemBr occur.
-func (t *Tree) parseParagraph() {
+func (t *Tree) parseParagraph() *ParagraphNode {
 	token := t.next()
 	p := t.newParagraph(token.pos)
 Loop:
@@ -139,12 +141,11 @@ Loop:
 		p.append(node)
 		token = t.next()
 	}
-	t.append(p)
+	return p
 }
 
 // parse heading block
-func (t *Tree) parseHeading() {
-	var node Node
+func (t *Tree) parseHeading() (node *HeadingNode) {
 	token := t.next()
 	match := block[token.typ].FindStringSubmatch(token.val)
 	if token.typ == itemHeading {
@@ -153,11 +154,11 @@ func (t *Tree) parseHeading() {
 		// itemLHeading will always be in level 1.
 		node = t.newHeading(token.pos, 1, match[1])
 	}
-	t.append(node)
+	return
 }
 
 // parse codeBlock
-func (t *Tree) parseCodeBlock() {
+func (t *Tree) parseCodeBlock() *CodeNode {
 	var lang, text string
 	token := t.next()
 	if token.typ == itemGfmCodeBlock {
@@ -169,7 +170,7 @@ func (t *Tree) parseCodeBlock() {
 	} else {
 		text = regexp.MustCompile("(?m)( {4}|\t)").ReplaceAllLiteralString(token.val, "")
 	}
-	t.append(t.newCode(token.pos, lang, text))
+	return t.newCode(token.pos, lang, text)
 }
 
 // parse list
