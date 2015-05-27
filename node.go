@@ -241,7 +241,11 @@ type ListNode struct {
 	NodeType
 	Pos
 	Ordered bool
-	Items   []ListItemNode
+	Items   []*ListItemNode
+}
+
+func (t *ListNode) append(item *ListItemNode) {
+	t.Items = append(t.Items, item)
 }
 
 // Return the html representation of list(ul|ol)
@@ -265,20 +269,22 @@ type ListItemNode struct {
 	NodeType
 	Pos
 	Nodes []Node
-	Text  []byte
+}
+
+func (t *ListItemNode) append(n Node) {
+	t.Nodes = append(t.Nodes, n)
 }
 
 // Return the html representation of listItem
-func (n *ListItemNode) Render() string {
-	s := string(n.Text)
+func (n *ListItemNode) Render() (s string) {
 	for _, node := range n.Nodes {
 		s += node.Render()
 	}
 	return render("li", s)
 }
 
-func (t *Tree) newListItem(pos Pos, text string) *ListItemNode {
-	return &ListItemNode{NodeType: NodeListItem, Pos: pos, Text: []byte(text)}
+func (t *Tree) newListItem(pos Pos) *ListItemNode {
+	return &ListItemNode{NodeType: NodeListItem, Pos: pos}
 }
 
 // TODO(Ariel): rename to wrap()

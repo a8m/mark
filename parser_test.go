@@ -6,13 +6,16 @@ import (
 	"testing"
 )
 
-func Parser(t *testing.T) {
+func jTestParser(t *testing.T) {
 	l := lex("1", "foo bar baz\nhello world")
 	p := &Tree{lex: l}
+	fmt.Println("peek")
 	item := p.peek()
 	fmt.Println(tokenNames[item.typ], "-->", item.val)
-	p.peekCount = 0
 	item = p.peek()
+	fmt.Println(tokenNames[item.typ], "-->", item.val)
+	fmt.Println("next")
+	item = p.next()
 	fmt.Println(tokenNames[item.typ], "-->", item.val)
 }
 

@@ -39,7 +39,7 @@ Loop:
 		case itemCodeBlock, itemGfmCodeBlock:
 			n = t.parseCodeBlock()
 		case itemList:
-			t.parseList()
+			n = t.parseList()
 		default:
 			fmt.Println("Nothing to do", p)
 		}
@@ -104,7 +104,7 @@ Loop:
 	for {
 		var node Node
 		switch token.typ {
-		case eof, itemError, itemHeading:
+		case eof, itemError, itemHeading, itemList:
 			t.backup()
 			break Loop
 		case itemNewLine:
@@ -174,11 +174,55 @@ func (t *Tree) parseCodeBlock() *CodeNode {
 }
 
 // parse list
-func (t *Tree) parseList() {
-	//	token := t.next()
-	//	list := t.newList(token.pos, isDigit(token.val))
-	// iterate over the list items...(recursively of course)
-	// and push to tree
+func (t *Tree) parseList() *ListNode {
+	token := t.next()
+	list := t.newList(token.pos, isDigit(token.val))
+	item := new(ListItemNode)
+Loop:
+	for {
+		switch token = t.next(); token.typ {
+		case eof, itemError:
+			break Loop
+		// It's actually a listItem
+		case itemList:
+			// List, but not the same type
+			if list.Ordered != isDigit(token.val) {
+				break Loop
+			}
+			item = t.parseListItem(token.pos)
+		case itemNewLine:
+			if t.peek().typ == itemNewLine {
+				break Loop
+			}
+			fallthrough
+		default:
+			t.backup()
+			item = t.parseListItem(token.pos)
+		}
+		list.append(item)
+	}
+	return list
+}
+
+func (t *Tree) parseListItem(pos Pos) *ListItemNode {
+	item := t.newListItem(pos)
+	var n Node
+Loop:
+	for {
+		switch token := t.next(); token.typ {
+		case eof, itemError:
+			break Loop
+		case itemList:
+			t.backup()
+			break Loop
+		case itemNewLine:
+			continue
+		default:
+			n = t.newText(token.pos, token.val)
+		}
+		item.append(n)
+	}
+	return item
 }
 
 // test if given string is digit

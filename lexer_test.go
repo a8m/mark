@@ -39,28 +39,30 @@ func printRound(i int) {
 }
 
 func TestBasic(t *testing.T) {
-	l := lex("1", "foo\n***\nbar")
-	for item := range l.items {
-		fmt.Println(tokenNames[item.typ], "--->", item.val)
-	}
-	//tr := &Tree{lex: l}
-	//tr.parse()
-	//	fmt.Println(tr.Nodes)
-	//	tr.render()
-	//	fmt.Println(tr.output)
+	l := lex("1", "-foo\n-bar")
+	//	for item := range l.items {
+	//		fmt.Println(tokenNames[item.typ], "--->", item.val)
+	//	}
+	tr := &Tree{lex: l}
+	tr.parse()
+	fmt.Println(tr.Nodes)
+	tr.render()
+	fmt.Println(tr.output)
 }
 
-func List(t *testing.T) {
+func xestList(t *testing.T) {
 	printRound(1)
 	// Test round 1
-	l := lex("1", `
+	src := `
 - foo
 - bar
  - baz
 1. asda
 3. asdas
-`)
+`
+	l := lex("1", src)
+	fmt.Printf("Source:\n" + src + "\n")
 	for item := range l.items {
-		fmt.Println(tokenNames[item.typ], "--->", item.val)
+		fmt.Printf(tokenNames[item.typ] + " ---> " + item.val + "\n")
 	}
 }
