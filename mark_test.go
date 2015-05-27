@@ -46,6 +46,13 @@ func TestRender(t *testing.T) {
 		"```js\nvar a;\n```":  "<pre><code class=\"lang-js\">var a;</code></pre>",
 		"~~~\nvar b;~~~":      "<pre><code>var b;</code></pre>",
 		"~~~js\nlet d = 1~~~": "<pre><code>let d = 1</code></pre>",
+		// Hr
+		"foo\n****\nbar": "<p>foo</p>\n<hr><p>bar</p>",
+		"foo\n___":       "<p>foo</p>\n<hr>",
+		// Images
+		"![name](url)":           "<p><img src=\"url\" alt=\"name\"></p>",
+		"![name](url \"title\")": "<p><img src=\"url\" alt=\"name\" title=\"title\"></p>",
+		"img: ![name]()":         "<p>img: <img src=\"\" alt=\"name\"></p>",
 	}
 	for actual, expected := range cases {
 		expect(Render(actual)).To.Equal(expected)

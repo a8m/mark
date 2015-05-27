@@ -39,7 +39,7 @@ func printRound(i int) {
 }
 
 func TestBasic(t *testing.T) {
-	l := lex("1", "\tfoo\n\n\nbar")
+	l := lex("1", "foo\n***\nbar")
 	for item := range l.items {
 		fmt.Println(tokenNames[item.typ], "--->", item.val)
 	}
