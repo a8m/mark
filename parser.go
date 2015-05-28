@@ -39,7 +39,8 @@ Loop:
 		case itemCodeBlock, itemGfmCodeBlock:
 			n = t.parseCodeBlock()
 		case itemList:
-			n = t.parseList()
+			// 0 for the depth
+			n = t.parseList(0)
 		default:
 			fmt.Println("Nothing to do", p)
 		}
@@ -174,9 +175,9 @@ func (t *Tree) parseCodeBlock() *CodeNode {
 }
 
 // parse list
-func (t *Tree) parseList() *ListNode {
+func (t *Tree) parseList(depth int) *ListNode {
 	token := t.next()
-	list := t.newList(token.pos, isDigit(token.val))
+	list := t.newList(token.pos, depth, isDigit(token.val))
 	item := new(ListItemNode)
 Loop:
 	for {
@@ -187,9 +188,10 @@ Loop:
 		case itemList:
 			// List, but not the same type
 			if list.Ordered != isDigit(token.val) {
+				t.backup()
 				break Loop
 			}
-			item = t.parseListItem(token.pos)
+			item = t.parseListItem(token.pos, list)
 		case itemNewLine:
 			if t.peek().typ == itemNewLine {
 				break Loop
@@ -197,15 +199,15 @@ Loop:
 			fallthrough
 		default:
 			t.backup()
-			item = t.parseListItem(token.pos)
+			item = t.parseListItem(token.pos, list)
 		}
 		list.append(item)
 	}
 	return list
 }
 
-func (t *Tree) parseListItem(pos Pos) *ListItemNode {
-	item := t.newListItem(pos)
+func (t *Tree) parseListItem(pos Pos, list *ListNode) *ListItemNode {
+	item := t.newListItem(pos, list)
 	var n Node
 Loop:
 	for {
@@ -216,7 +218,19 @@ Loop:
 			t.backup()
 			break Loop
 		case itemNewLine:
-			continue
+			switch typ := t.peek().typ; typ {
+			case itemNewLine, eof, itemError, itemList, itemIndent:
+				continue
+			default:
+				n = t.newLine(token.pos)
+			}
+		case itemIndent:
+			depth := item.List.Depth + 1
+			if t.peek().typ == itemList {
+				n = t.parseList(depth)
+			} else {
+				n = t.newText(token.pos, token.val)
+			}
 		default:
 			n = t.newText(token.pos, token.val)
 		}
