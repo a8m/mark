@@ -105,7 +105,7 @@ Loop:
 	for {
 		var node Node
 		switch token.typ {
-		case eof, itemError, itemHeading, itemList:
+		case eof, itemError, itemHeading, itemList, itemIndent:
 			t.backup()
 			break Loop
 		case itemNewLine:
@@ -243,8 +243,16 @@ Loop:
 			} else {
 				n = t.newText(token.pos, token.val)
 			}
+		case itemCodeBlock, itemGfmCodeBlock:
+			n = t.parseCodeBlock()
 		default:
-			n = t.newText(token.pos, token.val)
+			// DRY
+			for _, n := range t.parseParagraph().Nodes {
+				if n.Type() != NodeNewLine {
+					item.append(n)
+				}
+			}
+			continue
 		}
 		item.append(n)
 	}
