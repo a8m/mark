@@ -161,9 +161,14 @@ func lexAny(l *lexer) stateFn {
 		return lexHeading
 	case r == ' ', r == '\t':
 		// Should be here ?
+		// TODO(Ariel): test that it's a codeBlock and not list for sure
 		if block[itemCodeBlock].MatchString(l.input[l.pos-1:]) {
 			l.backup()
 			return lexCode
+		}
+		// Keep moving forward until we get all the
+		// indentation size
+		for ; r == l.peek(); r = l.next() {
 		}
 		l.emit(itemIndent)
 		return lexAny

@@ -187,7 +187,7 @@ Loop:
 		// It's actually a listItem
 		case itemList:
 			// List, but not the same type
-			if list.Ordered != isDigit(token.val) {
+			if list.Ordered != isDigit(token.val) || depth > 0 {
 				t.backup()
 				break Loop
 			}
@@ -197,6 +197,12 @@ Loop:
 				break Loop
 			}
 			fallthrough
+		case itemIndent:
+			if depth == len(token.val) {
+				item = t.parseListItem(token.pos, list)
+			}
+			t.backup()
+			break Loop
 		default:
 			t.backup()
 			item = t.parseListItem(token.pos, list)
@@ -225,8 +231,14 @@ Loop:
 				n = t.newLine(token.pos)
 			}
 		case itemIndent:
-			depth := item.List.Depth + 1
 			if t.peek().typ == itemList {
+				depth := len(token.val)
+				// If it's in the same depth - sibling
+				// or if it's less-than - exit
+				if depth <= item.List.Depth {
+					t.backup2(token)
+					break Loop
+				}
 				n = t.parseList(depth)
 			} else {
 				n = t.newText(token.pos, token.val)

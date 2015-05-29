@@ -40,19 +40,32 @@ func printRound(i int) {
 
 func TestBasic(t *testing.T) {
 	l := lex("1", `
-- foo
-- bar
- - baz
- - lala
+1. one
+2. two
+ 1. one of two
+ 2. two of two
+3. three
+4. four
+ 1. one of four
+  1. one of one of four
+5. five and done!
 
-1. foo
-2. bar
- 1. bla bla
- 1. googo
+- 1
+- 2
+ - 1
+  - 1
+  - 2
+  - 3
+   - 1
+   - 2
+   - 3
+ - 2
+ - 3
+- 3
 `)
-	//	for item := range l.items {
-	//		fmt.Println(tokenNames[item.typ], "--->", item.val)
-	//	}
+	/*	for item := range l.items {
+		fmt.Printf(tokenNames[item.typ] + " ---> '" + item.val + "'" + "\n")
+	}*/
 	tr := &Tree{lex: l}
 	tr.parse()
 	fmt.Println(tr.Nodes)
