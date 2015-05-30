@@ -53,6 +53,14 @@ func TestRender(t *testing.T) {
 		"![name](url)":           "<p><img src=\"url\" alt=\"name\"></p>",
 		"![name](url \"title\")": "<p><img src=\"url\" alt=\"name\" title=\"title\"></p>",
 		"img: ![name]()":         "<p>img: <img src=\"\" alt=\"name\"></p>",
+		// Lists
+		"- foo\n- bar": "<ul><li>foo</li><li>bar</li></ul>",
+		"* foo\n* bar": "<ul><li>foo</li><li>bar</li></ul>",
+		"+ foo\n+ bar": "<ul><li>foo</li><li>bar</li></ul>",
+		// Ordered Lists
+		"1. one\n2. two\n3. three": "<ol><li>one</li><li>two</li><li>three</li></ol>",
+		"1. one\n 1. one of one":   "<ol><li>one<ol><li>one of one</li></ol></li></ol>",
+		"2. two\n 3. three":        "<ol><li>two<ol><li>three</li></ol></li></ol>",
 	}
 	for actual, expected := range cases {
 		expect(Render(actual)).To.Equal(expected)
