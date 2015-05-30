@@ -38,6 +38,7 @@ const (
 	itemGfmCodeBlock
 	itemHr
 	itemTable
+	itemLpTable
 	// Span Elements
 	itemLink
 	itemAutoLink
@@ -68,6 +69,9 @@ var block = map[itemType]*regexp.Regexp{
 	// Backreferences is unavailable
 	itemGfmCodeBlock: regexp.MustCompile(fmt.Sprintf(reGfmCode, "`", "`") + "|" + fmt.Sprintf(reGfmCode, "~", "~")),
 	itemList:         regexp.MustCompile("(?:[*+-]|\\d+\\.)"),
+	// No leading-pipe table
+	itemLpTable: regexp.MustCompile(`^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*`),
+	itemTable:   regexp.MustCompile(`^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*`),
 }
 
 // Inline Grammer
@@ -138,10 +142,10 @@ func (l *lexer) next() rune {
 
 // lexAny scans non-space items.
 func lexAny(l *lexer) stateFn {
-	switch r := l.next(); {
-	case r == eof:
+	switch r := l.next(); r {
+	case eof:
 		return nil
-	case r == '*' || r == '-' || r == '_':
+	case '*', '-', '_', '+':
 		p := l.peek()
 		if p == '*' || p == '-' || p == '_' {
 			l.backup()
@@ -150,16 +154,16 @@ func lexAny(l *lexer) stateFn {
 			l.backup()
 			return lexList
 		}
-	case '0' <= r && r <= '9':
+	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 		l.backup()
 		return lexList
-	case r == '>':
+	case '>':
 		l.emit(itemBlockQuote)
 		return lexText
-	case r == '#':
+	case '#':
 		l.backup()
 		return lexHeading
-	case r == ' ', r == '\t':
+	case ' ', '\t':
 		// Should be here ?
 		// TODO(Ariel): test that it's a codeBlock and not list for sure
 		if block[itemCodeBlock].MatchString(l.input[l.pos-1:]) {
@@ -172,7 +176,7 @@ func lexAny(l *lexer) stateFn {
 		}
 		l.emit(itemIndent)
 		return lexAny
-	case r == '`' || r == '~':
+	case '`', '~':
 		// if it's gfm-code
 		c := l.input[l.pos : l.pos+2]
 		if c == "``" || c == "~~" {

@@ -38,10 +38,10 @@ func printRound(i int) {
 	fmt.Printf("\n\n%s Round %d %s\n\n", sep, i, sep)
 }
 
-func TestBasic(t *testing.T) {
+func STestBasic(t *testing.T) {
 	l := lex("1", `
-1. one
-2. two
+1. one **havebold**
+2. two _have italic_
  1. one of two
  2. two of two
 3. three
