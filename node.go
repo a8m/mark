@@ -33,6 +33,9 @@ const (
 	NodeListItem
 	NodeCode // Code block.
 	NodeLink
+	NodeTable
+	NodeRow
+	NodeCell
 	NodeBlockQuote // Blockquote block.
 )
 
@@ -287,6 +290,67 @@ func (n *ListItemNode) Render() (s string) {
 
 func (t *Tree) newListItem(pos Pos, list *ListNode) *ListItemNode {
 	return &ListItemNode{NodeType: NodeListItem, Pos: pos, List: list}
+}
+
+// TableNode represent table elment contains head and body
+type TableNode struct {
+	NodeType
+	Pos
+	Rows []*RowNode
+}
+
+func (n *TableNode) Render() string {
+	return ""
+}
+
+func (t *Tree) newTable(pos Pos) *TableNode {
+	return &TableNode{NodeType: NodeTable, Pos: pos}
+}
+
+// TableRowNode represnt tr that holds batch of table-data/cells
+type RowNode struct {
+	NodeType
+	Pos
+	Cells []*CellNode
+}
+
+func (n *RowNode) Render() string {
+	return ""
+}
+
+func (t *Tree) newRow(pos Pos) *RowNode {
+	return &RowNode{NodeType: NodeRow, Pos: pos}
+}
+
+// Alignment
+const (
+	None = iota
+	Right
+	Left
+	Center
+)
+
+// Cell types
+const (
+	Header = iota
+	Data
+)
+
+// TableCellNode represent table-data/cell that holds simple text(my be emphasis)
+// Note: the text in <th> elements are bold and centered by default.
+type CellNode struct {
+	NodeType
+	Pos
+	Kind, Align int
+	Nodes       []Node
+}
+
+func (n *CellNode) Render() string {
+	return ""
+}
+
+func (t *Tree) newCell(pos Pos, kind, align int) *CellNode {
+	return &CellNode{NodeType: NodeCell, Pos: pos, Kind: kind, Align: align}
 }
 
 // TODO(Ariel): rename to wrap()
