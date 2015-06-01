@@ -21,16 +21,18 @@ var tokenNames = map[itemType]string{
 	10: "itemGfmCodeBlock",
 	11: "itemHr",
 	12: "itemTable",
-	13: "itemLink",
-	14: "itemAutoLink",
-	15: "itemGfmLink",
-	16: "itemStrong",
-	17: "itemItalic",
-	18: "itemStrike",
-	19: "itemCode",
-	20: "itemImage",
-	21: "itemBr",
-	22: "itemIndent",
+	13: "itemLpTable",
+	14: "itemLink",
+	15: "itemAutoLink",
+	16: "itemGfmLink",
+	17: "itemStrong",
+	18: "itemItalic",
+	19: "itemStrike",
+	20: "itemCode",
+	21: "itemImage",
+	22: "itemBr",
+	23: "itemPipe",
+	24: "itemIndent",
 }
 
 func printRound(i int) {
@@ -38,39 +40,23 @@ func printRound(i int) {
 	fmt.Printf("\n\n%s Round %d %s\n\n", sep, i, sep)
 }
 
-func STestBasic(t *testing.T) {
+func TestBasic(t *testing.T) {
 	l := lex("1", `
-1. one **havebold**
-2. two _have italic_
- 1. one of two
- 2. two of two
-3. three
-4. four
- 1. one of four
-  1. one of one of four
-5. five and done!
+| foo | bar |  
+baz baz blalala
 
-- 1
-- 2
- - 1
-  - 1
-  - 2
-  - 3
-   - 1
-   - 2
-   - 3
- - 2
- - 3
-- 3
-`)
-	/*	for item := range l.items {
+Name | Age
+---- | ---
+Ariel| 26`)
+
+	for item := range l.items {
 		fmt.Printf(tokenNames[item.typ] + " ---> '" + item.val + "'" + "\n")
-	}*/
-	tr := &Tree{lex: l}
-	tr.parse()
-	fmt.Println(tr.Nodes)
-	tr.render()
-	fmt.Println(tr.output)
+	}
+	/*	tr := &Tree{lex: l}
+		tr.parse()
+		fmt.Println(tr.Nodes)
+		tr.render()
+		fmt.Println(tr.output)*/
 }
 
 func xestList(t *testing.T) {

@@ -49,6 +49,7 @@ const (
 	itemCode
 	itemImage
 	itemBr
+	itemPipe
 	// Indentation
 	itemIndent
 )
@@ -69,14 +70,14 @@ var block = map[itemType]*regexp.Regexp{
 	// Backreferences is unavailable
 	itemGfmCodeBlock: regexp.MustCompile(fmt.Sprintf(reGfmCode, "`", "`") + "|" + fmt.Sprintf(reGfmCode, "~", "~")),
 	itemList:         regexp.MustCompile("(?:[*+-]|\\d+\\.)"),
-	// No leading-pipe table
+	// leading-pipe table
 	itemLpTable: regexp.MustCompile(`^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*`),
 	itemTable:   regexp.MustCompile(`^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*`),
 }
 
 // Inline Grammer
 var span = map[itemType]*regexp.Regexp{
-	itemText:   regexp.MustCompile("^([\\s\\S]+?)([!<\\[_*`~]| {2,}\n|\n|$)"),
+	itemText:   regexp.MustCompile("^([\\s\\S]+?)([!<\\[_*`~|]| {2,}\n|\n|$)"),
 	itemItalic: regexp.MustCompile(fmt.Sprintf(reEmphasise, 1)),
 	itemStrong: regexp.MustCompile(fmt.Sprintf(reEmphasise, 2)),
 	itemStrike: regexp.MustCompile("^~{2}([\\s\\S]+?)~{2}"),
@@ -98,15 +99,15 @@ type stateFn func(*lexer) stateFn
 
 // lexer holds the state of the scanner.
 type lexer struct {
-	name       string    // the name of the input; used only for error reports
-	input      string    // the string being scanned
-	state      stateFn   // the next lexing function to enter
-	pos        Pos       // current position in the input
-	start      Pos       // start position of this item
-	width      Pos       // width of last rune read from input
-	lastPos    Pos       // position of most recent item returned by nextItem
-	items      chan item // channel of scanned items
-	parenDepth int       // nesting depth of ( ) exprs
+	name    string    // the name of the input; used only for error reports
+	input   string    // the string being scanned
+	state   stateFn   // the next lexing function to enter
+	pos     Pos       // current position in the input
+	start   Pos       // start position of this item
+	width   Pos       // width of last rune read from input
+	lastPos Pos       // position of most recent item returned by nextItem
+	items   chan item // channel of scanned items
+	eot     Pos       // end of table
 }
 
 // lex creates a new lexer for the input string.
@@ -184,7 +185,20 @@ func lexAny(l *lexer) stateFn {
 			return lexGfmCode
 		}
 		fallthrough
+	case '|':
+		if m := block[itemLpTable].FindString(l.input[l.pos-1:]); m != "" {
+			l.emit(itemLpTable)
+			l.eot = l.pos + Pos(len(m))
+		}
+		fallthrough
 	default:
+		if m := block[itemTable].FindString(l.input[l.pos-1:]); m != "" {
+			l.emit(itemTable)
+			l.eot = l.pos + Pos(len(m))
+			// we go one step back to get the full text
+			// in the lexText phase
+			l.start--
+		}
 		l.backup()
 		return lexText
 	}
@@ -319,6 +333,12 @@ Loop:
 			}
 			// ~backup()
 			l.pos += l.width
+			fallthrough
+		case r == '|':
+			if l.eot > l.pos {
+				l.emit(itemPipe)
+				break
+			}
 			fallthrough
 		default:
 			l.backup()
