@@ -4,11 +4,12 @@
 2. html tags
 3. comments ?
 4. images - (almost done)
-5. itemIndent
+5. itemIndent - (think it's done)
+6. mixim - ___foo___, `**bar**`, etc...
 
 - Blocks
 1. heading - add id automatic.(autolink)
-2. list
+2. list - done!
  - break after 3-newlines(\n)
  - one or more indentation make it nested
 3. table
@@ -29,18 +30,7 @@ src = src
 
 Stash
 -----
-	re := regexp.MustCompile(`^\[((?:\[[^\]]*\]|[^\[\]]|\])*)\]\(\s*<?([\s\S]*?)>?(?:\s+['"]([\s\S]*?)['"])?\s*\)`)
-	fmt.Println(re.FindStringSubmatch("[name](link \"title\")"))
-	fmt.Println(re.FindStringSubmatch("[name]()"))
-	fmt.Println(re.FindStringSubmatch("[name](link)"))
-	fmt.Println(re.FindStringSubmatch("[name](http://adasnd.com?asdas3 \"Title\")"))
-	
-	re = regexp.MustCompile(`^<([^ >]+(@|:\/)[^ >]+)>`)
-	// Autolinks
-	// <http://example.com/>
-	fmt.Println(re.FindStringSubmatch("<http://lol.com>"))
-	
-	re = regexp.MustCompile(`^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])`)
-	// Gfm links
-	// This should be a link: http://example.com/hello-world.
-	fmt.Println(re.FindStringSubmatch("http://asdasdsa.com"))
+Some ideas:
+change parseParagraph to parseInline that everyone can use it.
+add ignore-list, for example ignore `br` to parseInline(for example chage `br` to to simple text)
+create itemPipe and use it in the lexical phase ? or deal with it in the parseTable ?
