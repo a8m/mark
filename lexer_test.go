@@ -42,21 +42,18 @@ func printRound(i int) {
 
 func TestBasic(t *testing.T) {
 	l := lex("1", `
-| foo | bar |  
-baz baz blalala
-
-Name | Age
----- | ---
-Ariel| 26`)
+  Name  |  Age
+--------|-----
+  Ariel |  26 `)
 
 	for item := range l.items {
 		fmt.Printf(tokenNames[item.typ] + " ---> '" + item.val + "'" + "\n")
 	}
-	/*	tr := &Tree{lex: l}
-		tr.parse()
-		fmt.Println(tr.Nodes)
-		tr.render()
-		fmt.Println(tr.output)*/
+	/*itr := &Tree{lex: l}
+	tr.parse()
+	fmt.Println(tr.Nodes)
+	tr.render()
+	fmt.Println(tr.output)*/
 }
 
 func xestList(t *testing.T) {

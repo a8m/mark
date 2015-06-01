@@ -77,7 +77,8 @@ var block = map[itemType]*regexp.Regexp{
 
 // Inline Grammer
 var span = map[itemType]*regexp.Regexp{
-	itemText:   regexp.MustCompile("^([\\s\\S]+?)([!<\\[_*`~|]| {2,}\n|\n|$)"),
+	itemText:   regexp.MustCompile("^([\\s\\S]+?)([!<\\[_*`~]| {2,}\n|\n|$)"),
+	itemPipe:   regexp.MustCompile("^([\\s\\S]+?)([!<\\[_*`~|]| {2,}\n|\n|$)"),
 	itemItalic: regexp.MustCompile(fmt.Sprintf(reEmphasise, 1)),
 	itemStrong: regexp.MustCompile(fmt.Sprintf(reEmphasise, 2)),
 	itemStrike: regexp.MustCompile("^~{2}([\\s\\S]+?)~{2}"),
@@ -355,8 +356,11 @@ Loop:
 				l.emit(itemGfmLink)
 				break
 			}
-			// Simple text
+			// TODO(Ariel): leave this regexp
 			subMatch := span[itemText].FindStringSubmatch(input)
+			if l.eot > l.pos {
+				subMatch = span[itemPipe].FindStringSubmatch(input)
+			}
 			if len(subMatch) >= 1 {
 				l.pos += Pos(len(subMatch[1]))
 			}

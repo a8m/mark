@@ -22,7 +22,7 @@ func (t *Tree) parse() {
 Loop:
 	for {
 		var n Node
-		switch p := t.peek().typ; p {
+		switch p := t.peek(); p.typ {
 		case eof, itemError:
 			break Loop
 		case itemNewLine:
@@ -33,7 +33,9 @@ Loop:
 			n = t.newHr(t.next().pos)
 		case itemText, itemStrong, itemItalic, itemStrike, itemCode,
 			itemLink, itemAutoLink, itemGfmLink, itemImage:
-			n = t.parseParagraph()
+			tmp := t.newParagraph(p.pos)
+			tmp.Nodes = t.parseText()
+			n = tmp
 		case itemHeading, itemLHeading:
 			n = t.parseHeading()
 		case itemCodeBlock, itemGfmCodeBlock:
@@ -41,6 +43,8 @@ Loop:
 		case itemList:
 			// 0 for the depth
 			n = t.parseList(0)
+		case itemTable, itemLpTable:
+			n = t.parseTable()
 		default:
 			fmt.Println("Nothing to do", p)
 		}
@@ -98,13 +102,12 @@ func (t *Tree) backup2(t1 item) {
 }
 
 // parseParagraph scan until itemBr occur.
-func (t *Tree) parseParagraph() *ParagraphNode {
-	token := t.next()
-	p := t.newParagraph(token.pos)
+func (t *Tree) parseText() []Node {
+	var nodes []Node
 Loop:
 	for {
 		var node Node
-		switch token.typ {
+		switch token := t.next(); token.typ {
 		case eof, itemError, itemHeading, itemList, itemIndent:
 			t.backup()
 			break Loop
@@ -138,11 +141,12 @@ Loop:
 		case itemImage:
 			match := span[token.typ].FindStringSubmatch(token.val)
 			node = t.newImage(token.pos, match[3], match[2], match[1])
+		default:
+			fmt.Println("Matching not found for this shit:", token)
 		}
-		p.append(node)
-		token = t.next()
+		nodes = append(nodes, node)
 	}
-	return p
+	return nodes
 }
 
 // parse heading block
@@ -212,6 +216,7 @@ Loop:
 	return list
 }
 
+// parse listItem
 func (t *Tree) parseListItem(pos Pos, list *ListNode) *ListItemNode {
 	item := t.newListItem(pos, list)
 	var n Node
@@ -247,7 +252,7 @@ Loop:
 			n = t.parseCodeBlock()
 		default:
 			// DRY
-			for _, n := range t.parseParagraph().Nodes {
+			for _, n := range t.parseText() {
 				if n.Type() != NodeNewLine {
 					item.append(n)
 				}
@@ -257,6 +262,35 @@ Loop:
 		item.append(n)
 	}
 	return item
+}
+
+// parse table
+func (t *Tree) parseTable() *TableNode {
+	token := t.next()
+	// ignore the first and last one...
+	//lp := token.val == "|"
+	table := t.newTable(token.pos)
+	rows := [][]item{}
+	cell := []item{}
+Loop:
+	for {
+		switch token := t.next(); token.typ {
+		case eof, itemError:
+			if len(cell) > 0 {
+				rows = append(rows, cell)
+			}
+			break Loop
+		case itemItalic, itemText:
+			cell = append(cell, token)
+		case itemPipe, itemNewLine:
+			rows = append(rows, cell)
+			cell = []item{}
+			// ignore spaces, etc...
+
+		}
+	}
+	fmt.Println(rows)
+	return table
 }
 
 // test if given string is digit
