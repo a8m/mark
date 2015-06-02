@@ -3,6 +3,7 @@ package mark
 import (
 	fmt "github.com/k0kubun/pp"
 	"regexp"
+	"strings"
 	"unicode"
 	"unicode/utf8"
 )
@@ -46,7 +47,7 @@ Loop:
 		case itemTable, itemLpTable:
 			n = t.parseTable()
 		default:
-			fmt.Println("Nothing to do", p)
+			fmt.Println("[Skip]:", t.next())
 		}
 		t.append(n)
 	}
@@ -270,20 +271,42 @@ func (t *Tree) parseTable() *TableNode {
 	// ignore the first and last one...
 	//lp := token.val == "|"
 	table := t.newTable(token.pos)
-	rows := [][]item{}
-	cell := []item{}
+	rows := struct {
+		Align        []AlignType
+		Header, Data [][]item
+	}{}
+	var cell []item
 Loop:
-	for {
+	for i := 0; ; {
 		switch token := t.next(); token.typ {
 		case eof, itemError:
 			if len(cell) > 0 {
-				rows = append(rows, cell)
+				rows.Data = append(rows.Data, cell)
 			}
 			break Loop
 		case itemItalic, itemText:
 			cell = append(cell, token)
 		case itemPipe, itemNewLine:
-			rows = append(rows, cell)
+			if len(cell) == 0 {
+				continue
+			}
+			if i == 0 {
+				rows.Header = append(rows.Header, cell)
+			} else if i == 1 {
+				align := cell[0].val
+				if len(cell) > 1 {
+					for i := 1; i < len(cell); i++ {
+						align += cell[i].val
+					}
+				}
+				// Trim spaces
+				rows.Align = append(rows.Align, parseAlign(align))
+			} else {
+				rows.Data = append(rows.Data, cell)
+			}
+			if token.typ == itemNewLine {
+				i++
+			}
 			cell = []item{}
 			// ignore spaces, etc...
 
@@ -293,6 +316,23 @@ Loop:
 	return table
 }
 
+// get align-string and return the align type of it
+// e.g: ":---", "---:", ":---:", "---"
+func parseAlign(s string) (typ AlignType) {
+	// Trim spaces before
+	s = strings.Trim(s, " ")
+	sfx, pfx := strings.HasSuffix(s, ":"), strings.HasPrefix(s, ":")
+	switch {
+	case sfx && pfx:
+		typ = Center
+	case sfx:
+		typ = Right
+	case pfx:
+		typ = Left
+	}
+	return
+}
+
 // test if given string is digit
 func isDigit(s string) bool {
 	r, _ := utf8.DecodeRuneInString(s)
@@ -300,12 +340,11 @@ func isDigit(s string) bool {
 }
 
 // test if given token is type block
-func isBlock(item itemType) bool {
+func isBlock(item itemType) (b bool) {
 	switch item {
 	case itemHeading, itemLHeading, itemCodeBlock, itemBlockQuote,
 		itemList, itemTable, itemGfmCodeBlock, itemHr:
-		return true
-	default:
-		return false
+		b = true
 	}
+	return
 }

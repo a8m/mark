@@ -322,9 +322,18 @@ func (t *Tree) newRow(pos Pos) *RowNode {
 	return &RowNode{NodeType: NodeRow, Pos: pos}
 }
 
+// AlignType identifies the aligment-type of specfic cell.
+type AlignType int
+
+// Align returns itself and provides an easy default implementation
+// for embedding in a Node.
+func (t AlignType) Align() AlignType {
+	return t
+}
+
 // Alignment
 const (
-	None = iota
+	None AlignType = iota
 	Right
 	Left
 	Center
@@ -341,16 +350,17 @@ const (
 type CellNode struct {
 	NodeType
 	Pos
-	Kind, Align int
-	Nodes       []Node
+	AlignType
+	Kind  int
+	Nodes []Node
 }
 
 func (n *CellNode) Render() string {
 	return ""
 }
 
-func (t *Tree) newCell(pos Pos, kind, align int) *CellNode {
-	return &CellNode{NodeType: NodeCell, Pos: pos, Kind: kind, Align: align}
+func (t *Tree) newCell(pos Pos, kind int, align AlignType) *CellNode {
+	return &CellNode{NodeType: NodeCell, Pos: pos, Kind: kind, AlignType: align}
 }
 
 // TODO(Ariel): rename to wrap()
