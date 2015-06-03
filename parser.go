@@ -271,22 +271,28 @@ func (t *Tree) parseTable() *TableNode {
 	// ignore the first and last one...
 	//lp := token.val == "|"
 	table := t.newTable(token.pos)
+	// Align	[ None, Left, Right, ... ]
+	// Header	[ Cels: [token, token, ... ] ]
+	// Data:	[ Row: [Cells: [token, ... ] ] ]
 	rows := struct {
-		Align        []AlignType
-		Header, Data [][]item
+		Align  []AlignType
+		Header [][]item
+		Data   [][][]item
 	}{}
 	var cell []item
+	var row [][]item
+	// Collect items
 Loop:
 	for i := 0; ; {
 		switch token := t.next(); token.typ {
 		case eof, itemError:
 			if len(cell) > 0 {
-				rows.Data = append(rows.Data, cell)
+				row = append(row, cell)
+				rows.Data = append(rows.Data, row)
 			}
 			break Loop
-		case itemItalic, itemText:
-			cell = append(cell, token)
 		case itemPipe, itemNewLine:
+			fmt.Println("In pipe, cell situation:", cell, i)
 			if len(cell) == 0 {
 				continue
 			}
@@ -302,18 +308,42 @@ Loop:
 				// Trim spaces
 				rows.Align = append(rows.Align, parseAlign(align))
 			} else {
-				rows.Data = append(rows.Data, cell)
+				row = append(row, cell)
 			}
 			if token.typ == itemNewLine {
 				i++
+				if i >= 2 {
+					rows.Data = append(rows.Data, row)
+					row = [][]item{}
+				}
 			}
 			cell = []item{}
-			// ignore spaces, etc...
-
+		default:
+			cell = append(cell, token)
 		}
 	}
+	// Tranform to nodes
+	//rowLen := len(rows.Align)
 	fmt.Println(rows)
 	return table
+}
+
+// Should return typ []CellNode
+func (t *Tree) parseCells(kind int, items [][]item, align []AlignType) (nodes []Node) {
+	for i, item := range items {
+		// Cell contain nodes
+		cell := t.newCell(item[0].pos, kind, align[i])
+		for _, token := range item {
+			var node Node
+			switch token.typ {
+			case itemText:
+				node = t.newText(token.pos, token.val)
+			}
+			cell.append(node)
+		}
+		nodes = append(nodes, cell)
+	}
+	return
 }
 
 // get align-string and return the align type of it

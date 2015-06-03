@@ -299,6 +299,10 @@ type TableNode struct {
 	Rows []*RowNode
 }
 
+func (t *TableNode) append(row *RowNode) {
+	t.Rows = append(t.Rows, row)
+}
+
 func (n *TableNode) Render() string {
 	return ""
 }
@@ -353,6 +357,10 @@ type CellNode struct {
 	AlignType
 	Kind  int
 	Nodes []Node
+}
+
+func (t *CellNode) append(n Node) {
+	t.Nodes = append(t.Nodes, n)
 }
 
 func (n *CellNode) Render() string {
