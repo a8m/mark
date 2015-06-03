@@ -288,11 +288,12 @@ Loop:
 		case eof, itemError:
 			if len(cell) > 0 {
 				row = append(row, cell)
+			}
+			if len(row) > 0 {
 				rows.Data = append(rows.Data, row)
 			}
 			break Loop
 		case itemPipe, itemNewLine:
-			fmt.Println("In pipe, cell situation:", cell, i)
 			if len(cell) == 0 {
 				continue
 			}
@@ -323,13 +324,22 @@ Loop:
 		}
 	}
 	// Tranform to nodes
-	//rowLen := len(rows.Align)
-	fmt.Println(rows)
+	// Add an average mechanisem, that ignore empty(or " ") in end of cell
+	//	rowLen := len(rows.Align)
+	// Table head
+	table.append(t.parseCells(Header, rows.Header, rows.Align))
+	// Table body
+	for _, row := range rows.Data {
+		table.append(t.parseCells(Data, row, rows.Align))
+	}
+	fmt.Println(table)
 	return table
 }
 
 // Should return typ []CellNode
-func (t *Tree) parseCells(kind int, items [][]item, align []AlignType) (nodes []Node) {
+func (t *Tree) parseCells(kind int, items [][]item, align []AlignType) *RowNode {
+	// Add real position
+	row := t.newRow(1)
 	for i, item := range items {
 		// Cell contain nodes
 		cell := t.newCell(item[0].pos, kind, align[i])
@@ -341,9 +351,9 @@ func (t *Tree) parseCells(kind int, items [][]item, align []AlignType) (nodes []
 			}
 			cell.append(node)
 		}
-		nodes = append(nodes, cell)
+		row.Cells = append(row.Cells, cell)
 	}
-	return
+	return row
 }
 
 // get align-string and return the align type of it
