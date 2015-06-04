@@ -42,10 +42,11 @@ func printRound(i int) {
 
 func TestBasic(t *testing.T) {
 	l := lex("1", `
-Id  |	Name  |  Age  
+Id  |	Name  |  Age
 :--:| :-----: | :---:
  1  | Ariel   |  26
- 2  | Erez	  |  29`)
+ 2  | Erez	  |  29
+`)
 
 	// for item := range l.items {
 	// 	fmt.Printf(tokenNames[item.typ] + " ---> '" + item.val + "'" + "\n")

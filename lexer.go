@@ -261,6 +261,9 @@ func lexList(l *lexer) stateFn {
 }
 
 // lexText scans until eol(\n)
+// We have a lot of things to do in this lextext
+// for example: ignore itemBr on list/tables
+// fix the text scaning etc...
 func lexText(l *lexer) stateFn {
 Loop:
 	for {
