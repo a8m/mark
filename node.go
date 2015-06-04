@@ -303,8 +303,24 @@ func (t *TableNode) append(row *RowNode) {
 	t.Rows = append(t.Rows, row)
 }
 
+// Return the htnml representation of a table
 func (n *TableNode) Render() string {
-	return ""
+	var s string
+	for i, row := range n.Rows {
+		switch i {
+		case 0:
+			s += render("thead", row.Render())
+		case 1:
+			s += "<tbody>"
+			fallthrough
+		default:
+			s += row.Render()
+			if i == len(n.Rows)-1 {
+				s += "</tbody>"
+			}
+		}
+	}
+	return render("table", s)
 }
 
 func (t *Tree) newTable(pos Pos) *TableNode {
@@ -318,8 +334,16 @@ type RowNode struct {
 	Cells []*CellNode
 }
 
+func (r *RowNode) append(cell *CellNode) {
+	r.Cells = append(r.Cells, cell)
+}
+
 func (n *RowNode) Render() string {
-	return ""
+	var s string
+	for _, cell := range n.Cells {
+		s += cell.Render()
+	}
+	return render("tr", s)
 }
 
 func (t *Tree) newRow(pos Pos) *RowNode {
@@ -363,8 +387,33 @@ func (t *CellNode) append(n Node) {
 	t.Nodes = append(t.Nodes, n)
 }
 
+// Return the html reprenestation of table-cell
 func (n *CellNode) Render() string {
-	return ""
+	var s string
+	tag := "td"
+	if n.Kind == Header {
+		tag = "th"
+	}
+	for _, node := range n.Nodes {
+		s += node.Render()
+	}
+	return fmt.Sprintf("<%[1]s%s>%s</%[1]s>", tag, n.Style(), s)
+}
+
+// Return the cell-style based on alignment
+func (n *CellNode) Style() string {
+	s := " style=\"text-align:"
+	switch n.Align() {
+	case Right:
+		s += "right\""
+	case Left:
+		s += "left\""
+	case Center:
+		s += "center\""
+	default:
+		s = ""
+	}
+	return s
 }
 
 func (t *Tree) newCell(pos Pos, kind int, align AlignType) *CellNode {

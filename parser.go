@@ -338,7 +338,7 @@ Loop:
 
 // Should return typ []CellNode
 func (t *Tree) parseCells(kind int, items [][]item, align []AlignType) *RowNode {
-	// Add real position
+	// TODO(Ariel): Add real position
 	row := t.newRow(1)
 	for i, item := range items {
 		// Cell contain nodes
@@ -351,7 +351,7 @@ func (t *Tree) parseCells(kind int, items [][]item, align []AlignType) *RowNode 
 			}
 			cell.append(node)
 		}
-		row.Cells = append(row.Cells, cell)
+		row.append(cell)
 	}
 	return row
 }

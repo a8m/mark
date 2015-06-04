@@ -44,7 +44,7 @@ func TestBasic(t *testing.T) {
 	l := lex("1", `
   Name    | Age  | id
 ----------|------|:--
-| *Ariel* | 26   | 2 |`)
+| Ariel | 26   | 2 |`)
 
 	//	for item := range l.items {
 	//		fmt.Printf(tokenNames[item.typ] + " ---> '" + item.val + "'" + "\n")
