@@ -49,7 +49,9 @@ Loop:
 		default:
 			fmt.Println("[Skip]:", t.next())
 		}
-		t.append(n)
+		if n != nil {
+			t.append(n)
+		}
 	}
 }
 
@@ -294,26 +296,29 @@ Loop:
 			}
 			break Loop
 		case itemPipe, itemNewLine:
-			if len(cell) == 0 {
-				continue
-			}
-			if i == 0 {
-				rows.Header = append(rows.Header, cell)
-			} else if i == 1 {
-				align := cell[0].val
-				if len(cell) > 1 {
-					for i := 1; i < len(cell); i++ {
-						align += cell[i].val
+			// Append to cell
+			if len(cell) > 0 {
+				// Header
+				if i == 0 {
+					rows.Header = append(rows.Header, cell)
+					// Alignment
+				} else if i == 1 {
+					align := cell[0].val
+					if len(cell) > 1 {
+						for i := 1; i < len(cell); i++ {
+							align += cell[i].val
+						}
 					}
+					// Trim spaces
+					rows.Align = append(rows.Align, parseAlign(align))
+					// Data
+				} else {
+					row = append(row, cell)
 				}
-				// Trim spaces
-				rows.Align = append(rows.Align, parseAlign(align))
-			} else {
-				row = append(row, cell)
 			}
 			if token.typ == itemNewLine {
 				i++
-				if i >= 2 {
+				if i > 2 {
 					rows.Data = append(rows.Data, row)
 					row = [][]item{}
 				}
@@ -332,7 +337,6 @@ Loop:
 	for _, row := range rows.Data {
 		table.append(t.parseCells(Data, row, rows.Align))
 	}
-	fmt.Println(table)
 	return table
 }
 
@@ -349,7 +353,9 @@ func (t *Tree) parseCells(kind int, items [][]item, align []AlignType) *RowNode 
 			case itemText:
 				node = t.newText(token.pos, token.val)
 			}
-			cell.append(node)
+			if node != nil {
+				cell.append(node)
+			}
 		}
 		row.append(cell)
 	}
