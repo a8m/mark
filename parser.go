@@ -254,6 +254,7 @@ Loop:
 		case itemCodeBlock, itemGfmCodeBlock:
 			n = t.parseCodeBlock()
 		default:
+			t.backup()
 			// DRY
 			for _, n := range t.parseText() {
 				if n.Type() != NodeNewLine {

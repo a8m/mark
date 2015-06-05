@@ -40,7 +40,7 @@ func printRound(i int) {
 	fmt.Printf("\n\n%s Round %d %s\n\n", sep, i, sep)
 }
 
-func TestBasic(t *testing.T) {
+func LTestBasic(t *testing.T) {
 	l := lex("1", `
 Id  |	Name  |  Age
 :--:| :-----: | :---:
@@ -58,15 +58,14 @@ Id  |	Name  |  Age
 	fmt.Printf(tr.output)
 }
 
-func xestList(t *testing.T) {
+func TestList(t *testing.T) {
 	printRound(1)
 	// Test round 1
 	src := `
-- foo
-- bar
- - baz
-1. asda
-3. asdas
+- one
+ - one of one
+- two
+- three
 `
 	l := lex("1", src)
 	fmt.Printf("Source:\n" + src + "\n")

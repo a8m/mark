@@ -69,7 +69,7 @@ var block = map[itemType]*regexp.Regexp{
 	itemCodeBlock: regexp.MustCompile(`^(( {4}|\t)[^-+*(\d\.)\n]+\n*)+`),
 	// Backreferences is unavailable
 	itemGfmCodeBlock: regexp.MustCompile(fmt.Sprintf(reGfmCode, "`", "`") + "|" + fmt.Sprintf(reGfmCode, "~", "~")),
-	itemList:         regexp.MustCompile("(?:[*+-]|\\d+\\.)"),
+	itemList:         regexp.MustCompile("(?:[*+-]|\\d+\\.)\\s+"),
 	// leading-pipe table
 	itemLpTable: regexp.MustCompile(`^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*`),
 	itemTable:   regexp.MustCompile(`^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*`),
@@ -265,109 +265,90 @@ func lexList(l *lexer) stateFn {
 // for example: ignore itemBr on list/tables
 // fix the text scaning etc...
 func lexText(l *lexer) stateFn {
+	// Drain text before emitting
+	emit := func(item itemType, pos Pos) {
+		if l.pos > l.start {
+			l.emit(itemText)
+		}
+		l.pos += pos
+		l.emit(item)
+	}
 Loop:
 	for {
-		switch r := l.next(); {
+		switch r := l.peek(); {
 		case r == eof:
+			emit(eof, Pos(0))
 			break Loop
 		case r == '\n':
-			l.emit(itemNewLine)
+			emit(itemNewLine, l.width)
 			break Loop
 		case r == ' ':
-			l.backup()
 			if m := span[itemBr].FindString(l.input[l.pos:]); m != "" {
-				// length of new-line
-				l.pos += Pos(len(m))
-				l.emit(itemBr)
-				break Loop
-			} else {
-				// ~backup()
-				l.pos += l.width
-				// Yeah, space it's also text.
-				l.emit(itemText)
+				// pos - length of new-line
+				emit(itemBr, Pos(len(m)))
+				break
 			}
+			l.next()
 		// if it's start as an emphasis
 		case r == '_', r == '*', r == '~', r == '`':
-			l.backup()
 			input := l.input[l.pos:]
 			// Strong
 			if m := span[itemStrong].FindString(input); m != "" {
-				l.pos += Pos(len(m))
-				l.emit(itemStrong)
+				emit(itemStrong, Pos(len(m)))
 				break
 			}
 			// Italic
 			if m := span[itemItalic].FindString(input); m != "" {
-				l.pos += Pos(len(m))
-				l.emit(itemItalic)
+				emit(itemItalic, Pos(len(m)))
 				break
 			}
 			// Strike
 			if m := span[itemStrike].FindString(input); m != "" {
-				l.pos += Pos(len(m))
-				l.emit(itemStrike)
+				emit(itemStrike, Pos(len(m)))
 				break
 			}
 			// InlineCode
 			if m := span[itemCode].FindString(input); m != "" {
-				l.pos += Pos(len(m))
-				l.emit(itemCode)
+				emit(itemCode, Pos(len(m)))
 				break
 			}
-			// ~backup()
-			l.pos += l.width
-			fallthrough
+			l.next()
 		// itemLink, itemAutoLink, itemImage
 		case r == '[', r == '<', r == '!':
-			l.backup()
 			input := l.input[l.pos:]
 			if m := span[itemLink].FindString(input); m != "" {
-				l.pos += Pos(len(m))
+				pos := Pos(len(m))
 				if r == '[' {
-					l.emit(itemLink)
+					emit(itemLink, pos)
 				} else {
-					l.emit(itemImage)
+					emit(itemImage, pos)
 				}
 				break
 			}
 			if m := span[itemAutoLink].FindString(input); m != "" {
-				l.pos += Pos(len(m))
-				l.emit(itemAutoLink)
+				emit(itemAutoLink, Pos(len(m)))
 				break
 			}
-			// ~backup()
-			l.pos += l.width
-			fallthrough
+			l.next()
 		case r == '|':
 			if l.eot > l.pos {
-				l.emit(itemPipe)
+				emit(itemPipe, l.width)
 				break
 			}
-			fallthrough
+			l.next()
 		default:
-			l.backup()
 			input := l.input[l.pos:]
 			// Test for Setext-style headers
 			if m := block[itemLHeading].FindString(input); m != "" {
-				l.pos += Pos(len(m))
-				l.emit(itemLHeading)
+				emit(itemLHeading, Pos(len(m)))
 				break Loop
 			}
 			// GfmLink
 			if m := span[itemGfmLink].FindString(input); m != "" {
-				l.pos += Pos(len(m))
-				l.emit(itemGfmLink)
+				emit(itemGfmLink, Pos(len(m)))
 				break
 			}
-			// TODO(Ariel): leave this regexp
-			subMatch := span[itemText].FindStringSubmatch(input)
-			if l.eot > l.pos {
-				subMatch = span[itemPipe].FindStringSubmatch(input)
-			}
-			if len(subMatch) >= 1 {
-				l.pos += Pos(len(subMatch[1]))
-			}
-			l.emit(itemText)
+			l.next()
 		}
 	}
 	return lexAny
