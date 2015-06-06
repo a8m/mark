@@ -63,9 +63,9 @@ var (
 
 // Block Grammer
 var block = map[itemType]*regexp.Regexp{
-	itemHeading:   regexp.MustCompile("^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)"),
-	itemLHeading:  regexp.MustCompile("^([^\n]+)\n *(=|-){2,} *(?:\n+|$)"),
-	itemHr:        regexp.MustCompile("^( *[-*_]){3,} *(?:\n+|$)"),
+	itemHeading:   regexp.MustCompile(`^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)`),
+	itemLHeading:  regexp.MustCompile(`^([^\n]+)\n *(=|-){2,} *(?:\n+|$)`),
+	itemHr:        regexp.MustCompile(`^( *[-*_]){3,} *(?:\n+|$)`),
 	itemCodeBlock: regexp.MustCompile(`^(( {4}|\t)[^-+*(\d\.)\n]+\n*)+`),
 	// Backreferences is unavailable
 	itemGfmCodeBlock: regexp.MustCompile(fmt.Sprintf(reGfmCode, "`", "`") + "|" + fmt.Sprintf(reGfmCode, "~", "~")),
@@ -77,11 +77,9 @@ var block = map[itemType]*regexp.Regexp{
 
 // Inline Grammer
 var span = map[itemType]*regexp.Regexp{
-	itemText:   regexp.MustCompile("^([\\s\\S]+?)([!<\\[_*`~]| {2,}\n|\n|$)"),
-	itemPipe:   regexp.MustCompile("^([\\s\\S]+?)([!<\\[_*`~|]| {2,}\n|\n|$)"),
 	itemItalic: regexp.MustCompile(fmt.Sprintf(reEmphasise, 1)),
 	itemStrong: regexp.MustCompile(fmt.Sprintf(reEmphasise, 2)),
-	itemStrike: regexp.MustCompile("^~{2}([\\s\\S]+?)~{2}"),
+	itemStrike: regexp.MustCompile(`^~{2}([\s\S]+?)~{2}`),
 	// itemMixed(e.g: ***str***, ~~*str*~~) will be part of the parser
 	// or we'll lex recuresively
 	itemCode: regexp.MustCompile("^`{1,2}\\s*([\\s\\S]*?[^`])\\s*`{1,2}"),
