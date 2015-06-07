@@ -55,8 +55,8 @@ const (
 )
 
 var (
-	reEmphasise = `^_{%[1]d}([\s\S]+?)_{%[1]d}|^\*{%[1]d}([\s\S]+?)\*{%[1]d}`
-	reGfmCode   = `^%s{3,} *(\S+)? *\n([\s\S]+?)\s*%s{3,}$*(?:\n+|$)`
+	reEmphasise = `^_{%[1]d}(([\s\S].*(?:_|))+?)_{%[1]d}|^\*{%[1]d}(([\s\S].*(?:\*|))+?)\*{%[1]d}`
+	reGfmCode   = `^%[1]s{3,} *(\S+)? *\n([\s\S]+?)\s*%[1]s{3,}$*(?:\n+|$)`
 	reLinkText  = `(?:\[[^\]]*\]|[^\[\]]|\])*`
 	reLinkHref  = `\s*<?([\s\S]*?)>?(?:\s+['"]([\s\S]*?)['"])?\s*`
 )
@@ -68,7 +68,7 @@ var block = map[itemType]*regexp.Regexp{
 	itemHr:        regexp.MustCompile(`^( *[-*_]){3,} *(?:\n+|$)`),
 	itemCodeBlock: regexp.MustCompile(`^(( {4}|\t)[^-+*(\d\.)\n]+\n*)+`),
 	// Backreferences is unavailable
-	itemGfmCodeBlock: regexp.MustCompile(fmt.Sprintf(reGfmCode, "`", "`") + "|" + fmt.Sprintf(reGfmCode, "~", "~")),
+	itemGfmCodeBlock: regexp.MustCompile(fmt.Sprintf(reGfmCode, "`") + "|" + fmt.Sprintf(reGfmCode, "~")),
 	itemList:         regexp.MustCompile("(?:[*+-]|\\d+\\.)\\s+"),
 	// leading-pipe table
 	itemLpTable: regexp.MustCompile(`^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*`),
@@ -77,8 +77,8 @@ var block = map[itemType]*regexp.Regexp{
 
 // Inline Grammer
 var span = map[itemType]*regexp.Regexp{
-	itemItalic: regexp.MustCompile(`^_(([\s\S].*(?:_|))+?)_|^\*(([\s\S].*(?:\*|))+?)\*`),
-	itemStrong: regexp.MustCompile(`^__(([\s\S].*(?:_|))+?)__|^\*\*(([\s\S].*(?:\*|))+?)\*\*`),
+	itemItalic: regexp.MustCompile(fmt.Sprintf(reEmphasise, 1)),
+	itemStrong: regexp.MustCompile(fmt.Sprintf(reEmphasise, 2)),
 	itemStrike: regexp.MustCompile(`^~{2}([\s\S]+?)~{2}`),
 	// itemMixed(e.g: ***str***, ~~*str*~~) will be part of the parser
 	// or we'll lex recuresively
