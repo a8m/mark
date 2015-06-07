@@ -78,7 +78,7 @@ var block = map[itemType]*regexp.Regexp{
 // Inline Grammer
 var span = map[itemType]*regexp.Regexp{
 	itemItalic: regexp.MustCompile(fmt.Sprintf(reEmphasise, 1)),
-	itemStrong: regexp.MustCompile(fmt.Sprintf(reEmphasise, 2)),
+	itemStrong: regexp.MustCompile(`^__(([\s\S].*(?:_|))+?)__|^\*\*(([\s\S].*(?:\*|))+?)\*\*`),
 	itemStrike: regexp.MustCompile(`^~{2}([\s\S]+?)~{2}`),
 	// itemMixed(e.g: ***str***, ~~*str*~~) will be part of the parser
 	// or we'll lex recuresively
