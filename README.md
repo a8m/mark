@@ -1,4 +1,4 @@
-# TODO
+## TODO
 - Inline
 1. href (almost done, works only when it's on the start of the line)
 2. html tags
