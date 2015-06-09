@@ -69,7 +69,8 @@ var block = map[itemType]*regexp.Regexp{
 	itemCodeBlock: regexp.MustCompile(`^(( {4}|\t)[^-+*(\d\.)\n]+\n*)+`),
 	// Backreferences is unavailable
 	itemGfmCodeBlock: regexp.MustCompile(fmt.Sprintf(reGfmCode, "`") + "|" + fmt.Sprintf(reGfmCode, "~")),
-	itemList:         regexp.MustCompile("(?:[*+-]|\\d+\\.)\\s+"),
+	// `^(?:[*+-]|\d+\.) [\s\S]+?(?:\n|)`
+	itemList: regexp.MustCompile(`^(?:[*+-]|\d+\.) +?(?:\n|)`),
 	// leading-pipe table
 	itemLpTable: regexp.MustCompile(`^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*`),
 	itemTable:   regexp.MustCompile(`^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*`),
