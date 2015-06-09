@@ -126,12 +126,7 @@ Loop:
 		case itemText:
 			node = t.newText(token.pos, token.val)
 		case itemStrong, itemItalic, itemStrike, itemCode:
-			match := span[token.typ].FindStringSubmatch(token.val)
-			text := match[len(match)-1]
-			if text == "" {
-				text = match[1]
-			}
-			node = t.newEmphasis(token.pos, token.typ, text)
+			node = t.parseEmphasis(token.typ, token.pos, token.val)
 		case itemLink, itemAutoLink, itemGfmLink:
 			var title, text, href string
 			match := span[token.typ].FindStringSubmatch(token.val)
@@ -150,6 +145,30 @@ Loop:
 		nodes = append(nodes, node)
 	}
 	return nodes
+}
+
+// Parse inline emphasis
+func (t *Tree) parseEmphasis(typ itemType, pos Pos, val string) *EmphasisNode {
+	node := t.newEmphasis(pos, typ)
+	match := span[typ].FindStringSubmatch(val)
+	text := match[len(match)-1]
+	if text == "" {
+		text = match[1]
+	}
+	// sub node
+	var c Node
+	switch {
+	case isWrap(text, "**", "__"):
+		c = t.parseEmphasis(itemStrong, pos, text)
+	case isWrap(text, "*", "_"):
+		c = t.parseEmphasis(itemItalic, pos, text)
+	case isWrap(text, "~~"):
+		c = t.parseEmphasis(itemStrike, pos, text)
+	default:
+		c = t.newText(pos, text)
+	}
+	node.append(c)
+	return node
 }
 
 // parse heading block
@@ -394,4 +413,14 @@ func isBlock(item itemType) (b bool) {
 		b = true
 	}
 	return
+}
+
+// Test if strings start and end with specific string
+func isWrap(text string, args ...string) bool {
+	for _, s := range args {
+		if strings.HasPrefix(text, s) && strings.HasSuffix(text, s) {
+			return true
+		}
+	}
+	return false
 }

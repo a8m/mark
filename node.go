@@ -129,7 +129,7 @@ type EmphasisNode struct {
 	NodeType
 	Pos
 	Style itemType
-	Text  []byte
+	Nodes []Node
 }
 
 // Tag return the tagName based on Style field
@@ -149,11 +149,19 @@ func (n *EmphasisNode) Tag() (s string) {
 
 // Return the html representation of emphasis text(string, italic, ..).
 func (n *EmphasisNode) Render() string {
-	return render(n.Tag(), string(n.Text))
+	var s string
+	for _, node := range n.Nodes {
+		s += node.Render()
+	}
+	return render(n.Tag(), s)
 }
 
-func (t *Tree) newEmphasis(pos Pos, style itemType, text string) *EmphasisNode {
-	return &EmphasisNode{NodeType: NodeEmphasis, Pos: pos, Style: style, Text: []byte(text)}
+func (n *EmphasisNode) append(node Node) {
+	n.Nodes = append(n.Nodes, node)
+}
+
+func (t *Tree) newEmphasis(pos Pos, style itemType) *EmphasisNode {
+	return &EmphasisNode{NodeType: NodeEmphasis, Pos: pos, Style: style}
 }
 
 // Heading holds heaing node with specific level.
@@ -373,7 +381,7 @@ const (
 	Data
 )
 
-// TableCellNode represent table-data/cell that holds simple text(my be emphasis)
+// TableCellNode represent table-data/cell that holds simple text(may be emphasis)
 // Note: the text in <th> elements are bold and centered by default.
 type CellNode struct {
 	NodeType

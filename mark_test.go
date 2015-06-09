@@ -19,7 +19,12 @@ func TestRender(t *testing.T) {
 		"_foo_~~bar~~ baz":      "<p><em>foo</em><del>bar</del> baz</p>",
 		"~~baz~~ _baz_":         "<p><del>baz</del> <em>baz</em></p>",
 		"`bool` and that's it.": "<p><code>bool</code> and that's it.</p>",
-		//	"___mixim___": "<p><strong><em>foo</em></strong></p>",
+		// Emphasis mixim
+		"___foo___":       "<p><strong><em>foo</em></strong></p>",
+		"__*foo*__":       "<p><strong><em>foo</em></strong></p>",
+		"_**mixim**_":     "<p><em><strong>mixim</strong></em></p>",
+		"~~__*mixim*__~~": "<p><del><strong><em>mixim</em></strong></del></p>",
+		"~~*mixim*~~":     "<p><del><em>mixim</em></del></p>",
 		// Paragraph
 		"1  \n2  \n3":        "<p>1<br>2<br>3</p>",
 		"1\n\n2":             "<p>1</p>\n<p>2</p>",
