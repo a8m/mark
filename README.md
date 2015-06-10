@@ -4,7 +4,6 @@
 2. html tags
 3. comments ?
 4. images - (almost done)
-5. itemIndent - (think it's done)
 6. mixim - ___foo___, `**bar**`, etc...
 
 - Blocks
