@@ -61,15 +61,19 @@ Id  |	Name  |  Age
 func TestList(t *testing.T) {
 	printRound(1)
 	// Test round 1
-	src := `
-- one
- - one of one
-- two
-- three
+	// TODO(Ariel): BUG!!!!
+	src := `none
+*foo*
+*bar*
 `
 	l := lex("1", src)
 	fmt.Printf("Source:\n" + src + "\n")
 	for item := range l.items {
 		fmt.Printf(tokenNames[item.typ] + " ---> " + item.val + "\n")
 	}
+	// tr := &Tree{lex: l}
+	// tr.parse()
+	// fmt.Println(tr.Nodes)
+	// tr.render()
+	// fmt.Printf(tr.output)
 }
