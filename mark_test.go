@@ -67,6 +67,7 @@ func TestRender(t *testing.T) {
 		"1. one\n2. two\n3. three": "<ol><li>one</li><li>two</li><li>three</li></ol>",
 		"1. one\n 1. one of one":   "<ol><li>one<ol><li>one of one</li></ol></li></ol>",
 		"2. two\n 3. three":        "<ol><li>two<ol><li>three</li></ol></li></ol>",
+		// Tables
 	}
 	for actual, expected := range cases {
 		expect(Render(actual)).To.Equal(expected)
