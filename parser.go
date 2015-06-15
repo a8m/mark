@@ -123,8 +123,6 @@ Loop:
 			node = t.newLine(token.pos)
 		case itemBr:
 			node = t.newBr(token.pos)
-		case itemText:
-			node = t.newText(token.pos, token.val)
 		case itemStrong, itemItalic, itemStrike, itemCode:
 			node = t.parseEmphasis(token.typ, token.pos, token.val)
 		case itemLink, itemAutoLink, itemGfmLink:
@@ -139,6 +137,8 @@ Loop:
 		case itemImage:
 			match := span[token.typ].FindStringSubmatch(token.val)
 			node = t.newImage(token.pos, match[3], match[2], match[1])
+		case itemText:
+			node = t.newText(token.pos, token.val)
 		default:
 			fmt.Println("Matching not found for this shit:", token)
 		}
