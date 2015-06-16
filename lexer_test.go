@@ -58,7 +58,7 @@ Id  |	Name  |  Age
 	fmt.Printf(tr.output)
 }
 
-func TestList(t *testing.T) {
+func lTestList(t *testing.T) {
 	printRound(1)
 	// Test round 1
 	// TODO(Ariel): BUG!!!!

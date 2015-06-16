@@ -1,7 +1,11 @@
 package mark
 
 import (
+	"fmt"
 	"github.com/a8m/expect"
+	"io/ioutil"
+	"regexp"
+	"strings"
 	"testing"
 )
 
@@ -71,5 +75,32 @@ func TestRender(t *testing.T) {
 	}
 	for actual, expected := range cases {
 		expect(Render(actual)).To.Equal(expected)
+	}
+}
+
+func TestData(t *testing.T) {
+	var testFiles []string
+	files, err := ioutil.ReadDir("test")
+	if err != nil {
+		t.Error("Couldn't open 'test' directory")
+	}
+	for _, file := range files {
+		if name := file.Name(); strings.HasSuffix(name, ".text") {
+			testFiles = append(testFiles, "test/"+strings.TrimSuffix(name, ".text"))
+		}
+	}
+	re := regexp.MustCompile(`\n`)
+	for _, file := range testFiles {
+		html, err := ioutil.ReadFile(file + ".html")
+		if err != nil {
+			t.Errorf("Error to read html file: %s", file)
+		}
+		text, err := ioutil.ReadFile(file + ".text")
+		if err != nil {
+			t.Errorf("Error to read text file: %s", file)
+		}
+		sHtml := re.ReplaceAllLiteralString(string(html), "")
+		sText := re.ReplaceAllLiteralString(Render(string(text)), "")
+		fmt.Println(sHtml == sText)
 	}
 }
