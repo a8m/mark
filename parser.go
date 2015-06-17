@@ -47,7 +47,7 @@ Loop:
 		case itemTable, itemLpTable:
 			n = t.parseTable()
 		default:
-			fmt.Println("[Skip]:", t.next())
+			t.next()
 		}
 		if n != nil {
 			t.append(n)
