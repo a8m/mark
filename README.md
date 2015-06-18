@@ -4,7 +4,8 @@
 2. html tags
 3. comments ?
 4. images - (almost done)
-6. mixim - ___foo___, `**bar**`, etc...
+6. escape special characters
+7. mixim - **hello _world_**
 
 - Blocks
 1. heading - add id automatic.(autolink)
