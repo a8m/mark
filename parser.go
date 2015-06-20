@@ -225,10 +225,11 @@ Loop:
 			fallthrough
 		case itemIndent:
 			if depth == len(token.val) {
-				item = t.parseListItem(token.pos, list)
+				item = t.parseListItem(t.next().pos, list)
+			} else {
+				t.backup()
+				break Loop
 			}
-			t.backup()
-			break Loop
 		default:
 			t.backup()
 			item = t.parseListItem(token.pos, list)
