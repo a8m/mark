@@ -1,7 +1,6 @@
 package mark
 
 import (
-	"fmt"
 	"github.com/a8m/expect"
 	"io/ioutil"
 	"regexp"
@@ -55,7 +54,7 @@ func TestRender(t *testing.T) {
 		// GfmCodeBlock
 		"```js\nvar a;\n```":  "<pre><code class=\"lang-js\">var a;</code></pre>",
 		"~~~\nvar b;~~~":      "<pre><code>var b;</code></pre>",
-		"~~~js\nlet d = 1~~~": "<pre><code>let d = 1</code></pre>",
+		"~~~js\nlet d = 1~~~": "<pre><code class=\"lang-js\">let d = 1</code></pre>",
 		// Hr
 		"foo\n****\nbar": "<p>foo</p>\n<hr><p>bar</p>",
 		"foo\n___":       "<p>foo</p>\n<hr>",
@@ -80,6 +79,7 @@ func TestRender(t *testing.T) {
 
 func TestData(t *testing.T) {
 	var testFiles []string
+	var expect = expect.New(t)
 	files, err := ioutil.ReadDir("test")
 	if err != nil {
 		t.Error("Couldn't open 'test' directory")
@@ -101,6 +101,6 @@ func TestData(t *testing.T) {
 		}
 		sHtml := re.ReplaceAllLiteralString(string(html), "")
 		sText := re.ReplaceAllLiteralString(Render(string(text)), "")
-		fmt.Println(sHtml == sText)
+		expect(sHtml).To.Equal(sText)
 	}
 }

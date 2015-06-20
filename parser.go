@@ -190,9 +190,11 @@ func (t *Tree) parseCodeBlock() *CodeNode {
 	token := t.next()
 	if token.typ == itemGfmCodeBlock {
 		match := block[itemGfmCodeBlock].FindStringSubmatch(token.val)
-		lang, text = match[1], match[2]
-		if text == "" {
+		if text = match[2]; text == "" {
 			text = match[4]
+		}
+		if lang = match[1]; lang == "" {
+			lang = match[3]
 		}
 	} else {
 		text = regexp.MustCompile("(?m)( {4}|\t)").ReplaceAllLiteralString(token.val, "")
