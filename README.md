@@ -12,8 +12,9 @@
 2. list - done!
  - break after 3-newlines(\n)
  - one or more indentation make it nested
-3. table
+3. table(refactor parser)
 4. code should be indent with tabs too.
+5. blockqoute
 
 - Misc
 1. Escaping regex in lexer.go
@@ -34,3 +35,18 @@ Some ideas:
 change parseParagraph to parseInline that everyone can use it.
 add ignore-list, for example ignore `br` to parseInline(for example chage `br` to to simple text)
 create itemPipe and use it in the lexical phase ? or deal with it in the parseTable ?
+
+
+Bugs
+----
+1. codeBlock as hr
+`Dash
+
+---
+
+   ---
+
+	    ---
+ `
+
+
