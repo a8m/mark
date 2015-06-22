@@ -221,10 +221,8 @@ Loop:
 			}
 			item = t.parseListItem(token.pos, list)
 		case itemNewLine:
-			if t.peek().typ == itemNewLine {
-				break Loop
-			}
-			fallthrough
+			t.backup()
+			break Loop
 		case itemIndent:
 			if depth == len(token.val) {
 				item = t.parseListItem(t.next().pos, list)
@@ -255,7 +253,10 @@ Loop:
 			break Loop
 		case itemNewLine:
 			switch typ := t.peek().typ; typ {
-			case itemNewLine, eof, itemError, itemList, itemIndent:
+			case itemNewLine, eof, itemError:
+				t.backup2(token)
+				break Loop
+			case itemList, itemIndent:
 				continue
 			default:
 				n = t.newLine(token.pos)
