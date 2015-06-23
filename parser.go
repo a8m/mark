@@ -35,7 +35,7 @@ Loop:
 		case itemText, itemStrong, itemItalic, itemStrike, itemCode,
 			itemLink, itemAutoLink, itemGfmLink, itemImage:
 			tmp := t.newParagraph(p.pos)
-			tmp.Nodes = t.parseText()
+			tmp.Nodes = t.parseText(t.collectTextItems())
 			n = tmp
 		case itemHeading, itemLHeading:
 			n = t.parseHeading()
@@ -53,6 +53,27 @@ Loop:
 			t.append(n)
 		}
 	}
+}
+
+// Collect all items for paragraph creation
+func (t *Tree) collectTextItems() (items []item) {
+Loop:
+	for {
+		switch tkn := t.next(); tkn.typ {
+		case eof, itemError, itemHeading, itemList, itemIndent:
+			t.backup()
+			break Loop
+		case itemNewLine:
+			if typ := t.peek().typ; typ == itemNewLine || isBlock(typ) {
+				t.backup2(tkn)
+				break Loop
+			}
+			fallthrough
+		default:
+			items = append(items, tkn)
+		}
+	}
+	return
 }
 
 // Render parse nodes to the wanted output
@@ -105,21 +126,12 @@ func (t *Tree) backup2(t1 item) {
 }
 
 // parseParagraph scan until itemBr occur.
-func (t *Tree) parseText() []Node {
+func (t *Tree) parseText(tokens []item) []Node {
 	var nodes []Node
-Loop:
-	for {
+	for _, token := range tokens {
 		var node Node
-		switch token := t.next(); token.typ {
-		case eof, itemError, itemHeading, itemList, itemIndent:
-			t.backup()
-			break Loop
+		switch token.typ {
 		case itemNewLine:
-			// Two or more lines continuosly, or block below
-			if typ := t.peek().typ; typ == itemNewLine || isBlock(typ) {
-				t.backup2(token)
-				break Loop
-			}
 			node = t.newLine(token.pos)
 		case itemBr:
 			node = t.newBr(token.pos)
@@ -279,7 +291,8 @@ Loop:
 		default:
 			t.backup()
 			// DRY
-			for _, n := range t.parseText() {
+			for _, n := range t.parseText(t.collectTextItems()) {
+				// TODO: Remove this condition
 				if n.Type() != NodeNewLine {
 					item.append(n)
 				}
