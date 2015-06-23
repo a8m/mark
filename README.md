@@ -1,11 +1,10 @@
 ## TODO
 - Inline
-1. href (almost done, works only when it's on the start of the line)
-2. html tags
-3. comments ?
-4. images - (almost done)
-6. escape special characters
-7. mixim - **hello _world_**
+1. html tags
+2. comments ?
+3. images - (almost done)
+4. escape special characters
+5. mixim - **hello _world_**
 
 - Blocks
 1. heading - add id automatic.(autolink)
@@ -15,19 +14,13 @@
 3. table(refactor parser)
 4. code should be indent with tabs too.
 5. blockqoute
+6. list - loose-item
 
 - Misc
 1. Escaping regex in lexer.go
 2. backslash escape(inline and blocks)
 3. Add peek() to lexer instead to backup all the times
 4. text interpolation
-
-- Preprocessing
-src = src
-    .replace(/\r\n|\r/g, '\n')
-    .replace(/\t/g, '    ')
-    .replace(/\u00a0/g, ' ')
-    .replace(/\u2424/g, '\n');
 
 Stash
 -----
