@@ -384,16 +384,11 @@ func (t *Tree) parseCells(kind int, items [][]item, align []AlignType) *RowNode 
 	for i, item := range items {
 		// Cell contain nodes
 		cell := t.newCell(item[0].pos, kind, align[i])
-		for _, token := range item {
-			var node Node
-			switch token.typ {
-			case itemText:
-				node = t.newText(token.pos, token.val)
-			}
-			if node != nil {
-				cell.append(node)
-			}
+		// Map: Trim all items
+		for i, _ := range item {
+			item[i].val = strings.Trim(item[i].val, " ")
 		}
+		cell.Nodes = t.parseText(item)
 		row.append(cell)
 	}
 	return row
