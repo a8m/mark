@@ -187,14 +187,14 @@ func lexAny(l *lexer) stateFn {
 		fallthrough
 	case '|':
 		if m := block[itemLpTable].FindString(l.input[l.pos-1:]); m != "" {
+			l.eot = l.start + Pos(len(m))
 			l.emit(itemLpTable)
-			l.eot = l.pos + Pos(len(m))
 		}
 		fallthrough
 	default:
 		if m := block[itemTable].FindString(l.input[l.pos-1:]); m != "" {
+			l.eot = l.start + Pos(len(m)) - l.width
 			l.emit(itemTable)
-			l.eot = l.pos + Pos(len(m))
 			// we go one step back to get the full text
 			// in the lexText phase
 			l.start--

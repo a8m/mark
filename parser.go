@@ -152,7 +152,7 @@ func (t *Tree) parseText(tokens []item) []Node {
 		case itemText:
 			node = t.newText(token.pos, token.val)
 		default:
-			fmt.Println("Matching not found for this shit:", token)
+			fmt.Println("Matching not found for this token:", token)
 		}
 		nodes = append(nodes, node)
 	}
@@ -306,6 +306,8 @@ Loop:
 
 // parse table
 func (t *Tree) parseTable() *TableNode {
+	// End of table
+	done := t.lex.eot
 	token := t.next()
 	// ignore the first and last one...
 	//lp := token.val == "|"
@@ -325,15 +327,15 @@ Loop:
 	for i := 0; ; {
 		switch token := t.next(); token.typ {
 		case eof, itemError:
-			if len(cell) > 0 {
-				row = append(row, cell)
-			}
-			if len(row) > 0 {
-				rows.Data = append(rows.Data, row)
-			}
 			break Loop
-		case itemPipe, itemNewLine:
-			// Append to cell
+		case itemNewLine:
+			// If we done with this table
+			if t.peek().pos >= done {
+				break Loop
+			}
+			fallthrough
+		case itemPipe:
+			// Test if cell non-empty before appending to current row
 			if len(cell) > 0 {
 				// Header
 				if i == 0 {
@@ -355,7 +357,9 @@ Loop:
 			}
 			if token.typ == itemNewLine {
 				i++
-				if i > 2 {
+				// test if there's an elemnts to append to tbody.
+				// we want to avoid situations like `appending empty rows`, etc..
+				if i > 2 && len(row) > 0 {
 					rows.Data = append(rows.Data, row)
 					row = [][]item{}
 				}
@@ -364,6 +368,13 @@ Loop:
 		default:
 			cell = append(cell, token)
 		}
+	}
+	// Drain cell/row
+	if len(cell) > 0 {
+		row = append(row, cell)
+	}
+	if len(row) > 0 {
+		rows.Data = append(rows.Data, row)
 	}
 	// Tranform to nodes
 	// Add an average mechanisem, that ignore empty(or " ") in end of cell
