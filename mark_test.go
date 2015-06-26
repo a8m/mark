@@ -34,9 +34,9 @@ func TestRender(t *testing.T) {
 		"1\n\n\n2":           "<p>1</p>\n<p>2</p>",
 		"1\n\n\n\n\n\n\n\n2": "<p>1</p>\n<p>2</p>",
 		// Heading
-		"#1\n##2":                  "<h1>1</h1>\n<h2>2</h2>",
-		"#1\np\n##2\n###3\n4\n===": "<h1>1</h1>\n<p>p</p>\n<h2>2</h2>\n<h3>3</h3>\n<h1>4</h1>",
-		"Hello\n===":               "<h1>Hello</h1>",
+		"#1\n##2":                  "<h1 id=\"1\">1</h1>\n<h2 id=\"2\">2</h2>",
+		"#1\np\n##2\n###3\n4\n===": "<h1 id=\"1\">1</h1>\n<p>p</p>\n<h2 id=\"2\">2</h2>\n<h3 id=\"3\">3</h3>\n<h1 id=\"4\">4</h1>",
+		"Hello\n===":               "<h1 id=\"hello\">Hello</h1>",
 		// Links
 		"[text](link \"title\")": "<p><a href=\"link\" title=\"title\">text</a></p>",
 		"[text](link)":           "<p><a href=\"link\">text</a></p>",
