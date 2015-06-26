@@ -395,9 +395,12 @@ func (t *Tree) parseCells(kind int, items [][]item, align []AlignType) *RowNode 
 	for i, item := range items {
 		// Cell contain nodes
 		cell := t.newCell(item[0].pos, kind, align[i])
-		// Map: Trim all items
+		// Map: Trim all start and end spaces.
+		// TODO(Ariel): it's just a patch right now
 		for i, _ := range item {
-			item[i].val = strings.Trim(item[i].val, " ")
+			if i == 0 || i == len(item)-1 {
+				item[i].val = strings.Trim(item[i].val, " ")
+			}
 		}
 		cell.Nodes = t.parseText(item)
 		row.append(cell)
