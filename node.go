@@ -2,7 +2,9 @@ package mark
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
+	"strings"
 )
 
 // A Node is an element in the parse tree.
@@ -174,7 +176,11 @@ type HeadingNode struct {
 
 // Render return the html representation based on heading level.
 func (n *HeadingNode) Render() string {
-	return render("h"+strconv.Itoa(n.Level), string(n.Text))
+	re := regexp.MustCompile(`[^\w]+`)
+	id := re.ReplaceAllString(string(n.Text), "-")
+	// ToLowerCase
+	id = strings.ToLower(id)
+	return fmt.Sprintf("<%[1]s id=\"%s\">%s</%[1]s>", "h"+strconv.Itoa(n.Level), id, n.Text)
 }
 
 func (t *Tree) newHeading(pos Pos, level int, text string) *HeadingNode {
