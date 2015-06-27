@@ -190,8 +190,12 @@ func (t *Tree) parseHeading() (node *HeadingNode) {
 	if token.typ == itemHeading {
 		node = t.newHeading(token.pos, len(match[1]), match[2])
 	} else {
-		// itemLHeading will always be in level 1.
-		node = t.newHeading(token.pos, 1, match[1])
+		// using equal signs for first-level, and dashes for second-level.
+		level := 1
+		if match[2] == "-" {
+			level = 2
+		}
+		node = t.newHeading(token.pos, level, match[1])
 	}
 	return
 }
