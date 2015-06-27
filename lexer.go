@@ -55,10 +55,10 @@ const (
 )
 
 var (
-	reEmphasise = `^_{%[1]d}([\s\S]+?(?:_{0,}))_{%[1]d}|^\*{%[1]d}([\s\S]+?(?:\*{0,}))\*{%[1]d}`
-	reGfmCode   = `^%[1]s{3,} *(\S+)? *\n([\s\S]+?)\s*%[1]s{3,}$*(?:\n+|$)`
+	reEmphasise = `(?s)^_{%[1]d}(.+?(?:_{0,}))_{%[1]d}|^\*{%[1]d}(.+?(?:\*{0,}))\*{%[1]d}`
+	reGfmCode   = `(?s)^%[1]s{3,} *(\S+)? *\n(.+?)\s*%[1]s{3,}$*(?:\n+|$)`
 	reLinkText  = `(?:\[[^\]]*\]|[^\[\]]|\])*`
-	reLinkHref  = `\s*<?([\s\S]*?)>?(?:\s+['"]([\s\S]*?)['"])?\s*`
+	reLinkHref  = `(?s)\s*<?(.*?)>?(?:\s+['"](.*?)['"])?\s*`
 )
 
 // Block Grammer
@@ -80,10 +80,10 @@ var block = map[itemType]*regexp.Regexp{
 var span = map[itemType]*regexp.Regexp{
 	itemItalic: regexp.MustCompile(fmt.Sprintf(reEmphasise, 1)),
 	itemStrong: regexp.MustCompile(fmt.Sprintf(reEmphasise, 2)),
-	itemStrike: regexp.MustCompile(`^~{2}([\s\S]+?)~{2}`),
+	itemStrike: regexp.MustCompile(`(?s)^~{2}(.+?)~{2}`),
 	// itemMixed(e.g: ***str***, ~~*str*~~) will be part of the parser
 	// or we'll lex recuresively
-	itemCode: regexp.MustCompile("^`{1,2}\\s*([\\s\\S]*?[^`])\\s*`{1,2}"),
+	itemCode: regexp.MustCompile("(?s)^`{1,2}\\s*(.*?[^`])\\s*`{1,2}"),
 	itemBr:   regexp.MustCompile(`^ {2,}\n`),
 	// Links
 	itemLink:     regexp.MustCompile(fmt.Sprintf(`^!?\[(%s)\]\(%s\)`, reLinkText, reLinkHref)),
