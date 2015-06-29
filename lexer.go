@@ -121,6 +121,16 @@ func lex(name, input string) *lexer {
 	return l
 }
 
+// One phase lexing(inline reason)
+func lexInline(input string) *lexer {
+	l := &lexer{
+		input: input,
+		items: make(chan item),
+	}
+	go l.lexInline()
+	return l
+}
+
 // run runs the state machine for the lexer.
 func (l *lexer) run() {
 	for l.state = lexAny; l.state != nil; {
@@ -259,10 +269,9 @@ func lexList(l *lexer) stateFn {
 	return lexText
 }
 
-// lexText scans until eol(\n)
+// lexText scans until end-of-line(\n)
 // We have a lot of things to do in this lextext
 // for example: ignore itemBr on list/tables
-// fix the text scaning etc...
 func lexText(l *lexer) stateFn {
 	// Drain text before emitting
 	emit := func(item itemType, pos Pos) {
@@ -280,6 +289,67 @@ Loop:
 			break Loop
 		case r == '\n':
 			emit(itemNewLine, l.width)
+			break Loop
+		case r == '|':
+			if l.eot > l.pos {
+				emit(itemPipe, l.width)
+				break
+			}
+			l.next()
+		default:
+			// Test for Setext-style headers
+			if m := block[itemLHeading].FindString(l.input[l.pos:]); m != "" {
+				emit(itemLHeading, Pos(len(m)))
+				break Loop
+			}
+			l.next()
+		}
+	}
+	return lexAny
+}
+
+// backup steps back one rune. Can only be called once per call of next.
+func (l *lexer) backup() {
+	l.pos -= l.width
+}
+
+// peek returns but does not consume the next rune in the input.
+func (l *lexer) peek() rune {
+	r := l.next()
+	l.backup()
+	return r
+}
+
+// emit passes an item back to the client.
+func (l *lexer) emit(t itemType) {
+	l.items <- item{t, l.start, l.input[l.start:l.pos]}
+	l.start = l.pos
+}
+
+// lexItem return the next item token, clled by the parser.
+func (l *lexer) nextItem() item {
+	item := <-l.items
+	l.lastPos = l.pos
+	return item
+}
+
+// One phase lexing(inline reason)
+func (l *lexer) lexInline() {
+	// Drain text before emitting
+	emit := func(item itemType, pos Pos) {
+		if l.pos > l.start {
+			l.emit(itemText)
+		}
+		l.pos += pos
+		l.emit(item)
+	}
+Loop:
+	for {
+		switch r := l.peek(); {
+		case r == eof:
+			// I don;t want to emit EOF(in inline mode)
+			// emit(eof, Pos(0))
+			l.emit(itemText)
 			break Loop
 		case r == ' ':
 			if m := span[itemBr].FindString(l.input[l.pos:]); m != "" {
@@ -329,20 +399,8 @@ Loop:
 				break
 			}
 			l.next()
-		case r == '|':
-			if l.eot > l.pos {
-				emit(itemPipe, l.width)
-				break
-			}
-			l.next()
 		default:
 			input := l.input[l.pos:]
-			// Test for Setext-style headers
-			if m := block[itemLHeading].FindString(input); m != "" {
-				emit(itemLHeading, Pos(len(m)))
-				break Loop
-			}
-			// GfmLink
 			if m := span[itemGfmLink].FindString(input); m != "" {
 				emit(itemGfmLink, Pos(len(m)))
 				break
@@ -350,30 +408,5 @@ Loop:
 			l.next()
 		}
 	}
-	return lexAny
-}
-
-// backup steps back one rune. Can only be called once per call of next.
-func (l *lexer) backup() {
-	l.pos -= l.width
-}
-
-// peek returns but does not consume the next rune in the input.
-func (l *lexer) peek() rune {
-	r := l.next()
-	l.backup()
-	return r
-}
-
-// emit passes an item back to the client.
-func (l *lexer) emit(t itemType) {
-	l.items <- item{t, l.start, l.input[l.start:l.pos]}
-	l.start = l.pos
-}
-
-// lexItem return the next item token, called by the parser.
-func (l *lexer) nextItem() item {
-	item := <-l.items
-	l.lastPos = l.pos
-	return item
+	close(l.items)
 }

@@ -35,7 +35,7 @@ Loop:
 		case itemText, itemStrong, itemItalic, itemStrike, itemCode,
 			itemLink, itemAutoLink, itemGfmLink, itemImage:
 			tmp := t.newParagraph(p.pos)
-			tmp.Nodes = t.parseText(t.collectTextItems())
+			tmp.Nodes = t.parseText(t.next().val)
 			n = tmp
 		case itemHeading, itemLHeading:
 			n = t.parseHeading()
@@ -53,27 +53,6 @@ Loop:
 			t.append(n)
 		}
 	}
-}
-
-// Collect all items for paragraph creation
-func (t *Tree) collectTextItems() (items []item) {
-Loop:
-	for {
-		switch tkn := t.next(); tkn.typ {
-		case eof, itemError, itemHeading, itemList, itemIndent:
-			t.backup()
-			break Loop
-		case itemNewLine:
-			if typ := t.peek().typ; typ == itemNewLine || isBlock(typ) {
-				t.backup2(tkn)
-				break Loop
-			}
-			fallthrough
-		default:
-			items = append(items, tkn)
-		}
-	}
-	return
 }
 
 // Render parse nodes to the wanted output
@@ -126,9 +105,25 @@ func (t *Tree) backup2(t1 item) {
 }
 
 // parseParagraph scan until itemBr occur.
-func (t *Tree) parseText(tokens []item) []Node {
-	var nodes []Node
-	for _, token := range tokens {
+func (t *Tree) parseText(input string) (nodes []Node) {
+	// HACK: if there's more 'itemText' in the way, make it one.
+	for {
+		tkn := t.next()
+		if tkn.typ == itemText {
+			input += tkn.val
+		} else if tkn.typ == itemNewLine {
+			if t.peek().typ != itemText {
+				t.backup2(tkn)
+				break
+			}
+			input += tkn.val
+		} else {
+			t.backup()
+			break
+		}
+	}
+	l := lexInline(input)
+	for token := range l.items {
 		var node Node
 		switch token.typ {
 		case itemNewLine:
@@ -293,9 +288,8 @@ Loop:
 		case itemCodeBlock, itemGfmCodeBlock:
 			n = t.parseCodeBlock()
 		default:
-			t.backup()
 			// DRY
-			for _, n := range t.parseText(t.collectTextItems()) {
+			for _, n := range t.parseText(token.val) {
 				// TODO: Remove this condition
 				if n.Type() != NodeNewLine {
 					item.append(n)
@@ -398,15 +392,13 @@ func (t *Tree) parseCells(kind int, items [][]item, align []AlignType) *RowNode 
 	row := t.newRow(1)
 	for i, item := range items {
 		// Cell contain nodes
+		var s string
 		cell := t.newCell(item[0].pos, kind, align[i])
-		// Map: Trim all start and end spaces.
-		// TODO(Ariel): it's just a patch right now
-		for i, _ := range item {
-			if i == 0 || i == len(item)-1 {
-				item[i].val = strings.Trim(item[i].val, " ")
-			}
+		for _, tkn := range item {
+			s += tkn.val
 		}
-		cell.Nodes = t.parseText(item)
+		// Used before: `^[ |\t]*|[ |\t]*$`
+		cell.Nodes = t.parseText(strings.TrimSpace(s))
 		row.append(cell)
 	}
 	return row
