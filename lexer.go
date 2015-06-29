@@ -371,7 +371,7 @@ func (l *lexer) emit(t itemType) {
 	l.start = l.pos
 }
 
-// lexItem return the next item token, clled by the parser.
+// lexItem return the next item token, called by the parser.
 func (l *lexer) nextItem() item {
 	item := <-l.items
 	l.lastPos = l.pos
