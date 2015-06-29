@@ -162,19 +162,7 @@ func (t *Tree) parseEmphasis(typ itemType, pos Pos, val string) *EmphasisNode {
 	if text == "" {
 		text = match[1]
 	}
-	// sub node
-	var c Node
-	switch {
-	case isWrap(text, "**", "__"):
-		c = t.parseEmphasis(itemStrong, pos, text)
-	case isWrap(text, "*", "_"):
-		c = t.parseEmphasis(itemItalic, pos, text)
-	case isWrap(text, "~~"):
-		c = t.parseEmphasis(itemStrike, pos, text)
-	default:
-		c = t.newText(pos, text)
-	}
-	node.append(c)
+	node.Nodes = t.parseText(text)
 	return node
 }
 
@@ -408,7 +396,7 @@ func (t *Tree) parseCells(kind int, items [][]item, align []AlignType) *RowNode 
 // e.g: ":---", "---:", ":---:", "---"
 func parseAlign(s string) (typ AlignType) {
 	// Trim spaces before
-	s = strings.Trim(s, " ")
+	s = strings.TrimSpace(s)
 	sfx, pfx := strings.HasSuffix(s, ":"), strings.HasPrefix(s, ":")
 	switch {
 	case sfx && pfx:
@@ -435,14 +423,4 @@ func isBlock(item itemType) (b bool) {
 		b = true
 	}
 	return
-}
-
-// Test if strings start and end with specific string
-func isWrap(text string, args ...string) bool {
-	for _, s := range args {
-		if strings.HasPrefix(text, s) && strings.HasSuffix(text, s) {
-			return true
-		}
-	}
-	return false
 }

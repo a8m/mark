@@ -24,6 +24,7 @@ func TestRender(t *testing.T) {
 		"`bool` and that's it.": "<p><code>bool</code> and that's it.</p>",
 		// Emphasis mixim
 		"___foo___":       "<p><strong><em>foo</em></strong></p>",
+		"__foo _bar___":   "<p><strong>foo <em>bar</em></strong></p>",
 		"__*foo*__":       "<p><strong><em>foo</em></strong></p>",
 		"_**mixim**_":     "<p><em><strong>mixim</strong></em></p>",
 		"~~__*mixim*__~~": "<p><del><strong><em>mixim</em></strong></del></p>",
