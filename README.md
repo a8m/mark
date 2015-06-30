@@ -1,14 +1,12 @@
 ## TODO
 - Inline
 1. html tags
-2. comments ?
-3. images - (almost done)
+3. images - (almost done - defined image reference)
 4. escape special characters
 5. mixim - **hello _world_**
 
 - Blocks
-1. heading - add id automatic.(autolink)
-2. list - done!
+2. list - (with blocks.. code block... tables..)!
  - break after 3-newlines(\n)
  - one or more indentation make it nested
 3. table(refactor parser)
@@ -21,6 +19,7 @@
 2. backslash escape(inline and blocks)
 3. Add peek() to lexer instead to backup all the times
 4. text interpolation
+5. Configuration, gfm or not(heading, tables, etc...)
 
 Stash
 -----
