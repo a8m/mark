@@ -39,6 +39,7 @@ const (
 	NodeRow
 	NodeCell
 	NodeBlockQuote // Blockquote block.
+	NodeHTML
 )
 
 // ParagraphNode hold simple paragraph node contains text
