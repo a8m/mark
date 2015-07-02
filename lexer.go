@@ -24,12 +24,9 @@ const eof = -1 // Zero value so closed channel delivers EOF
 
 const (
 	itemError itemType = iota // Error occurred; value is text of error
-	// Intersting things
 	itemNewLine
 	itemHTML
 	// Block Elements
-	itemText
-	itemLineBreak
 	itemHeading
 	itemLHeading // Setext-style headers
 	itemBlockQuote
@@ -40,6 +37,7 @@ const (
 	itemTable
 	itemLpTable
 	// Span Elements
+	itemText
 	itemLink
 	itemAutoLink
 	itemGfmLink
@@ -168,6 +166,9 @@ func lexAny(l *lexer) stateFn {
 	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 		l.backup()
 		return lexList
+	case '<':
+		l.backup()
+		return lexHtml
 	case '>':
 		l.emit(itemBlockQuote)
 		return lexText
@@ -409,4 +410,46 @@ Loop:
 		}
 	}
 	close(l.items)
+}
+
+// lexList scans ordered and unordered lists.
+func lexHtml(l *lexer) stateFn {
+	if match, res := l.MatchHtml(l.input[l.pos:]); match {
+		fmt.Println("Match:", res)
+		l.pos += Pos(len(res))
+		l.emit(itemHTML)
+		return lexAny
+	}
+	return lexText
+}
+
+// Test if the given input is match the HTML pattern(blocks only)
+func (l *lexer) MatchHtml(input string) (bool, string) {
+	comment := regexp.MustCompile(`(?s)<!--.*?-->`)
+	if m := comment.FindString(input); m != "" {
+		return true, m
+	}
+	reStart := regexp.MustCompile(`^<(\w+)(?:"[^"]*"|'[^']*'|[^'">])*?>`)
+	// TODO: Add all span-tags and move to config.
+	reSpan := regexp.MustCompile(`^(a|em|strong|small|s|q|data|time|code|sub|sup|i|b|u|span|br|del|img)$`)
+	if m := reStart.FindStringSubmatch(input); len(m) != 0 {
+		el, name := m[0], m[1]
+		// if name is a span... is a text
+		if reSpan.MatchString(name) {
+			return false, ""
+		}
+		// if it's a self-closed html element
+		if strings.HasSuffix(el, "/>") {
+			return true, el
+		}
+		reStr := fmt.Sprintf(`(?s)(.)+?<\/%s> *(?:\n{2,}|\s*$)`, name)
+		reMatch, err := regexp.Compile(reStr)
+		if err != nil {
+			return false, ""
+		}
+		if m := reMatch.FindString(input); m != "" {
+			return true, m
+		}
+	}
+	return false, ""
 }
