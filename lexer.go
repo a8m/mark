@@ -26,6 +26,7 @@ const (
 	itemError itemType = iota // Error occurred; value is text of error
 	itemNewLine
 	itemHTML
+	itemDefLink
 	// Block Elements
 	itemHeading
 	itemLHeading // Setext-style headers
@@ -57,10 +58,12 @@ var (
 	reGfmCode   = `(?s)^%[1]s{3,} *(\S+)? *\n(.+?)\s*%[1]s{3,}$*(?:\n+|$)`
 	reLinkText  = `(?:\[[^\]]*\]|[^\[\]]|\])*`
 	reLinkHref  = `(?s)\s*<?(.*?)>?(?:\s+['"](.*?)['"])?\s*`
+	reDefLink   = `^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)`
 )
 
 // Block Grammer
 var block = map[itemType]*regexp.Regexp{
+	itemDefLink:   regexp.MustCompile(reDefLink),
 	itemHeading:   regexp.MustCompile(`^ *(#{1,6}) +([^\n]+?) *#* *(?:\n+|$)`),
 	itemLHeading:  regexp.MustCompile(`^([^\n]+)\n *(=|-){2,} *(?:\n+|$)`),
 	itemHr:        regexp.MustCompile(`^( *[-*_]){3,} *(?:\n+|$)`),
@@ -172,6 +175,9 @@ func lexAny(l *lexer) stateFn {
 	case '>':
 		l.emit(itemBlockQuote)
 		return lexText
+	case '[':
+		l.backup()
+		return lexDefLink
 	case '#':
 		l.backup()
 		return lexHeading
@@ -415,7 +421,6 @@ Loop:
 // lexList scans ordered and unordered lists.
 func lexHtml(l *lexer) stateFn {
 	if match, res := l.MatchHtml(l.input[l.pos:]); match {
-		fmt.Println("Match:", res)
 		l.pos += Pos(len(res))
 		l.emit(itemHTML)
 		return lexAny
@@ -452,4 +457,14 @@ func (l *lexer) MatchHtml(input string) (bool, string) {
 		}
 	}
 	return false, ""
+}
+
+// lexDefLink scans link definition
+func lexDefLink(l *lexer) stateFn {
+	if m := block[itemDefLink].FindString(l.input[l.pos:]); m != "" {
+		l.pos += Pos(len(m))
+		l.emit(itemDefLink)
+		return lexAny
+	}
+	return lexText
 }
