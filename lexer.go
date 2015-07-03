@@ -73,8 +73,9 @@ var block = map[itemType]*regexp.Regexp{
 	// `^(?:[*+-]|\d+\.) [\s\S]+?(?:\n|)`
 	itemList: regexp.MustCompile(`^(?:[*+-]|\d+\.) +?(?:\n|)`),
 	// leading-pipe table
-	itemLpTable: regexp.MustCompile(`^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*`),
-	itemTable:   regexp.MustCompile(`^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*`),
+	itemLpTable:    regexp.MustCompile(`^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*`),
+	itemTable:      regexp.MustCompile(`^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*`),
+	itemBlockQuote: regexp.MustCompile(`^( *>[^\n]+(\n[^\n]+)*\n*)+`),
 }
 
 // Inline Grammer
@@ -173,8 +174,8 @@ func lexAny(l *lexer) stateFn {
 		l.backup()
 		return lexHtml
 	case '>':
-		l.emit(itemBlockQuote)
-		return lexText
+		l.backup()
+		return lexBlockQuote
 	case '[':
 		l.backup()
 		return lexDefLink
@@ -464,6 +465,34 @@ func lexDefLink(l *lexer) stateFn {
 	if m := block[itemDefLink].FindString(l.input[l.pos:]); m != "" {
 		l.pos += Pos(len(m))
 		l.emit(itemDefLink)
+		return lexAny
+	}
+	return lexText
+}
+
+// Test if the given input match blockquote
+func (l *lexer) MatchBlockQuote(input string) (bool, string) {
+	match := block[itemBlockQuote].FindString(input)
+	if match == "" {
+		return false, match
+	}
+	lines := strings.Split(match, "\n")
+	for i, line := range lines {
+		// if line is a link-definition we cut the match until this point
+		if isDef := block[itemDefLink].MatchString(line); isDef {
+			match = strings.Join(lines[0:i], "\n")
+			break
+		}
+	}
+	return true, match
+}
+
+// lexBlockQuote
+func lexBlockQuote(l *lexer) stateFn {
+	if match, res := l.MatchBlockQuote(l.input[l.pos:]); match {
+		fmt.Println("Matching BQ:", res, "!!")
+		l.pos += Pos(len(res))
+		l.emit(itemBlockQuote)
 		return lexAny
 	}
 	return lexText
