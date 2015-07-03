@@ -48,6 +48,8 @@ Loop:
 			n = t.parseList(0)
 		case itemTable, itemLpTable:
 			n = t.parseTable()
+		case itemBlockQuote:
+			n = t.parseBlockQuote()
 		default:
 			t.next()
 		}
@@ -212,6 +214,19 @@ func (t *Tree) parseCodeBlock() *CodeNode {
 		text = regexp.MustCompile("(?m)( {4}|\t)").ReplaceAllLiteralString(token.val, "")
 	}
 	return t.newCode(token.pos, lang, text)
+}
+
+func (t *Tree) parseBlockQuote() (n *BlockQuoteNode) {
+	token := t.next()
+	// replacer
+	re := regexp.MustCompile(`(?m)^> ?`)
+	raw := re.ReplaceAllString(token.val, "")
+	// TODO(Ariel): not work right now with defLink(inside the blockQuote)
+	tr := &Tree{lex: lex(raw, raw)}
+	tr.parse()
+	n = t.newBlockQuote(token.pos)
+	n.Nodes = tr.Nodes
+	return
 }
 
 // parse list
