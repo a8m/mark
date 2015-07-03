@@ -32,8 +32,7 @@ Loop:
 			n = t.newBr(t.next().pos)
 		case itemHr:
 			n = t.newHr(t.next().pos)
-		case itemText, itemStrong, itemItalic, itemStrike, itemCode,
-			itemLink, itemAutoLink, itemGfmLink, itemImage:
+		case itemText:
 			tmp := t.newParagraph(p.pos)
 			tmp.Nodes = t.parseText(t.next().val)
 			n = tmp
@@ -104,7 +103,7 @@ func (t *Tree) backup2(t1 item) {
 	t.peekCount = 2
 }
 
-// parseParagraph scan until itemBr occur.
+// parseText scan until itemBr occur.
 func (t *Tree) parseText(input string) (nodes []Node) {
 	// HACK: if there's more 'itemText' in the way, make it one.
 	for {
