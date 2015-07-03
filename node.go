@@ -450,6 +450,25 @@ func (t *Tree) newCell(pos Pos, kind int, align AlignType) *CellNode {
 	return &CellNode{NodeType: NodeCell, Pos: pos, Kind: kind, AlignType: align}
 }
 
+// BlockQuote element
+type BlockQuoteNode struct {
+	NodeType
+	Pos
+	Nodes []Node
+}
+
+func (n *BlockQuoteNode) Render() string {
+	var s string
+	for _, node := range n.Nodes {
+		s += node.Render()
+	}
+	return render("blockquote", s)
+}
+
+func (t *Tree) newBlockQuote(pos Pos) *BlockQuoteNode {
+	return &BlockQuoteNode{NodeType: NodeBlockQuote, Pos: pos}
+}
+
 // TODO(Ariel): rename to wrap()
 // Wrap text with specific tag.
 func render(tag, body string) string {
