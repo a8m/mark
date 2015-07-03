@@ -155,38 +155,31 @@ func (l *lexer) next() rune {
 
 // lexAny scans non-space items.
 func lexAny(l *lexer) stateFn {
-	switch r := l.next(); r {
+	switch r := l.peek(); r {
 	case eof:
 		return nil
 	case '*', '-', '_', '+':
-		p := l.peek()
-		if p == '*' || p == '-' || p == '_' {
+		l.next()
+		if p := l.peek(); p == '*' || p == '-' || p == '_' {
 			l.backup()
 			return lexHr
-		} else {
-			l.backup()
-			return lexList
 		}
-	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 		l.backup()
 		return lexList
+	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+		return lexList
 	case '<':
-		l.backup()
 		return lexHtml
 	case '>':
-		l.backup()
 		return lexBlockQuote
 	case '[':
-		l.backup()
 		return lexDefLink
 	case '#':
-		l.backup()
 		return lexHeading
 	case ' ', '\t':
 		// Should be here ?
 		// TODO(Ariel): test that it's a codeBlock and not list for sure
-		if block[itemCodeBlock].MatchString(l.input[l.pos-1:]) {
-			l.backup()
+		if block[itemCodeBlock].MatchString(l.input[l.pos:]) {
 			return lexCode
 		}
 		// Keep moving forward until we get all the
@@ -199,25 +192,23 @@ func lexAny(l *lexer) stateFn {
 		// if it's gfm-code
 		c := l.input[l.pos : l.pos+2]
 		if c == "``" || c == "~~" {
-			l.backup()
 			return lexGfmCode
 		}
 		fallthrough
 	case '|':
-		if m := block[itemLpTable].FindString(l.input[l.pos-1:]); m != "" {
+		if m := block[itemLpTable].FindString(l.input[l.pos:]); m != "" {
 			l.eot = l.start + Pos(len(m))
 			l.emit(itemLpTable)
 		}
 		fallthrough
 	default:
-		if m := block[itemTable].FindString(l.input[l.pos-1:]); m != "" {
+		if m := block[itemTable].FindString(l.input[l.pos:]); m != "" {
 			l.eot = l.start + Pos(len(m)) - l.width
 			l.emit(itemTable)
 			// we go one step back to get the full text
 			// in the lexText phase
 			l.start--
 		}
-		l.backup()
 		return lexText
 	}
 }
@@ -490,7 +481,6 @@ func (l *lexer) MatchBlockQuote(input string) (bool, string) {
 // lexBlockQuote
 func lexBlockQuote(l *lexer) stateFn {
 	if match, res := l.MatchBlockQuote(l.input[l.pos:]); match {
-		fmt.Println("Matching BQ:", res, "!!")
 		l.pos += Pos(len(res))
 		l.emit(itemBlockQuote)
 		return lexAny
