@@ -16,6 +16,7 @@ type Tree struct {
 	token     [3]item // three-token lookahead for parser
 	peekCount int
 	output    string
+	links     map[string]*DefLinkNode
 }
 
 // Parse convert the raw text to NodeTree.
@@ -36,6 +37,8 @@ Loop:
 			tmp := t.newParagraph(p.pos)
 			tmp.Nodes = t.parseText(t.next().val)
 			n = tmp
+		case itemDefLink:
+			n = t.parseDefLink()
 		case itemHeading, itemLHeading:
 			n = t.parseHeading()
 		case itemCodeBlock, itemGfmCodeBlock:
@@ -180,6 +183,17 @@ func (t *Tree) parseHeading() (node *HeadingNode) {
 		node = t.newHeading(token.pos, level, match[1])
 	}
 	return
+}
+
+func (t *Tree) parseDefLink() *DefLinkNode {
+	token := t.next()
+	match := block[itemDefLink].FindStringSubmatch(token.val)
+	name := strings.ToLower(match[1])
+	// name(lowercase), href, title
+	n := t.newDefLink(token.pos, name, match[2], match[3])
+	// store in links
+	t.links[name] = n
+	return n
 }
 
 // parse codeBlock
