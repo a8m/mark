@@ -215,9 +215,8 @@ func (t *Tree) newCode(pos Pos, lang, text string) *CodeNode {
 type LinkNode struct {
 	NodeType
 	Pos
-	Title string
-	Href  string
-	Text  []byte
+	Title, Href string
+	Text        []byte
 }
 
 // Return the html representation of link node
@@ -253,9 +252,8 @@ func (t *Tree) newDefLink(pos Pos, name, href, title string) *DefLinkNode {
 type ImageNode struct {
 	NodeType
 	Pos
-	Title string
-	Src   string
-	Alt   []byte
+	Title, Src string
+	Alt        []byte
 }
 
 // Return the html representation on img node
