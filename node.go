@@ -35,6 +35,7 @@ const (
 	NodeListItem
 	NodeCode // Code block.
 	NodeLink
+	NodeDefLink
 	NodeTable
 	NodeRow
 	NodeCell
@@ -229,7 +230,23 @@ func (n *LinkNode) Render() string {
 }
 
 func (t *Tree) newLink(pos Pos, title, href, text string) *LinkNode {
-	return &LinkNode{NodeType: NodeLink, Title: title, Href: href, Text: []byte(text)}
+	return &LinkNode{NodeType: NodeLink, Pos: pos, Title: title, Href: href, Text: []byte(text)}
+}
+
+// DefLinkNode refresent single reference to link-definition
+type DefLinkNode struct {
+	NodeType
+	Pos
+	Name, Href, Title string
+}
+
+// Deflink have no representation(Transparent node)
+func (n *DefLinkNode) Render() string {
+	return ""
+}
+
+func (t *Tree) newDefLink(pos Pos, name, href, title string) *DefLinkNode {
+	return &DefLinkNode{NodeType: NodeLink, Pos: pos, Name: name, Href: href, Title: title}
 }
 
 // Image holds img tag with optional title
