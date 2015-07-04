@@ -236,21 +236,18 @@ func (t *Tree) parseList(depth int) *ListNode {
 	item := new(ListItemNode)
 Loop:
 	for {
-		switch token = t.next(); token.typ {
-		case eof, itemError:
+		switch token = t.peek(); token.typ {
+		case eof, itemError, itemNewLine:
 			break Loop
 		// It's actually a listItem
 		case itemList:
 			// List, but not the same type
 			if list.Ordered != isDigit(token.val) || depth > 0 {
-				t.backup()
 				break Loop
 			}
-			item = t.parseListItem(token.pos, list)
-		case itemNewLine:
-			t.backup()
-			break Loop
+			item = t.parseListItem(t.next().pos, list)
 		case itemIndent:
+			t.next()
 			if depth == len(token.val) {
 				item = t.parseListItem(t.next().pos, list)
 			} else {
@@ -258,7 +255,6 @@ Loop:
 				break Loop
 			}
 		default:
-			t.backup()
 			item = t.parseListItem(token.pos, list)
 		}
 		list.append(item)
