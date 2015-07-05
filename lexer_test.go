@@ -40,12 +40,16 @@ func printRound(i int) {
 	fmt.Printf("\n\n%s Round %d %s\n\n", sep, i, sep)
 }
 
-func LTestBasic(t *testing.T) {
+func lTestBasic(t *testing.T) {
 	l := lex("1", `
+asdasdsa
+
 Id  |	Name  |  Age
-:--:| :-----: | :---:
+----|---------|-----
  1  | Ariel   |  26
  2  | Erez	  |  29
+
+asdas
 `)
 
 	// for item := range l.items {
@@ -53,27 +57,31 @@ Id  |	Name  |  Age
 	// }
 	tr := &Tree{lex: l}
 	tr.parse()
-	fmt.Println(tr.Nodes)
+	// fmt.Println(tr.Nodes)
 	tr.render()
 	fmt.Printf(tr.output)
 }
 
-func lTestList(t *testing.T) {
+func TestList(t *testing.T) {
 	printRound(1)
 	// Test round 1
 	// TODO(Ariel): BUG!!!!
-	src := `none
-*foo*
-*bar*
+	src := `
+- a
+   b
+  c
+
+  d
+  e
 `
 	l := lex("1", src)
-	fmt.Printf("Source:\n" + src + "\n")
-	for item := range l.items {
-		fmt.Printf(tokenNames[item.typ] + " ---> " + item.val + "\n")
-	}
-	// tr := &Tree{lex: l}
-	// tr.parse()
+	// fmt.Printf("Source:\n" + src + "\n")
+	// for item := range l.items {
+	// 	fmt.Printf(tokenNames[item.typ]+" ---> "+item.val+", length: %s\n", len(item.val))
+	// }
+	tr := &Tree{lex: l, links: map[string]*DefLinkNode{}}
+	tr.parse()
 	// fmt.Println(tr.Nodes)
-	// tr.render()
-	// fmt.Printf(tr.output)
+	tr.render()
+	fmt.Printf(tr.output + "\n")
 }

@@ -2,16 +2,17 @@
 - Inline
 1. html tags
 3. images - (almost done - defined image reference)
+  - link reference
 4. escape special characters
-5. mixim - **hello _world_**
+5. refLink will bind to defLink in the rendering phase
 
 - Blocks
 2. list - (with blocks.. code block... tables..)!
  - break after 3-newlines(\n)
  - one or more indentation make it nested
 3. table(refactor parser)
-4. code should be indent with tabs too.
-5. blockqoute
+4. code should be indent with tabs too.(fix with preprocessing)
+5. blockqoute(ignore defLink)
 6. list - loose-item
 
 - Misc
@@ -19,7 +20,7 @@
 2. backslash escape(inline and blocks)
 3. Add peek() to lexer instead to backup all the times
 4. text interpolation
-5. Configuration, gfm or not(heading, tables, etc...)
+5. Configuration, gfm or not(heading, tables, spanTags, etc...)
 
 Stash
 -----
