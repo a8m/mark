@@ -461,6 +461,28 @@ func lexDefLink(l *lexer) stateFn {
 	return lexText
 }
 
+func (l *lexer) MatchList(input string) (bool, string) {
+	var depth, pos int
+	var line string
+	reItem := regexp.MustCompile(`^( *)(?:[*+-]|\d+\.) (.*)(?:\n|)`)
+	reLine := regexp.MustCompile(`^\n{2,}`)
+	if match := reItem.FindStringSubmatch(input); len(match) > 0 {
+		depth, pos = match[1], len(match[0])
+	} else {
+		return false, ""
+	}
+	for {
+		tmp := input[pos:]
+		if m := reLine.FindString(tmp); len(m) > 2 {
+			return true, input[:pos]
+		} else if len(m) == 2 {
+			pos += 2
+			tmp = input[pos:]
+		}
+	}
+
+}
+
 // Test if the given input match blockquote
 func (l *lexer) MatchBlockQuote(input string) (bool, string) {
 	match := block[itemBlockQuote].FindString(input)
