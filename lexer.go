@@ -259,15 +259,6 @@ func lexCode(l *lexer) stateFn {
 	return lexAny
 }
 
-// lexList scans ordered and unordered lists.
-func lexList(l *lexer) stateFn {
-	if m := block[itemList].FindString(l.input[l.pos:]); m != "" {
-		l.pos += Pos(len(m))
-		l.emit(itemList)
-	}
-	return lexText
-}
-
 // lexText scans until end-of-line(\n)
 // We have a lot of things to do in this lextext
 // for example: ignore itemBr on list/tables
@@ -461,26 +452,44 @@ func lexDefLink(l *lexer) stateFn {
 	return lexText
 }
 
+// lexList scans ordered and unordered lists.
+func lexList(l *lexer) stateFn {
+	// if m := block[itemList].FindString(l.input[l.pos:]); m != "" {
+	// 	l.pos += Pos(len(m))
+	// 	l.emit(itemList)
+	// }
+	// return lexText
+	i, txt := l.MatchList(l.input[l.pos:])
+	fmt.Println(i, txt, "END")
+	return lexText
+}
+
 func (l *lexer) MatchList(input string) (bool, string) {
-	var depth, pos int
-	var line string
+	var pos int
 	reItem := regexp.MustCompile(`^( *)(?:[*+-]|\d+\.) (.*)(?:\n|)`)
-	reLine := regexp.MustCompile(`^\n{2,}`)
-	if match := reItem.FindStringSubmatch(input); len(match) > 0 {
-		depth, pos = match[1], len(match[0])
+	reScan := regexp.MustCompile(`^(.*)(?:\n|)`)
+	reLine := regexp.MustCompile(`^\n{1,}`)
+	if m := reItem.FindString(input); m != "" {
+		pos = len(m)
 	} else {
 		return false, ""
 	}
-	for {
-		tmp := input[pos:]
-		if m := reLine.FindString(tmp); len(m) > 2 {
-			return true, input[:pos]
-		} else if len(m) == 2 {
-			pos += 2
-			tmp = input[pos:]
+	for pos < len(input) {
+		raw := input[pos:]
+		// \n\n\n.. break list
+		if m := reLine.FindString(raw); m != "" {
+			pos += len(m)
+			raw = input[pos:]
+			if len(m) >= 2 || !reItem.MatchString(raw) && !strings.HasPrefix(raw, " ") {
+				break
+			}
 		}
+		if block[itemDefLink].MatchString(raw) || block[itemHr].MatchString(raw) {
+			break
+		}
+		pos += len(reScan.FindString(raw))
 	}
-
+	return true, input[:pos]
 }
 
 // Test if the given input match blockquote
