@@ -274,7 +274,6 @@ type ListNode struct {
 	NodeType
 	Pos
 	Ordered bool
-	Depth   int
 	Items   []*ListItemNode
 }
 
@@ -294,8 +293,8 @@ func (n *ListNode) Render() (s string) {
 	return render(tag, s)
 }
 
-func (t *Tree) newList(pos Pos, depth int, ordered bool) *ListNode {
-	return &ListNode{NodeType: NodeList, Pos: pos, Ordered: ordered, Depth: depth}
+func (t *Tree) newList(pos Pos, ordered bool) *ListNode {
+	return &ListNode{NodeType: NodeList, Pos: pos, Ordered: ordered}
 }
 
 // ListItem represent single item in ListNode that may contains nested nodes.
@@ -303,7 +302,6 @@ type ListItemNode struct {
 	NodeType
 	Pos
 	Nodes []Node
-	List  *ListNode
 }
 
 func (t *ListItemNode) append(n Node) {
@@ -318,8 +316,8 @@ func (n *ListItemNode) Render() (s string) {
 	return render("li", s)
 }
 
-func (t *Tree) newListItem(pos Pos, list *ListNode) *ListItemNode {
-	return &ListItemNode{NodeType: NodeListItem, Pos: pos, List: list}
+func (t *Tree) newListItem(pos Pos) *ListItemNode {
+	return &ListItemNode{NodeType: NodeListItem, Pos: pos}
 }
 
 // TableNode represent table elment contains head and body
