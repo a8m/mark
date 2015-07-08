@@ -44,8 +44,7 @@ Loop:
 		case itemCodeBlock, itemGfmCodeBlock:
 			n = t.parseCodeBlock()
 		case itemList:
-			// 0 for the depth
-			n = t.parseList(0)
+			n = t.parseList()
 		case itemTable, itemLpTable:
 			n = t.parseTable()
 		case itemBlockQuote:
@@ -222,7 +221,7 @@ func (t *Tree) parseBlockQuote() (n *BlockQuoteNode) {
 	re := regexp.MustCompile(`(?m)^> ?`)
 	raw := re.ReplaceAllString(token.val, "")
 	// TODO(Ariel): not work right now with defLink(inside the blockQuote)
-	tr := &Tree{lex: lex(raw, raw)}
+	tr := &Tree{lex: lex(raw)}
 	tr.parse()
 	n = t.newBlockQuote(token.pos)
 	n.Nodes = tr.Nodes
@@ -230,86 +229,35 @@ func (t *Tree) parseBlockQuote() (n *BlockQuoteNode) {
 }
 
 // parse list
-func (t *Tree) parseList(depth int) *ListNode {
+func (t *Tree) parseList() *ListNode {
 	token := t.next()
-	list := t.newList(token.pos, depth, isDigit(token.val))
-	item := new(ListItemNode)
+	list := t.newList(token.pos, isDigit(token.val))
 Loop:
 	for {
 		switch token = t.peek(); token.typ {
-		case eof, itemError, itemNewLine:
-			break Loop
-		// It's actually a listItem
-		case itemList:
-			// List, but not the same type
-			if list.Ordered != isDigit(token.val) || depth > 0 {
-				break Loop
-			}
-			item = t.parseListItem(t.next().pos, list)
-		case itemIndent:
-			t.next()
-			if depth == len(token.val) {
-				item = t.parseListItem(t.next().pos, list)
-			} else {
-				t.backup()
-				break Loop
-			}
+		case itemLooseItem, itemListItem:
+			list.append(t.parseListItem())
 		default:
-			item = t.parseListItem(token.pos, list)
+			break Loop
 		}
-		list.append(item)
 	}
 	return list
 }
 
 // parse listItem
-func (t *Tree) parseListItem(pos Pos, list *ListNode) *ListItemNode {
-	item := t.newListItem(pos, list)
-	var n Node
-Loop:
-	for {
-		switch token := t.next(); token.typ {
-		case eof, itemError:
-			break Loop
-		case itemList:
-			t.backup()
-			break Loop
-		case itemNewLine:
-			switch typ := t.peek().typ; typ {
-			case itemNewLine, eof, itemError:
-				t.backup2(token)
-				break Loop
-			case itemList, itemIndent:
-				continue
-			default:
-				n = t.newLine(token.pos)
-			}
-		case itemIndent:
-			if t.peek().typ == itemList {
-				depth := len(token.val)
-				// If it's in the same depth - sibling
-				// or if it's less-than - exit
-				if depth <= item.List.Depth {
-					t.backup2(token)
-					break Loop
-				}
-				n = t.parseList(depth)
-			} else {
-				n = t.newText(token.pos, token.val)
-			}
-		case itemCodeBlock, itemGfmCodeBlock:
-			n = t.parseCodeBlock()
-		default:
-			// DRY
-			for _, n := range t.parseText(token.val) {
-				// TODO: Remove this condition
-				if n.Type() != NodeNewLine {
-					item.append(n)
-				}
-			}
-			continue
+// Add ignore list(e.g: table should parse as a text)
+func (t *Tree) parseListItem() *ListItemNode {
+	token := t.next()
+	item := t.newListItem(token.pos)
+	tr := &Tree{lex: lex(strings.TrimSpace(token.val))}
+	tr.parse()
+	for _, node := range tr.Nodes {
+		// wrap with paragraph only when it's loose item
+		if n, ok := node.(*ParagraphNode); ok && token.typ == itemListItem {
+			item.Nodes = append(item.Nodes, n.Nodes...)
+		} else {
+			item.append(node)
 		}
-		item.append(n)
 	}
 	return item
 }
