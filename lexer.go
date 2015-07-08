@@ -32,6 +32,7 @@ const (
 	itemLHeading // Setext-style headers
 	itemBlockQuote
 	itemList
+	itemLooseList
 	itemCodeBlock
 	itemGfmCodeBlock
 	itemHr
@@ -311,8 +312,11 @@ func (l *lexer) peek() rune {
 }
 
 // emit passes an item back to the client.
-func (l *lexer) emit(t itemType) {
-	l.items <- item{t, l.start, l.input[l.start:l.pos]}
+func (l *lexer) emit(t itemType, s ...string) {
+	if len(s) == 0 {
+		s = append(s, l.input[l.start:l.pos])
+	}
+	l.items <- item{t, l.start, s[0]}
 	l.start = l.pos
 }
 
@@ -454,42 +458,90 @@ func lexDefLink(l *lexer) stateFn {
 
 // lexList scans ordered and unordered lists.
 func lexList(l *lexer) stateFn {
-	// if m := block[itemList].FindString(l.input[l.pos:]); m != "" {
-	// 	l.pos += Pos(len(m))
-	// 	l.emit(itemList)
-	// }
-	// return lexText
-	i, txt := l.MatchList(l.input[l.pos:])
-	fmt.Println(i, txt, "END")
-	return lexText
-}
-
-func (l *lexer) MatchList(input string) (bool, string) {
-	var pos int
-	reItem := regexp.MustCompile(`^( *)(?:[*+-]|\d+\.) (.*)(?:\n|)`)
-	reScan := regexp.MustCompile(`^(.*)(?:\n|)`)
-	reLine := regexp.MustCompile(`^\n{1,}`)
-	if m := reItem.FindString(input); m != "" {
-		pos = len(m)
-	} else {
-		return false, ""
+	match, items := l.MatchList(l.input[l.pos:])
+	if !match {
+		return lexText
 	}
-	for pos < len(input) {
-		raw := input[pos:]
-		// \n\n\n.. break list
-		if m := reLine.FindString(raw); m != "" {
-			pos += len(m)
-			raw = input[pos:]
-			if len(m) >= 2 || !reItem.MatchString(raw) && !strings.HasPrefix(raw, " ") {
+	var space int
+	var loose bool
+	var typ itemType
+	reItem := regexp.MustCompile(`^ *([*+-]|\d+\.) +`)
+	reLoose := regexp.MustCompile(`(?m)\n\n(.*)`)
+	for i, item := range items {
+		// Initialize each loop
+		typ, loose = itemList, false
+		space = len(item)
+		l.pos += Pos(space)
+		item = reItem.ReplaceAllString(item, "")
+		// Indented
+		if strings.Contains(item, "\n ") {
+			space -= len(item)
+			reSpace := regexp.MustCompile(fmt.Sprintf("(?m)^ {1,%d}", space))
+			item = reSpace.ReplaceAllString(item, "")
+		}
+		// If current is loose
+		for _, l := range reLoose.FindAllString(item, -1) {
+			if len(strings.TrimSpace(l)) > 0 {
+				loose = true
 				break
 			}
 		}
-		if block[itemDefLink].MatchString(raw) || block[itemHr].MatchString(raw) {
+		// or previous
+		if !loose && i > 0 && strings.HasSuffix(items[i-1], "\n\n") {
+			loose = true
+		}
+		if loose {
+			typ = itemLooseList
+		}
+		l.emit(typ, item)
+	}
+	return lexAny
+}
+
+func (l *lexer) MatchList(input string) (bool, []string) {
+	var res []string
+	reItem := regexp.MustCompile(`^( *)(?:[*+-]|\d+\.) (.*)(?:\n|)`)
+	reScan := regexp.MustCompile(`^(.*)(?:\n|)`)
+	reLine := regexp.MustCompile(`^\n{1,}`)
+	if !reItem.MatchString(input) {
+		return false, res
+	}
+	// First item
+	m := reItem.FindStringSubmatch(input)
+	item, depth := m[0], len(m[1])
+	input = input[len(item):]
+	// Loop over the input
+	for len(input) > 0 {
+		// Count new-lines('\n')
+		if m := reLine.FindString(input); m != "" {
+			item += m
+			input = input[len(m):]
+			if len(m) >= 2 || !reItem.MatchString(input) && !strings.HasPrefix(input, " ") {
+				break
+			}
+		}
+		// DefLink or hr
+		if block[itemDefLink].MatchString(input) || block[itemHr].MatchString(input) {
 			break
 		}
-		pos += len(reScan.FindString(raw))
+		// It's list in the same depth
+		if m := reItem.FindStringSubmatch(input); len(m) > 0 && len(m[1]) == depth {
+			if item != "" {
+				res = append(res, item)
+			}
+			item = m[0]
+			input = input[len(item):]
+		} else {
+			m := reScan.FindString(input)
+			item += m
+			input = input[len(m):]
+		}
 	}
-	return true, input[:pos]
+	// Drain res
+	if item != "" {
+		res = append(res, item)
+	}
+	return true, res
 }
 
 // Test if the given input match blockquote
