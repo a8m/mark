@@ -32,7 +32,8 @@ const (
 	itemLHeading // Setext-style headers
 	itemBlockQuote
 	itemList
-	itemLooseList
+	itemListItem
+	itemLooseItem
 	itemCodeBlock
 	itemGfmCodeBlock
 	itemHr
@@ -102,7 +103,6 @@ type stateFn func(*lexer) stateFn
 
 // lexer holds the state of the scanner.
 type lexer struct {
-	name    string    // the name of the input; used only for error reports
 	input   string    // the string being scanned
 	state   stateFn   // the next lexing function to enter
 	pos     Pos       // current position in the input
@@ -114,9 +114,8 @@ type lexer struct {
 }
 
 // lex creates a new lexer for the input string.
-func lex(name, input string) *lexer {
+func lex(input string) *lexer {
 	l := &lexer{
-		name:  name,
 		input: input,
 		items: make(chan item),
 	}
@@ -457,6 +456,7 @@ func lexDefLink(l *lexer) stateFn {
 }
 
 // lexList scans ordered and unordered lists.
+// TODO: DRY loose variable
 func lexList(l *lexer) stateFn {
 	match, items := l.MatchList(l.input[l.pos:])
 	if !match {
@@ -468,8 +468,12 @@ func lexList(l *lexer) stateFn {
 	reItem := regexp.MustCompile(`^ *([*+-]|\d+\.) +`)
 	reLoose := regexp.MustCompile(`(?m)\n\n(.*)`)
 	for i, item := range items {
+		// Emit itemList on the first loop
+		if i == 0 {
+			l.emit(itemList, reItem.FindStringSubmatch(item)[1])
+		}
 		// Initialize each loop
-		typ, loose = itemList, false
+		typ, loose = itemListItem, false
 		space = len(item)
 		l.pos += Pos(space)
 		item = reItem.ReplaceAllString(item, "")
@@ -481,7 +485,7 @@ func lexList(l *lexer) stateFn {
 		}
 		// If current is loose
 		for _, l := range reLoose.FindAllString(item, -1) {
-			if len(strings.TrimSpace(l)) > 0 {
+			if len(strings.TrimSpace(l)) > 0 || i != len(l)-1 {
 				loose = true
 				break
 			}
@@ -491,7 +495,7 @@ func lexList(l *lexer) stateFn {
 			loose = true
 		}
 		if loose {
-			typ = itemLooseList
+			typ = itemLooseItem
 		}
 		l.emit(typ, item)
 	}
