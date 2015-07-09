@@ -456,14 +456,12 @@ func lexDefLink(l *lexer) stateFn {
 }
 
 // lexList scans ordered and unordered lists.
-// TODO: DRY loose variable
 func lexList(l *lexer) stateFn {
 	match, items := l.MatchList(l.input[l.pos:])
 	if !match {
 		return lexText
 	}
 	var space int
-	var loose bool
 	var typ itemType
 	reItem := regexp.MustCompile(`^ *([*+-]|\d+\.) +`)
 	reLoose := regexp.MustCompile(`(?m)\n\n(.*)`)
@@ -473,7 +471,7 @@ func lexList(l *lexer) stateFn {
 			l.emit(itemList, reItem.FindStringSubmatch(item)[1])
 		}
 		// Initialize each loop
-		typ, loose = itemListItem, false
+		typ = itemListItem
 		space = len(item)
 		l.pos += Pos(space)
 		item = reItem.ReplaceAllString(item, "")
@@ -486,15 +484,12 @@ func lexList(l *lexer) stateFn {
 		// If current is loose
 		for _, l := range reLoose.FindAllString(item, -1) {
 			if len(strings.TrimSpace(l)) > 0 || i != len(items)-1 {
-				loose = true
+				typ = itemLooseItem
 				break
 			}
 		}
 		// or previous
-		if !loose && i > 0 && strings.HasSuffix(items[i-1], "\n\n") {
-			loose = true
-		}
-		if loose {
+		if typ != itemLooseItem && i > 0 && strings.HasSuffix(items[i-1], "\n\n") {
 			typ = itemLooseItem
 		}
 		l.emit(typ, item)
