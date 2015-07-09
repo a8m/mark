@@ -429,8 +429,8 @@ func (l *lexer) MatchHtml(input string) (bool, string) {
 		if reSpan.MatchString(name) {
 			return false, ""
 		}
-		// if it's a self-closed html element
-		if strings.HasSuffix(el, "/>") {
+		// if it's a self-closed html element, but not a itemAutoLink
+		if strings.HasSuffix(el, "/>") && !span[itemAutoLink].MatchString(el) {
 			return true, el
 		}
 		reStr := fmt.Sprintf(`(?s)(.)+?<\/%s> *(?:\n{2,}|\s*$)`, name)
@@ -485,7 +485,7 @@ func lexList(l *lexer) stateFn {
 		}
 		// If current is loose
 		for _, l := range reLoose.FindAllString(item, -1) {
-			if len(strings.TrimSpace(l)) > 0 || i != len(l)-1 {
+			if len(strings.TrimSpace(l)) > 0 || i != len(items)-1 {
 				loose = true
 				break
 			}
