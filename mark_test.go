@@ -69,8 +69,8 @@ func TestRender(t *testing.T) {
 		"+ foo\n+ bar": "<ul><li>foo</li><li>bar</li></ul>",
 		// Ordered Lists
 		"1. one\n2. two\n3. three": "<ol><li>one</li><li>two</li><li>three</li></ol>",
-		"1. one\n 1. one of one":   "<ol><li>one<ol><li>one of one</li></ol></li></ol>",
-		"2. two\n 3. three":        "<ol><li>two<ol><li>three</li></ol></li></ol>",
+		"1. one\n 1. one of one":   "<ol><li>one\n<ol><li>one of one</li></ol></li></ol>",
+		"2. two\n 3. three":        "<ol><li>two\n<ol><li>three</li></ol></li></ol>",
 		// Tables
 	}
 	for actual, expected := range cases {
