@@ -1,0 +1,21 @@
+Loose list:
+
+- foo
+
+- foo
+
+* foo
+
+
+1. hello
+
+2. world
+
+4. buddy
+
+
+* should work
+  - in nested
+
+  - haha, yap!
+* not loose
