@@ -72,8 +72,10 @@ var block = map[itemType]*regexp.Regexp{
 	itemCodeBlock: regexp.MustCompile(`^(( {4}|\t)[^-+*(\d\.)\n]+\n*)+`),
 	// Backreferences is unavailable
 	itemGfmCodeBlock: regexp.MustCompile(fmt.Sprintf(reGfmCode, "`") + "|" + fmt.Sprintf(reGfmCode, "~")),
-	// `^(?:[*+-]|\d+\.) [\s\S]+?(?:\n|)`
-	itemList: regexp.MustCompile(`^(?:[*+-]|\d+\.) +?(?:\n|)`),
+	// itemListRegexp it's actually similar to item, but scan whole line
+	itemList:      regexp.MustCompile(`^( *)(?:[*+-]|\d+\.) (.*)(?:\n|)`),
+	itemListItem:  regexp.MustCompile(`^ *([*+-]|\d+\.) +`),
+	itemLooseItem: regexp.MustCompile(`(?m)\n\n(.*)`),
 	// leading-pipe table
 	itemLpTable:    regexp.MustCompile(`^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*`),
 	itemTable:      regexp.MustCompile(`^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*`),
@@ -85,10 +87,8 @@ var span = map[itemType]*regexp.Regexp{
 	itemItalic: regexp.MustCompile(fmt.Sprintf(reEmphasise, 1)),
 	itemStrong: regexp.MustCompile(fmt.Sprintf(reEmphasise, 2)),
 	itemStrike: regexp.MustCompile(`(?s)^~{2}(.+?)~{2}`),
-	// itemMixed(e.g: ***str***, ~~*str*~~) will be part of the parser
-	// or we'll lex recuresively
-	itemCode: regexp.MustCompile("(?s)^`{1,2}\\s*(.*?[^`])\\s*`{1,2}"),
-	itemBr:   regexp.MustCompile(`^ {2,}\n`),
+	itemCode:   regexp.MustCompile("(?s)^`{1,2}\\s*(.*?[^`])\\s*`{1,2}"),
+	itemBr:     regexp.MustCompile(`^ {2,}\n`),
 	// Links
 	itemLink:     regexp.MustCompile(fmt.Sprintf(`^!?\[(%s)\]\(%s\)`, reLinkText, reLinkHref)),
 	itemAutoLink: regexp.MustCompile(`^<([^ >]+(@|:\/)[^ >]+)>`),
@@ -404,7 +404,7 @@ Loop:
 	close(l.items)
 }
 
-// lexList scans ordered and unordered lists.
+// lexHtml.
 func lexHtml(l *lexer) stateFn {
 	if match, res := l.MatchHtml(l.input[l.pos:]); match {
 		l.pos += Pos(len(res))
@@ -463,8 +463,8 @@ func lexList(l *lexer) stateFn {
 	}
 	var space int
 	var typ itemType
-	reItem := regexp.MustCompile(`^ *([*+-]|\d+\.) +`)
-	reLoose := regexp.MustCompile(`(?m)\n\n(.*)`)
+	reItem := block[itemListItem]
+	reLoose := block[itemLooseItem]
 	for i, item := range items {
 		// Emit itemList on the first loop
 		if i == 0 {
@@ -478,7 +478,7 @@ func lexList(l *lexer) stateFn {
 		// Indented
 		if strings.Contains(item, "\n ") {
 			space -= len(item)
-			reSpace := regexp.MustCompile(fmt.Sprintf("(?m)^ {1,%d}", space))
+			reSpace := regexp.MustCompile(fmt.Sprintf(`(?m)^ {1,%d}`, space))
 			item = reSpace.ReplaceAllString(item, "")
 		}
 		// If current is loose
@@ -499,7 +499,7 @@ func lexList(l *lexer) stateFn {
 
 func (l *lexer) MatchList(input string) (bool, []string) {
 	var res []string
-	reItem := regexp.MustCompile(`^( *)(?:[*+-]|\d+\.) (.*)(?:\n|)`)
+	reItem := block[itemList]
 	reScan := regexp.MustCompile(`^(.*)(?:\n|)`)
 	reLine := regexp.MustCompile(`^\n{1,}`)
 	if !reItem.MatchString(input) {
