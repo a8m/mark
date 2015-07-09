@@ -1,16 +1,16 @@
 Unordered lists:
 - foo
-  - bar
-- baz
+  - foo
+- foo
 
 
-* foo
 * bar
-  * baz
+* bar
+  * bar
 
 
-+ foo
-  + bar
++ baz
+  + baz
     + baz
 
 
