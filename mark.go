@@ -8,7 +8,7 @@ func Render(text string) string {
 	// 1. Replace all tabs with 4-spaces
 	text = strings.Replace(text, "\t", "    ", -1)
 	// TODO: Use/ot remove name option
-	t := &Tree{lex: lex(text, text), links: map[string]*DefLinkNode{}}
+	t := &Tree{lex: lex(text), links: map[string]*DefLinkNode{}}
 	t.parse()
 	// PostProcessing
 	// 1. HTML escaping(<, >, ...)
