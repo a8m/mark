@@ -69,7 +69,7 @@ var block = map[itemType]*regexp.Regexp{
 	itemHeading:   regexp.MustCompile(`^ *(#{1,6}) +([^\n]+?) *#* *(?:\n+|$)`),
 	itemLHeading:  regexp.MustCompile(`^([^\n]+)\n *(=|-){2,} *(?:\n+|$)`),
 	itemHr:        regexp.MustCompile(`^( *[-*_]){3,} *(?:\n+|$)`),
-	itemCodeBlock: regexp.MustCompile(`^(( {4}|\t)[^-+*(\d\.)\n]+\n*)+`),
+	itemCodeBlock: regexp.MustCompile(`^( {4}[^\n]+\n*)+`),
 	// Backreferences is unavailable
 	itemGfmCodeBlock: regexp.MustCompile(fmt.Sprintf(reGfmCode, "`") + "|" + fmt.Sprintf(reGfmCode, "~")),
 	// itemListRegexp it's actually similar to item, but scan whole line
@@ -176,7 +176,7 @@ func lexAny(l *lexer) stateFn {
 		return lexDefLink
 	case '#':
 		return lexHeading
-	case ' ', '\t':
+	case ' ':
 		// Should be here ?
 		// TODO(Ariel): test that it's a codeBlock and not list for sure
 		if block[itemCodeBlock].MatchString(l.input[l.pos:]) {
