@@ -210,7 +210,7 @@ func (t *Tree) parseCodeBlock() *CodeNode {
 			lang = match[3]
 		}
 	} else {
-		text = regexp.MustCompile("(?m)( {4}|\t)").ReplaceAllLiteralString(token.val, "")
+		text = regexp.MustCompile("(?m)^( {4})").ReplaceAllLiteralString(token.val, "")
 	}
 	return t.newCode(token.pos, lang, text)
 }
