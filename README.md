@@ -7,13 +7,9 @@
 5. refLink will bind to defLink in the rendering phase
 
 - Blocks
-2. list - (with blocks.. code block... tables..)!
- - break after 3-newlines(\n)
- - one or more indentation make it nested
 3. table(refactor parser)
 4. code should be indent with tabs too.(fix with preprocessing)
 5. blockqoute(ignore defLink)
-6. list - loose-item
 
 - Misc
 1. Escaping regex in lexer.go
@@ -30,16 +26,5 @@ add ignore-list, for example ignore `br` to parseInline(for example chage `br` t
 create itemPipe and use it in the lexical phase ? or deal with it in the parseTable ?
 
 
-Bugs
-----
-1. codeBlock as hr
-`Dash
-
----
-
-   ---
-
-	    ---
- `
 
 
