@@ -33,6 +33,9 @@ Loop:
 			n = t.newBr(t.next().pos)
 		case itemHr:
 			n = t.newHr(t.next().pos)
+		case itemHTML:
+			p = t.next()
+			n = t.newHTML(p.pos, p.val)
 		case itemText:
 			tmp := t.newParagraph(p.pos)
 			tmp.Nodes = t.parseText(t.next().val)
