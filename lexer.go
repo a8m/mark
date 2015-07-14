@@ -80,6 +80,7 @@ var block = map[itemType]*regexp.Regexp{
 	itemLpTable:    regexp.MustCompile(`^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*`),
 	itemTable:      regexp.MustCompile(`^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*`),
 	itemBlockQuote: regexp.MustCompile(`^( *>[^\n]+(\n[^\n]+)*\n*)+`),
+	itemHTML:       regexp.MustCompile(`^<(\w+)(?:"[^"]*"|'[^']*'|[^'">])*?>`),
 }
 
 // Inline Grammer
@@ -420,7 +421,7 @@ func (l *lexer) MatchHtml(input string) (bool, string) {
 	if m := comment.FindString(input); m != "" {
 		return true, m
 	}
-	reStart := regexp.MustCompile(`^<(\w+)(?:"[^"]*"|'[^']*'|[^'">])*?>`)
+	reStart := block[itemHTML]
 	// TODO: Add all span-tags and move to config.
 	reSpan := regexp.MustCompile(`^(a|em|strong|small|s|q|data|time|code|sub|sup|i|b|u|span|br|del|img)$`)
 	if m := reStart.FindStringSubmatch(input); len(m) != 0 {
