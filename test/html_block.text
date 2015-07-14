@@ -1,0 +1,9 @@
+<span>foo</span>bar
+
+<div>
+  hello bar
+</div>
+
+<directive src="foo.img"/>
+
+hello <i>world</i>
