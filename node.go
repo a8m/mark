@@ -83,6 +83,22 @@ func (t *Tree) newText(pos Pos, text string) *TextNode {
 	return &TextNode{NodeType: NodeText, Pos: pos, Text: []byte(text)}
 }
 
+// HTMLNode holds html source.
+type HTMLNode struct {
+	NodeType
+	Pos
+	Src []byte
+}
+
+// Render return the src of the HTMLNode
+func (n *HTMLNode) Render() string {
+	return string(n.Src)
+}
+
+func (t *Tree) newHTML(pos Pos, src string) *HTMLNode {
+	return &HTMLNode{NodeType: NodeHTML, Pos: pos, Src: []byte(src)}
+}
+
 // NewLineNode represent simple `\n`.
 type NewLineNode struct {
 	NodeType
