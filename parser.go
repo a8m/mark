@@ -9,8 +9,8 @@ import (
 )
 
 type Tree struct {
-	text  string
 	lex   *lexer
+	tr    *Tree
 	Nodes []Node
 	// Parsing only
 	token     [3]item // three-token lookahead for parser
@@ -59,6 +59,14 @@ Loop:
 			t.append(n)
 		}
 	}
+}
+
+// Root getter
+func (t *Tree) root() *Tree {
+	if t.tr == nil {
+		return t
+	}
+	return t.tr.root()
 }
 
 // Render parse nodes to the wanted output
@@ -150,6 +158,9 @@ func (t *Tree) parseText(input string) (nodes []Node) {
 		case itemImage:
 			match := span[token.typ].FindStringSubmatch(token.val)
 			node = t.newImage(token.pos, match[3], match[2], match[1])
+		case itemRefLink, itemRefImage:
+			match := span[itemRefLink].FindStringSubmatch(token.val)
+			node = t.newRef(token.typ, token.pos, token.val, match[1], match[2])
 		case itemText:
 			node = t.newText(token.pos, token.val)
 		default:
