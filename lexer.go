@@ -26,7 +26,6 @@ const (
 	itemError itemType = iota // Error occurred; value is text of error
 	itemNewLine
 	itemHTML
-	itemDefLink
 	// Block Elements
 	itemHeading
 	itemLHeading // Setext-style headers
@@ -42,13 +41,18 @@ const (
 	// Span Elements
 	itemText
 	itemLink
+	// Links
+	itemDefLink
+	itemRefLink
 	itemAutoLink
 	itemGfmLink
+	// Emphasis
 	itemStrong
 	itemItalic
 	itemStrike
 	itemCode
 	itemImage
+	itemRefImage
 	itemBr
 	itemPipe
 	// Indentation
@@ -92,6 +96,7 @@ var span = map[itemType]*regexp.Regexp{
 	itemBr:     regexp.MustCompile(`^ {2,}\n`),
 	// Links
 	itemLink:     regexp.MustCompile(fmt.Sprintf(`^!?\[(%s)\]\(%s\)`, reLinkText, reLinkHref)),
+	itemRefLink:  regexp.MustCompile(`^!?\[((?:\[[^\]]*\]|[^\[\]]|\])*)\](?:\s*\[([^\]]*)\])?`),
 	itemAutoLink: regexp.MustCompile(`^<([^ >]+(@|:\/)[^ >]+)>`),
 	itemGfmLink:  regexp.MustCompile(`^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])`),
 	// Image
@@ -376,7 +381,7 @@ Loop:
 				break
 			}
 			l.next()
-		// itemLink, itemAutoLink, itemImage
+		// itemLink, itemAutoLink, itemImage, itemRefLink, itemRefImage
 		case r == '[', r == '<', r == '!':
 			input := l.input[l.pos:]
 			if m := span[itemLink].FindString(input); m != "" {
@@ -385,6 +390,15 @@ Loop:
 					emit(itemLink, pos)
 				} else {
 					emit(itemImage, pos)
+				}
+				break
+			}
+			if m := span[itemRefLink].FindString(input); m != "" {
+				pos := Pos(len(m))
+				if r == '[' {
+					emit(itemRefLink, pos)
+				} else {
+					emit(itemRefImage, pos)
 				}
 				break
 			}
