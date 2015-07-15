@@ -11,17 +11,17 @@ import (
 func TestRender(t *testing.T) {
 	expect := expect.New(t)
 	cases := map[string]string{
-		"foobar":                "<p>foobar</p>",
-		"foo|bar":               "<p>foo|bar</p>",
-		"foo  \nbar":            "<p>foo<br>bar</p>",
-		"__bar__ foo":           "<p><strong>bar</strong> foo</p>",
-		"**bar** foo __bar__":   "<p><strong>bar</strong> foo <strong>bar</strong></p>",
-		"**bar**__baz__":        "<p><strong>bar</strong><strong>baz</strong></p>",
-		"**bar**foo__bar__":     "<p><strong>bar</strong>foo<strong>bar</strong></p>",
-		"_bar_baz":              "<p><em>bar</em>baz</p>",
-		"_foo_~~bar~~ baz":      "<p><em>foo</em><del>bar</del> baz</p>",
-		"~~baz~~ _baz_":         "<p><del>baz</del> <em>baz</em></p>",
-		"`bool` and that's it.": "<p><code>bool</code> and that's it.</p>",
+		"foobar":               "<p>foobar</p>",
+		"foo|bar":              "<p>foo|bar</p>",
+		"foo  \nbar":           "<p>foo<br>bar</p>",
+		"__bar__ foo":          "<p><strong>bar</strong> foo</p>",
+		"**bar** foo __bar__":  "<p><strong>bar</strong> foo <strong>bar</strong></p>",
+		"**bar**__baz__":       "<p><strong>bar</strong><strong>baz</strong></p>",
+		"**bar**foo__bar__":    "<p><strong>bar</strong>foo<strong>bar</strong></p>",
+		"_bar_baz":             "<p><em>bar</em>baz</p>",
+		"_foo_~~bar~~ baz":     "<p><em>foo</em><del>bar</del> baz</p>",
+		"~~baz~~ _baz_":        "<p><del>baz</del> <em>baz</em></p>",
+		"`bool` and thats it.": "<p><code>bool</code> and thats it.</p>",
 		// Emphasis mixim
 		"___foo___":       "<p><strong><em>foo</em></strong></p>",
 		"__foo _bar___":   "<p><strong>foo <em>bar</em></strong></p>",
@@ -48,7 +48,7 @@ func TestRender(t *testing.T) {
 		"Link: http://yeah.com":  "<p>Link: <a href=\"http://yeah.com\">http://yeah.com</a></p>",
 		"<http://foo.com>":       "<p><a href=\"http://foo.com\">http://foo.com</a></p>",
 		"Link: <http://l.co>":    "<p>Link: <a href=\"http://l.co\">http://l.co</a></p>",
-		"Link: <not really":      "<p>Link: <not really</p>",
+		"Link: <not really":      "<p>Link: &lt;not really</p>",
 		// CodeBlock
 		"\tfoo\n\tbar": "<pre><code>foo\nbar</code></pre>",
 		"\tfoo\nbar":   "<pre><code>foo\n</code></pre><p>bar</p>",
