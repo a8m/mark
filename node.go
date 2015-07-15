@@ -78,7 +78,7 @@ type TextNode struct {
 
 // Render return the string representation of TexNode
 func (n *TextNode) Render() string {
-	return string(n.Text)
+	return escape(string(n.Text))
 }
 
 func (t *Tree) newText(pos Pos, text string) *TextNode {
@@ -527,4 +527,37 @@ func (t *Tree) newBlockQuote(pos Pos) *BlockQuoteNode {
 // Wrap text with specific tag.
 func render(tag, body string) string {
 	return fmt.Sprintf("<%[1]s>%s</%[1]s>", tag, body)
+}
+
+// helper escaper
+func escape(str string) (cpy string) {
+	tag := regexp.MustCompile(`^<!--.*?-->|^<\/?\w+(?:"[^"]*"|'[^']*'|[^'">])*?>`)
+	emp := regexp.MustCompile(`&\w+;`)
+	for i := 0; i < len(str); i++ {
+		switch s := str[i]; s {
+		case '>':
+			cpy += "&gt;"
+		case '"':
+			cpy += "&quot;"
+		case '\'':
+			cpy += "&#39;"
+		case '<':
+			if res := tag.FindString(str[i:]); res != "" {
+				cpy += res
+				i += len(res) - 1
+			} else {
+				cpy += "&lt;"
+			}
+		case '&':
+			if res := emp.FindString(str[i:]); res != "" {
+				cpy += res
+				i += len(res) - 1
+			} else {
+				cpy += "&amp;"
+			}
+		default:
+			cpy += string(s)
+		}
+	}
+	return
 }
