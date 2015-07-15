@@ -84,7 +84,7 @@ var block = map[itemType]*regexp.Regexp{
 	itemLpTable:    regexp.MustCompile(`^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*`),
 	itemTable:      regexp.MustCompile(`^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*`),
 	itemBlockQuote: regexp.MustCompile(`^( *>[^\n]+(\n[^\n]+)*\n*)+`),
-	itemHTML:       regexp.MustCompile(`^<(\w+)(?:"[^"]*"|'[^']*'|[^'">])*?>`),
+	itemHTML:       regexp.MustCompile(`<!--.*?-->|^<(\w+)(?:"[^"]*"|'[^']*'|[^'">])*?>`),
 }
 
 // Inline Grammer
@@ -431,6 +431,7 @@ func lexHtml(l *lexer) stateFn {
 
 // Test if the given input is match the HTML pattern(blocks only)
 func (l *lexer) MatchHtml(input string) (bool, string) {
+	// TODO: DRY regexp - multiline comment
 	comment := regexp.MustCompile(`(?s)<!--.*?-->`)
 	if m := comment.FindString(input); m != "" {
 		return true, m
