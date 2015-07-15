@@ -31,10 +31,12 @@ const (
 	NodeBr
 	NodeHr
 	NodeImage
+	NodeRefImage
 	NodeList
 	NodeListItem
 	NodeCode // Code block.
 	NodeLink
+	NodeRefLink
 	NodeDefLink
 	NodeTable
 	NodeRow
@@ -246,6 +248,44 @@ func (n *LinkNode) Render() string {
 
 func (t *Tree) newLink(pos Pos, title, href, text string) *LinkNode {
 	return &LinkNode{NodeType: NodeLink, Pos: pos, Title: title, Href: href, Text: []byte(text)}
+}
+
+// RefLink holds link with refrence to link definition
+type RefNode struct {
+	NodeType
+	Pos
+	tr             *Tree
+	Text, Ref, Raw string
+}
+
+// rendering based type
+// TODO: Text should be TextNode(with escaping etc..)
+func (n *RefNode) Render() string {
+	var node Node
+	ref := strings.ToLower(n.Ref)
+	if l, ok := n.tr.links[ref]; ok {
+		if n.Type() == NodeRefLink {
+			node = n.tr.newLink(n.Pos, l.Title, l.Href, n.Text)
+		} else {
+			node = n.tr.newImage(n.Pos, l.Title, l.Href, n.Text)
+		}
+	} else {
+		node = n.tr.newText(n.Pos, n.Raw)
+	}
+	return node.Render()
+}
+
+// create newReferenceNode(Image/Link)
+func (t *Tree) newRef(typ itemType, pos Pos, raw, text, ref string) *RefNode {
+	nType := NodeRefLink
+	if typ == itemRefImage {
+		nType = NodeRefImage
+	}
+	// If it's implicit link
+	if ref == "" {
+		ref = text
+	}
+	return &RefNode{NodeType: nType, Pos: pos, tr: t.root(), Raw: raw, Text: text, Ref: ref}
 }
 
 // DefLinkNode refresent single reference to link-definition
