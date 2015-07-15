@@ -1,0 +1,53 @@
+Foo [bar] [1].
+
+Foo [bar][1].
+
+Foo [bar]
+[1].
+
+[1]: /url/  "Title"
+
+
+With [embedded [brackets]] [b].
+
+
+Indented [once][].
+
+Indented [twice][].
+
+Indented [thrice][].
+
+Indented [four][] times.
+
+ [once]: /url
+
+  [twice]: /url
+
+   [thrice]: /url
+
+    [four]: /url
+
+
+[b]: /url/
+
+***
+
+[this] [this] should work
+
+So should [this][this].
+
+And [this] [].
+
+And [this][].
+
+And [this].
+
+But not [that] [].
+
+Nor [that][].
+
+Nor [that].
+
+In this case, [this](/somethingelse/) points to something else.
+
+[this]: foo
