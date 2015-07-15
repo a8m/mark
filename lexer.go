@@ -84,7 +84,7 @@ var block = map[itemType]*regexp.Regexp{
 	itemLpTable:    regexp.MustCompile(`^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*`),
 	itemTable:      regexp.MustCompile(`^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*`),
 	itemBlockQuote: regexp.MustCompile(`^( *>[^\n]+(\n[^\n]+)*\n*)+`),
-	itemHTML:       regexp.MustCompile(`<!--.*?-->|^<(\w+)(?:"[^"]*"|'[^']*'|[^'">])*?>`),
+	itemHTML:       regexp.MustCompile(`^<(\w+)(?:"[^"]*"|'[^']*'|[^'">])*?>`),
 }
 
 // Inline Grammer
