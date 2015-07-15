@@ -164,15 +164,9 @@ func lexAny(l *lexer) stateFn {
 	switch r := l.peek(); r {
 	case eof:
 		return nil
-	case '*', '-', '_', '+':
-		l.next()
-		if p := l.peek(); p == '*' || p == '-' || p == '_' {
-			l.backup()
-			return lexHr
-		}
-		l.backup()
-		return lexList
-	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+	case '*', '-', '_':
+		return lexHr
+	case '+', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 		return lexList
 	case '<':
 		return lexHtml
@@ -242,7 +236,7 @@ func lexHr(l *lexer) stateFn {
 		l.emit(itemHr)
 		return lexAny
 	}
-	return lexText
+	return lexList
 }
 
 // lexGfmCode scans GFM code block.
