@@ -162,8 +162,6 @@ func (l *lexer) next() rune {
 // lexAny scans non-space items.
 func lexAny(l *lexer) stateFn {
 	switch r := l.peek(); r {
-	case eof:
-		return nil
 	case '*', '-', '_':
 		return lexHr
 	case '+', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
