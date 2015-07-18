@@ -501,7 +501,7 @@ func lexList(l *lexer) stateFn {
 		if typ != itemLooseItem && i > 0 && strings.HasSuffix(items[i-1], "\n\n") {
 			typ = itemLooseItem
 		}
-		l.emit(typ, item)
+		l.emit(typ, strings.TrimSpace(item))
 	}
 	return lexAny
 }
