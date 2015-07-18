@@ -53,7 +53,11 @@ type lexTest struct {
 }
 
 var (
-	tEOF = item{itemEOF, 0, ""}
+	tEOF     = item{itemEOF, 0, ""}
+	tTable   = item{itemTable, 0, ""}
+	tLpTable = item{itemLpTable, 0, ""}
+	tPipe    = item{itemPipe, 0, "|"}
+	tNewLine = item{itemNewLine, 0, "\n"}
 )
 
 var lexTests = []lexTest{
@@ -92,8 +96,63 @@ var lexTests = []lexTest{
 		{itemCodeBlock, 0, "    foo\n    bar"},
 		tEOF,
 	}},
-	{"gfm-code-block", "~~~js\nfoo\n~~~", []item{
+	{"gfm-code-block-1", "~~~js\nfoo\n~~~", []item{
 		{itemGfmCodeBlock, 0, "~~~js\nfoo\n~~~"},
+		tEOF,
+	}},
+	{"gfm-code-block-2", "```js\nfoo\n```", []item{
+		{itemGfmCodeBlock, 0, "```js\nfoo\n```"},
+		tEOF,
+	}},
+	{"hr1", "* * *\n***", []item{
+		{itemHr, 0, "* * *\n"},
+		{itemHr, 0, "***"},
+		tEOF,
+	}},
+	{"hr2", "- - -\n---", []item{
+		{itemHr, 0, "- - -\n"},
+		{itemHr, 0, "---"},
+		tEOF,
+	}},
+	{"hr3", "_ _ _\n___", []item{
+		{itemHr, 0, "_ _ _\n"},
+		{itemHr, 0, "___"},
+		tEOF,
+	}},
+	{"table", "Id | Name\n---|-----\n1 | Ariel", []item{
+		tTable,
+		{itemText, 0, "Id "},
+		tPipe,
+		{itemText, 0, " Name"},
+		tNewLine,
+		{itemText, 0, "---"},
+		tPipe,
+		{itemText, 0, "-----"},
+		tNewLine,
+		{itemText, 0, "1 "},
+		tPipe,
+		{itemText, 0, " Ariel"},
+		tEOF,
+	}},
+	{"lp-table", "|Id | Name|\n|---|-----|\n|1 | Ariel|", []item{
+		tLpTable,
+		tPipe,
+		{itemText, 0, "Id "},
+		tPipe,
+		{itemText, 0, " Name"},
+		tPipe,
+		tNewLine,
+		tPipe,
+		{itemText, 0, "---"},
+		tPipe,
+		{itemText, 0, "-----"},
+		tPipe,
+		tNewLine,
+		tPipe,
+		{itemText, 0, "1 "},
+		tPipe,
+		{itemText, 0, " Ariel"},
+		tPipe,
 		tEOF,
 	}},
 }
