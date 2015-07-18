@@ -6,8 +6,8 @@ import (
 )
 
 var itemName = map[itemType]string{
-	eof:              "EOF",
 	itemError:        "Error",
+	itemEOF:          "EOF",
 	itemNewLine:      "NewLine",
 	itemHTML:         "HTML",
 	itemHeading:      "Heading",
@@ -52,13 +52,41 @@ type lexTest struct {
 	items []item
 }
 
+var (
+	tEOF = item{itemEOF, 0, ""}
+)
+
 var lexTests = []lexTest{
-	{"empty", "", []item{
-		{eof, 0, ""},
-	}},
+	{"empty", "", []item{tEOF}},
 	{"heading", "# Hello", []item{
 		{itemHeading, 0, "# Hello"},
-		{eof, 0, ""},
+		tEOF,
+	}},
+	{"lheading", "Hello\n===", []item{
+		{itemLHeading, 0, "Hello\n==="},
+		tEOF,
+	}},
+	{"blockqoute", "> foo bar", []item{
+		{itemBlockQuote, 0, "> foo bar"},
+		tEOF,
+	}},
+	{"unordered list", "- foo\n- bar", []item{
+		{itemList, 0, "-"},
+		{itemListItem, 0, "foo"},
+		{itemListItem, 0, "bar"},
+		tEOF,
+	}},
+	{"ordered list", "1. foo\n2. bar", []item{
+		{itemList, 0, "1."},
+		{itemListItem, 0, "foo"},
+		{itemListItem, 0, "bar"},
+		tEOF,
+	}},
+	{"loose-items", "- foo\n\n- bar", []item{
+		{itemList, 0, "-"},
+		{itemLooseItem, 0, "foo"},
+		{itemLooseItem, 0, "bar"},
+		tEOF,
 	}},
 }
 
@@ -68,7 +96,7 @@ func collect(t *lexTest) (items []item) {
 	for {
 		item := l.nextItem()
 		items = append(items, item)
-		if item.typ == eof || item.typ == itemError {
+		if item.typ == itemEOF || item.typ == itemError {
 			break
 		}
 	}
