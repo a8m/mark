@@ -25,7 +25,7 @@ Loop:
 	for {
 		var n Node
 		switch p := t.peek(); p.typ {
-		case eof, itemError:
+		case itemEOF, itemError:
 			break Loop
 		case itemNewLine:
 			n = t.newLine(t.next().pos)
@@ -298,7 +298,7 @@ func (t *Tree) parseTable() *TableNode {
 Loop:
 	for i := 0; ; {
 		switch token := t.next(); token.typ {
-		case eof, itemError:
+		case itemEOF, itemError:
 			break Loop
 		case itemNewLine:
 			// If we done with this table

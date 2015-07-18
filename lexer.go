@@ -24,6 +24,7 @@ const eof = -1 // Zero value so closed channel delivers EOF
 
 const (
 	itemError itemType = iota // Error occurred; value is text of error
+	itemEOF
 	itemNewLine
 	itemHTML
 	// Block Elements
@@ -273,7 +274,7 @@ Loop:
 	for {
 		switch r := l.peek(); {
 		case r == eof:
-			emit(eof, Pos(0))
+			emit(itemEOF, Pos(0))
 			break Loop
 		case r == '\n':
 			emit(itemNewLine, l.width)
