@@ -1,87 +1,103 @@
 package mark
 
 import (
-	fmt "github.com/k0kubun/pp"
-	"strings"
+	"fmt"
 	"testing"
 )
 
-var tokenNames = map[itemType]string{
-	-1: "itemEOF",
-	0:  "itemError",
-	1:  "itemNewLine",
-	2:  "itemHTML",
-	3:  "itemText",
-	4:  "itemLineBreak",
-	5:  "itemHeading",
-	6:  "itemLHeading",
-	7:  "itemBlockQuote",
-	8:  "itemList",
-	9:  "itemCodeBlock",
-	10: "itemGfmCodeBlock",
-	11: "itemHr",
-	12: "itemTable",
-	13: "itemLpTable",
-	14: "itemLink",
-	15: "itemAutoLink",
-	16: "itemGfmLink",
-	17: "itemStrong",
-	18: "itemItalic",
-	19: "itemStrike",
-	20: "itemCode",
-	21: "itemImage",
-	22: "itemBr",
-	23: "itemPipe",
-	24: "itemIndent",
+var itemName = map[itemType]string{
+	eof:              "EOF",
+	itemError:        "Error",
+	itemNewLine:      "NewLine",
+	itemHTML:         "HTML",
+	itemHeading:      "Heading",
+	itemLHeading:     "LHeading",
+	itemBlockQuote:   "BlockQuote",
+	itemList:         "List",
+	itemListItem:     "ListItem",
+	itemLooseItem:    "LooseItem",
+	itemCodeBlock:    "CodeBlock",
+	itemGfmCodeBlock: "GfmCodeBlock",
+	itemHr:           "Hr",
+	itemTable:        "Table",
+	itemLpTable:      "LpTable",
+	itemText:         "Text",
+	itemLink:         "Link",
+	itemDefLink:      "DefLink",
+	itemRefLink:      "RefLink",
+	itemAutoLink:     "AutoLink",
+	itemGfmLink:      "GfmLink",
+	itemStrong:       "Strong",
+	itemItalic:       "Italic",
+	itemStrike:       "Strike",
+	itemCode:         "Code",
+	itemImage:        "Image",
+	itemRefImage:     "RefImage",
+	itemBr:           "Br",
+	itemPipe:         "Pipe",
+	itemIndent:       "Indent",
 }
 
-func printRound(i int) {
-	sep := strings.Repeat("#", 15)
-	fmt.Printf("\n\n%s Round %d %s\n\n", sep, i, sep)
+func (i itemType) String() string {
+	s := itemName[i]
+	if s == "" {
+		return fmt.Sprintf("item%d", int(i))
+	}
+	return s
 }
 
-func lTestBasic(t *testing.T) {
-	l := lex("1", `
-asdasdsa
-
-Id  |	Name  |  Age
-----|---------|-----
- 1  | Ariel   |  26
- 2  | Erez	  |  29
-
-asdas
-`)
-
-	// for item := range l.items {
-	// 	fmt.Printf(tokenNames[item.typ] + " ---> '" + item.val + "'" + "\n")
-	// }
-	tr := &Tree{lex: l}
-	tr.parse()
-	// fmt.Println(tr.Nodes)
-	tr.render()
-	fmt.Printf(tr.output)
+type lexTest struct {
+	name  string
+	input string
+	items []item
 }
 
-func TestList(t *testing.T) {
-	printRound(1)
-	// Test round 1
-	// TODO(Ariel): BUG!!!!
-	src := `
-- a
-   b
-  c
+var lexTests = []lexTest{
+	{"empty", "", []item{
+		{eof, 0, ""},
+	}},
+	{"heading", "# Hello", []item{
+		{itemHeading, 0, "# Hello"},
+		{eof, 0, ""},
+	}},
+}
 
-  d
-  e
-`
-	l := lex("1", src)
-	// fmt.Printf("Source:\n" + src + "\n")
-	// for item := range l.items {
-	// 	fmt.Printf(tokenNames[item.typ]+" ---> "+item.val+", length: %s\n", len(item.val))
-	// }
-	tr := &Tree{lex: l, links: map[string]*DefLinkNode{}}
-	tr.parse()
-	// fmt.Println(tr.Nodes)
-	tr.render()
-	fmt.Printf(tr.output + "\n")
+// collect gathers the emitted items into a slice.
+func collect(t *lexTest) (items []item) {
+	l := lex(t.input)
+	for {
+		item := l.nextItem()
+		items = append(items, item)
+		if item.typ == eof || item.typ == itemError {
+			break
+		}
+	}
+	return
+}
+
+func equal(i1, i2 []item, checkPos bool) bool {
+	if len(i1) != len(i2) {
+		return false
+	}
+	for k := range i1 {
+		if i1[k].typ != i2[k].typ {
+			return false
+		}
+		if i1[k].val != i2[k].val {
+			return false
+		}
+		if checkPos && i1[k].pos != i2[k].pos {
+			return false
+		}
+	}
+	return true
+}
+
+func TestLex(t *testing.T) {
+	for _, test := range lexTests {
+		items := collect(&test)
+		if !equal(items, test.items, false) {
+			t.Errorf("%s: got\n\t%+v\nexpected\n\t%+v", test.name, items, test.items)
+		}
+	}
 }
