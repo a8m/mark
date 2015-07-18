@@ -56,8 +56,6 @@ const (
 	itemRefImage
 	itemBr
 	itemPipe
-	// Indentation
-	itemIndent
 )
 
 var (
@@ -185,7 +183,7 @@ func lexAny(l *lexer) stateFn {
 		// indentation size
 		for ; r == l.peek(); r = l.next() {
 		}
-		l.emit(itemIndent)
+		l.ignore()
 		return lexAny
 	case '`', '~':
 		// if it's gfm-code
@@ -312,6 +310,11 @@ func (l *lexer) emit(t itemType, s ...string) {
 		s = append(s, l.input[l.start:l.pos])
 	}
 	l.items <- item{t, l.start, s[0]}
+	l.start = l.pos
+}
+
+// ignore skips over the pending input before this point.
+func (l *lexer) ignore() {
 	l.start = l.pos
 }
 
