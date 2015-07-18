@@ -88,6 +88,14 @@ var lexTests = []lexTest{
 		{itemLooseItem, 0, "bar"},
 		tEOF,
 	}},
+	{"code-block", "    foo\n    bar", []item{
+		{itemCodeBlock, 0, "    foo\n    bar"},
+		tEOF,
+	}},
+	{"gfm-code-block", "~~~js\nfoo\n~~~", []item{
+		{itemGfmCodeBlock, 0, "~~~js\nfoo\n~~~"},
+		tEOF,
+	}},
 }
 
 // collect gathers the emitted items into a slice.
