@@ -204,9 +204,6 @@ func lexAny(l *lexer) stateFn {
 		if m := block[itemTable].FindString(l.input[l.pos:]); m != "" {
 			l.eot = l.start + Pos(len(m)) - l.width
 			l.emit(itemTable)
-			// we go one step back to get the full text
-			// in the lexText phase
-			l.start--
 		}
 		return lexText
 	}
