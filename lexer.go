@@ -56,6 +56,7 @@ const (
 	itemRefImage
 	itemBr
 	itemPipe
+	itemIndent
 )
 
 var (
@@ -183,7 +184,7 @@ func lexAny(l *lexer) stateFn {
 		// indentation size
 		for ; r == l.peek(); r = l.next() {
 		}
-		l.ignore()
+		l.emit(itemIndent)
 		return lexAny
 	case '`', '~':
 		// if it's gfm-code
@@ -254,8 +255,6 @@ func lexCode(l *lexer) stateFn {
 }
 
 // lexText scans until end-of-line(\n)
-// We have a lot of things to do in this lextext
-// for example: ignore itemBr on list/tables
 func lexText(l *lexer) stateFn {
 	// Drain text before emitting
 	emit := func(item itemType, pos Pos) {
@@ -310,11 +309,6 @@ func (l *lexer) emit(t itemType, s ...string) {
 		s = append(s, l.input[l.start:l.pos])
 	}
 	l.items <- item{t, l.start, s[0]}
-	l.start = l.pos
-}
-
-// ignore skips over the pending input before this point.
-func (l *lexer) ignore() {
 	l.start = l.pos
 }
 
