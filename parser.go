@@ -29,8 +29,6 @@ Loop:
 			break Loop
 		case itemNewLine:
 			n = t.newLine(t.next().pos)
-		case itemBr:
-			n = t.newBr(t.next().pos)
 		case itemHr:
 			n = t.newHr(t.next().pos)
 		case itemHTML:
@@ -148,8 +146,6 @@ func (t *Tree) parseText(input string) (nodes []Node) {
 	for token := range l.items {
 		var node Node
 		switch token.typ {
-		case itemNewLine:
-			node = t.newLine(token.pos)
 		case itemBr:
 			node = t.newBr(token.pos)
 		case itemStrong, itemItalic, itemStrike, itemCode:
@@ -407,14 +403,4 @@ func parseAlign(s string) (typ AlignType) {
 func isDigit(s string) bool {
 	r, _ := utf8.DecodeRuneInString(s)
 	return unicode.IsDigit(r)
-}
-
-// test if given token is type block
-func isBlock(item itemType) (b bool) {
-	switch item {
-	case itemHeading, itemLHeading, itemCodeBlock, itemBlockQuote,
-		itemList, itemTable, itemGfmCodeBlock, itemHr:
-		b = true
-	}
-	return
 }
