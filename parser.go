@@ -36,10 +36,6 @@ Loop:
 		case itemHTML:
 			p = t.next()
 			n = t.newHTML(p.pos, p.val)
-		case itemText:
-			tmp := t.newParagraph(p.pos)
-			tmp.Nodes = t.parseText(t.next().val)
-			n = tmp
 		case itemDefLink:
 			n = t.parseDefLink()
 		case itemHeading, itemLHeading:
@@ -52,6 +48,18 @@ Loop:
 			n = t.parseTable()
 		case itemBlockQuote:
 			n = t.parseBlockQuote()
+		case itemIndent:
+			space := t.next()
+			// If it's no follow by text
+			if t.peek().typ != itemText {
+				continue
+			}
+			t.backup2(space)
+			fallthrough
+		case itemText:
+			tmp := t.newParagraph(p.pos)
+			tmp.Nodes = t.parseText(t.next().val)
+			n = tmp
 		default:
 			t.next()
 		}
