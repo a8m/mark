@@ -53,10 +53,11 @@ type lexTest struct {
 
 var (
 	tEOF     = item{itemEOF, 0, ""}
+	tNewLine = item{itemNewLine, 0, "\n"}
+	tBr      = item{itemBr, 0, "  \n"}
+	tPipe    = item{itemPipe, 0, "|"}
 	tTable   = item{itemTable, 0, ""}
 	tLpTable = item{itemLpTable, 0, ""}
-	tPipe    = item{itemPipe, 0, "|"}
-	tNewLine = item{itemNewLine, 0, "\n"}
 )
 
 var blockTests = []lexTest{
@@ -188,6 +189,11 @@ var inlineTests = []lexTest{
 	{"text-2", "hello\nworld", []item{
 		{itemText, 0, "hello\nworld"},
 	}},
+	{"br", "hello  \nworld", []item{
+		{itemText, 0, "hello"},
+		tBr,
+		{itemText, 0, "world"},
+	}},
 	{"strong-1", "**hello**", []item{
 		{itemStrong, 0, "**hello**"},
 	}},
@@ -230,6 +236,18 @@ var inlineTests = []lexTest{
 	}},
 	{"reflink-2", "[hello]", []item{
 		{itemRefLink, 0, "[hello]"},
+	}},
+	{"image-1", "![hello](world)", []item{
+		{itemImage, 0, "![hello](world)"},
+	}},
+	{"image-2", "![hello](world 'title')", []item{
+		{itemImage, 0, "![hello](world 'title')"},
+	}},
+	{"refimage-1", "![hello][world]", []item{
+		{itemRefImage, 0, "![hello][world]"},
+	}},
+	{"refimage-2", "![hello]", []item{
+		{itemRefImage, 0, "![hello]"},
 	}},
 }
 
