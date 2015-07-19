@@ -12,6 +12,7 @@ func TestRender(t *testing.T) {
 	expect := expect.New(t)
 	cases := map[string]string{
 		"foobar":               "<p>foobar</p>",
+		"  foo bar":            "<p>  foo bar</p>",
 		"foo|bar":              "<p>foo|bar</p>",
 		"foo  \nbar":           "<p>foo<br>bar</p>",
 		"__bar__ foo":          "<p><strong>bar</strong> foo</p>",

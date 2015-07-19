@@ -35,7 +35,6 @@ var itemName = map[itemType]string{
 	itemRefImage:     "RefImage",
 	itemBr:           "Br",
 	itemPipe:         "Pipe",
-	itemIndent:       "Indent",
 }
 
 func (i itemType) String() string {
@@ -153,6 +152,27 @@ var lexTests = []lexTest{
 		tPipe,
 		{itemText, 0, " Ariel"},
 		tPipe,
+		tEOF,
+	}},
+	{"text-1", "hello\nworld", []item{
+		{itemText, 0, "hello"},
+		tNewLine,
+		{itemText, 0, "world"},
+		tEOF,
+	}},
+	{"text-2", "__hello__\n__world__", []item{
+		{itemText, 0, "__hello__"},
+		tNewLine,
+		{itemText, 0, "__world__"},
+		tEOF,
+	}},
+	{"text-3", "~**_hello world_**~", []item{
+		{itemText, 0, "~**_hello world_**~"},
+		tEOF,
+	}},
+	{"text-4", "  hello world", []item{
+		{itemIndent, 0, "  "},
+		{itemText, 0, "hello world"},
 		tEOF,
 	}},
 }
