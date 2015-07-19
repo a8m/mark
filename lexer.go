@@ -320,6 +320,7 @@ func (l *lexer) nextItem() item {
 }
 
 // One phase lexing(inline reason)
+// TODO: Refactor
 func (l *lexer) lexInline() {
 	// Drain text before emitting
 	emit := func(item itemType, pos Pos) {
@@ -331,13 +332,13 @@ func (l *lexer) lexInline() {
 	}
 Loop:
 	for {
-		switch r := l.peek(); {
-		case r == eof:
-			// I don;t want to emit EOF(in inline mode)
-			// emit(eof, Pos(0))
-			l.emit(itemText)
+		switch r := l.peek(); r {
+		case eof:
+			if l.pos > l.start {
+				l.emit(itemText)
+			}
 			break Loop
-		case r == ' ':
+		case ' ':
 			if m := span[itemBr].FindString(l.input[l.pos:]); m != "" {
 				// pos - length of new-line
 				emit(itemBr, Pos(len(m)))
@@ -345,7 +346,7 @@ Loop:
 			}
 			l.next()
 		// if it's start as an emphasis
-		case r == '_', r == '*', r == '~', r == '`':
+		case '_', '*', '~', '`':
 			input := l.input[l.pos:]
 			// Strong
 			if m := span[itemStrong].FindString(input); m != "" {
@@ -369,7 +370,7 @@ Loop:
 			}
 			l.next()
 		// itemLink, itemAutoLink, itemImage, itemRefLink, itemRefImage
-		case r == '[', r == '<', r == '!':
+		case '[', '<', '!':
 			input := l.input[l.pos:]
 			if m := span[itemLink].FindString(input); m != "" {
 				pos := Pos(len(m))
