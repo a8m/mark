@@ -59,7 +59,7 @@ var (
 	tNewLine = item{itemNewLine, 0, "\n"}
 )
 
-var lexTests = []lexTest{
+var blockTests = []lexTest{
 	{"empty", "", []item{tEOF}},
 	{"heading", "# Hello", []item{
 		{itemHeading, 0, "# Hello"},
@@ -175,13 +175,71 @@ var lexTests = []lexTest{
 		{itemText, 0, "hello world"},
 		tEOF,
 	}},
+	{"deflink", "[1]: http://example.com", []item{
+		{itemDefLink, 0, "[1]: http://example.com"},
+		tEOF,
+	}},
+}
+
+var inlineTests = []lexTest{
+	{"text-1", "hello", []item{
+		{itemText, 0, "hello"},
+	}},
+	{"text-2", "hello\nworld", []item{
+		{itemText, 0, "hello\nworld"},
+	}},
+	{"strong-1", "**hello**", []item{
+		{itemStrong, 0, "**hello**"},
+	}},
+	{"strong-2", "__world__", []item{
+		{itemStrong, 0, "__world__"},
+	}},
+	{"italic-1", "*hello*", []item{
+		{itemItalic, 0, "*hello*"},
+	}},
+	{"italic-2", "_hello_", []item{
+		{itemItalic, 0, "_hello_"},
+	}},
+	{"strike", "~~hello~~", []item{
+		{itemStrike, 0, "~~hello~~"},
+	}},
+	{"code", "`hello`", []item{
+		{itemCode, 0, "`hello`"},
+	}},
+	{"link-1", "[hello](world)", []item{
+		{itemLink, 0, "[hello](world)"},
+	}},
+	{"link-2", "[hello](world 'title')", []item{
+		{itemLink, 0, "[hello](world 'title')"},
+	}},
+	{"autolink-1", "<http://example.com/>", []item{
+		{itemAutoLink, 0, "<http://example.com/>"},
+	}},
+	{"autolink-2", "<http://example.com/?foo=1&bar=2>", []item{
+		{itemAutoLink, 0, "<http://example.com/?foo=1&bar=2>"},
+	}},
+	{"gfmlink-1", "link: http://example.com/?foo=1&bar=2", []item{
+		{itemText, 0, "link: "},
+		{itemGfmLink, 0, "http://example.com/?foo=1&bar=2"},
+	}},
+	{"gfmlink-2", "http://example.com", []item{
+		{itemGfmLink, 0, "http://example.com"},
+	}},
+	{"reflink-1", "[hello][world]", []item{
+		{itemRefLink, 0, "[hello][world]"},
+	}},
+	{"reflink-2", "[hello]", []item{
+		{itemRefLink, 0, "[hello]"},
+	}},
 }
 
 // collect gathers the emitted items into a slice.
-func collect(t *lexTest) (items []item) {
+func collect(t *lexTest, isInline bool) (items []item) {
 	l := lex(t.input)
-	for {
-		item := l.nextItem()
+	if isInline {
+		l = lexInline(t.input)
+	}
+	for item := range l.items {
 		items = append(items, item)
 		if item.typ == itemEOF || item.typ == itemError {
 			break
@@ -208,9 +266,18 @@ func equal(i1, i2 []item, checkPos bool) bool {
 	return true
 }
 
-func TestLex(t *testing.T) {
-	for _, test := range lexTests {
-		items := collect(&test)
+func TestBlockLex(t *testing.T) {
+	for _, test := range blockTests {
+		items := collect(&test, false)
+		if !equal(items, test.items, false) {
+			t.Errorf("%s: got\n\t%+v\nexpected\n\t%+v", test.name, items, test.items)
+		}
+	}
+}
+
+func TestInlineLex(t *testing.T) {
+	for _, test := range inlineTests {
+		items := collect(&test, true)
 		if !equal(items, test.items, false) {
 			t.Errorf("%s: got\n\t%+v\nexpected\n\t%+v", test.name, items, test.items)
 		}

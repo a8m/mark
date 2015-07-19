@@ -41,17 +41,18 @@ const (
 	itemLpTable
 	// Span Elements
 	itemText
-	itemLink
-	// Links
-	itemDefLink
-	itemRefLink
-	itemAutoLink
-	itemGfmLink
 	// Emphasis
 	itemStrong
 	itemItalic
 	itemStrike
 	itemCode
+	// Links
+	itemLink
+	itemDefLink
+	itemRefLink
+	itemAutoLink
+	itemGfmLink
+	// Images
 	itemImage
 	itemRefImage
 	itemBr
