@@ -301,3 +301,29 @@ func TestInlineLex(t *testing.T) {
 		}
 	}
 }
+
+var lexPosTests = []lexTest{
+	{"empty", "", []item{tEOF}},
+	{"text", "hello\nworld", []item{
+		{itemText, 0, "hello"},
+		{itemNewLine, 5, "\n"},
+		{itemText, 6, "world"},
+		{itemEOF, 11, ""},
+	}},
+	{"heading", "# hello\nworld", []item{
+		{itemHeading, 0, "# hello"},
+		{itemNewLine, 7, "\n"},
+		{itemText, 8, "world"},
+		{itemEOF, 13, ""},
+	}},
+}
+
+// This one tests position of the returning tokens
+func TestPos(t *testing.T) {
+	for _, test := range lexPosTests {
+		items := collect(&test, false)
+		if !equal(items, test.items, true) {
+			t.Errorf("%s: got\n\t%+v\nexpected\n\t%+v", test.name, items, test.items)
+		}
+	}
+}
