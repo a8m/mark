@@ -2,6 +2,7 @@ package mark
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 	"unicode/utf8"
@@ -37,8 +38,11 @@ const (
 	itemCodeBlock
 	itemGfmCodeBlock
 	itemHr
+	// Tables
 	itemTable
 	itemLpTable
+	itemTableRow
+	itemTableCell
 	// Span Elements
 	itemText
 	// Emphasis
@@ -195,15 +199,15 @@ func lexAny(l *lexer) stateFn {
 		}
 		fallthrough
 	case '|':
-		if m := block[itemLpTable].FindString(l.input[l.pos:]); m != "" {
-			l.eot = l.start + Pos(len(m))
+		if m := block[itemLpTable].MatchString(l.input[l.pos:]); m {
 			l.emit(itemLpTable)
+			return lexTable
 		}
 		fallthrough
 	default:
-		if m := block[itemTable].FindString(l.input[l.pos:]); m != "" {
-			l.eot = l.start + Pos(len(m)) - l.width
+		if m := block[itemTable].MatchString(l.input[l.pos:]); m {
 			l.emit(itemTable)
+			return lexTable
 		}
 		return lexText
 	}
@@ -573,4 +577,29 @@ func lexBlockQuote(l *lexer) stateFn {
 		return lexAny
 	}
 	return lexText
+}
+
+func lexTable(l *lexer) stateFn {
+	re := block[itemTable]
+	if l.peek() == '|' {
+		re = block[itemLpTable]
+	}
+	// Ignore the first match, and flat all rows(by splitting)
+	rows := re.FindStringSubmatch(l.input[l.pos:])
+	rows = append(rows[1:3], strings.Split(rows[3], "\n")...)
+	trim := regexp.MustCompile(`^ *\| *| *\| *$`)
+	split := regexp.MustCompile(` *\| *`)
+	for _, row := range rows {
+		l.emit(itemTableRow)
+		fmt.Println(row, len(row))
+		rawCells := trim.ReplaceAllString(row, "")
+		cells := split.Split(rawCells, -1)
+		for _, cell := range cells {
+			l.emit(itemTableCell, cell)
+			fmt.Println("cell:", cell)
+		}
+	}
+	fmt.Println(len(l.input))
+	os.Exit(1)
+	return lexAny
 }

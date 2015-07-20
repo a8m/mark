@@ -284,7 +284,7 @@ func equal(i1, i2 []item, checkPos bool) bool {
 	return true
 }
 
-func TestBlockLex(t *testing.T) {
+func aTestBlockLex(t *testing.T) {
 	for _, test := range blockTests {
 		items := collect(&test, false)
 		if !equal(items, test.items, false) {
@@ -293,7 +293,7 @@ func TestBlockLex(t *testing.T) {
 	}
 }
 
-func TestInlineLex(t *testing.T) {
+func aTestInlineLex(t *testing.T) {
 	for _, test := range inlineTests {
 		items := collect(&test, true)
 		if !equal(items, test.items, false) {
@@ -319,7 +319,7 @@ var lexPosTests = []lexTest{
 }
 
 // This one tests position of the returning tokens
-func TestPos(t *testing.T) {
+func aTestPos(t *testing.T) {
 	for _, test := range lexPosTests {
 		items := collect(&test, false)
 		if !equal(items, test.items, true) {
