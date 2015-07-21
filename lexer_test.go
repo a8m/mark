@@ -21,6 +21,8 @@ var itemName = map[itemType]string{
 	itemHr:           "Hr",
 	itemTable:        "Table",
 	itemLpTable:      "LpTable",
+	itemTableRow:     "TableRow",
+	itemTableCell:    "TableCell",
 	itemText:         "Text",
 	itemLink:         "Link",
 	itemDefLink:      "DefLink",
@@ -58,6 +60,7 @@ var (
 	tPipe    = item{itemPipe, 0, "|"}
 	tTable   = item{itemTable, 0, ""}
 	tLpTable = item{itemLpTable, 0, ""}
+	tRow     = item{itemTableRow, 0, ""}
 )
 
 var blockTests = []lexTest{
@@ -121,38 +124,28 @@ var blockTests = []lexTest{
 	}},
 	{"table", "Id | Name\n---|-----\n1 | Ariel", []item{
 		tTable,
-		{itemText, 0, "Id "},
-		tPipe,
-		{itemText, 0, " Name"},
-		tNewLine,
-		{itemText, 0, "---"},
-		tPipe,
-		{itemText, 0, "-----"},
-		tNewLine,
-		{itemText, 0, "1 "},
-		tPipe,
-		{itemText, 0, " Ariel"},
+		tRow,
+		{itemTableCell, 0, "Id"},
+		{itemTableCell, 0, "Name"},
+		tRow,
+		{itemTableCell, 0, "---"},
+		{itemTableCell, 0, "-----"},
+		tRow,
+		{itemTableCell, 0, "1"},
+		{itemTableCell, 0, "Ariel"},
 		tEOF,
 	}},
 	{"lp-table", "|Id | Name|\n|---|-----|\n|1 | Ariel|", []item{
 		tLpTable,
-		tPipe,
-		{itemText, 0, "Id "},
-		tPipe,
-		{itemText, 0, " Name"},
-		tPipe,
-		tNewLine,
-		tPipe,
-		{itemText, 0, "---"},
-		tPipe,
-		{itemText, 0, "-----"},
-		tPipe,
-		tNewLine,
-		tPipe,
-		{itemText, 0, "1 "},
-		tPipe,
-		{itemText, 0, " Ariel"},
-		tPipe,
+		tRow,
+		{itemTableCell, 0, "Id"},
+		{itemTableCell, 0, "Name"},
+		tRow,
+		{itemTableCell, 0, "---"},
+		{itemTableCell, 0, "-----"},
+		tRow,
+		{itemTableCell, 0, "1"},
+		{itemTableCell, 0, "Ariel"},
 		tEOF,
 	}},
 	{"text-1", "hello\nworld", []item{
@@ -284,7 +277,7 @@ func equal(i1, i2 []item, checkPos bool) bool {
 	return true
 }
 
-func aTestBlockLex(t *testing.T) {
+func TestBlockLex(t *testing.T) {
 	for _, test := range blockTests {
 		items := collect(&test, false)
 		if !equal(items, test.items, false) {
@@ -293,7 +286,7 @@ func aTestBlockLex(t *testing.T) {
 	}
 }
 
-func aTestInlineLex(t *testing.T) {
+func TestInlineLex(t *testing.T) {
 	for _, test := range inlineTests {
 		items := collect(&test, true)
 		if !equal(items, test.items, false) {
@@ -319,7 +312,7 @@ var lexPosTests = []lexTest{
 }
 
 // This one tests position of the returning tokens
-func aTestPos(t *testing.T) {
+func TestPos(t *testing.T) {
 	for _, test := range lexPosTests {
 		items := collect(&test, false)
 		if !equal(items, test.items, true) {
