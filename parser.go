@@ -9,7 +9,7 @@ import (
 )
 
 type Tree struct {
-	lex   *lexer
+	lex   Lex
 	tr    *Tree
 	Nodes []Node
 	// Parsing only

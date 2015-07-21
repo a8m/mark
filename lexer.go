@@ -111,6 +111,11 @@ var span = map[itemType]*regexp.Regexp{
 // stateFn represents the state of the scanner as a function that returns the next state.
 type stateFn func(*lexer) stateFn
 
+// Lexer interface, used to composed it inside the Parser
+type Lex interface {
+	nextItem() item
+}
+
 // lexer holds the state of the scanner.
 type lexer struct {
 	input   string    // the string being scanned
@@ -120,7 +125,6 @@ type lexer struct {
 	width   Pos       // width of last rune read from input
 	lastPos Pos       // position of most recent item returned by nextItem
 	items   chan item // channel of scanned items
-	eot     Pos       // end of table
 }
 
 // lex creates a new lexer for the input string.
@@ -270,19 +274,13 @@ func lexText(l *lexer) stateFn {
 	}
 Loop:
 	for {
-		switch r := l.peek(); {
-		case r == eof:
+		switch r := l.peek(); r {
+		case eof:
 			emit(itemEOF, Pos(0))
 			break Loop
-		case r == '\n':
+		case '\n':
 			emit(itemNewLine, l.width)
 			break Loop
-		case r == '|':
-			if l.eot > l.pos {
-				emit(itemPipe, l.width)
-				break
-			}
-			l.next()
 		default:
 			// Test for Setext-style headers
 			if m := block[itemLHeading].FindString(l.input[l.pos:]); m != "" {
@@ -316,7 +314,7 @@ func (l *lexer) emit(t itemType, s ...string) {
 	l.start = l.pos
 }
 
-// lexItem return the next item token, clled by the parser.
+// lexItem return the next item token, called by the parser.
 func (l *lexer) nextItem() item {
 	item := <-l.items
 	l.lastPos = l.pos
