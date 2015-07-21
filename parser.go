@@ -282,101 +282,58 @@ func (t *Tree) parseListItem() *ListItemNode {
 
 // parse table
 func (t *Tree) parseTable() *TableNode {
-	// End of table
-	done := t.lex.eot
 	token := t.next()
-	// ignore the first and last one...
-	//lp := token.val == "|"
 	table := t.newTable(token.pos)
 	// Align	[ None, Left, Right, ... ]
-	// Header	[ Cels: [token, token, ... ] ]
-	// Data:	[ Row: [Cells: [token, ... ] ] ]
+	// Header	[ Cells: [ ... ] ]
+	// Data:	[ Rows: [ Cells: [ ... ] ] ]
 	rows := struct {
 		Align  []AlignType
-		Header [][]item
-		Data   [][][]item
+		Header []item
+		Cells  [][]item
 	}{}
-	var cell []item
-	var row [][]item
 	// Collect items
 Loop:
 	for i := 0; ; {
 		switch token := t.next(); token.typ {
-		case itemEOF, itemError:
-			break Loop
-		case itemNewLine:
-			// If we done with this table
-			if t.peek().pos >= done {
-				break Loop
+		case itemTableRow:
+			i++
+			if i > 2 {
+				rows.Cells = append(rows.Cells, []item{})
 			}
-			fallthrough
-		case itemPipe:
-			// Test if cell non-empty before appending to current row
-			if len(cell) > 0 {
-				// Header
-				if i == 0 {
-					rows.Header = append(rows.Header, cell)
-					// Alignment
-				} else if i == 1 {
-					align := cell[0].val
-					if len(cell) > 1 {
-						for i := 1; i < len(cell); i++ {
-							align += cell[i].val
-						}
-					}
-					// Trim spaces
-					rows.Align = append(rows.Align, parseAlign(align))
-					// Data
-				} else {
-					row = append(row, cell)
-				}
+		case itemTableCell:
+			// Header
+			if i == 1 {
+				rows.Header = append(rows.Header, token)
+				// Alignment
+			} else if i == 2 {
+				rows.Align = append(rows.Align, parseAlign(token.val))
+				// Data
+			} else {
+				pos := i - 3
+				rows.Cells[pos] = append(rows.Cells[pos], token)
 			}
-			if token.typ == itemNewLine {
-				i++
-				// test if there's an elemnts to append to tbody.
-				// we want to avoid situations like `appending empty rows`, etc..
-				if i > 2 && len(row) > 0 {
-					rows.Data = append(rows.Data, row)
-					row = [][]item{}
-				}
-			}
-			cell = []item{}
 		default:
-			cell = append(cell, token)
+			t.backup()
+			break Loop
 		}
 	}
-	// Drain cell/row
-	if len(cell) > 0 {
-		row = append(row, cell)
-	}
-	if len(row) > 0 {
-		rows.Data = append(rows.Data, row)
-	}
 	// Tranform to nodes
-	// Add an average mechanisem, that ignore empty(or " ") in end of cell
-	//	rowLen := len(rows.Align)
-	// Table head
 	table.append(t.parseCells(Header, rows.Header, rows.Align))
 	// Table body
-	for _, row := range rows.Data {
+	for _, row := range rows.Cells {
 		table.append(t.parseCells(Data, row, rows.Align))
 	}
 	return table
 }
 
 // Should return typ []CellNode
-func (t *Tree) parseCells(kind int, items [][]item, align []AlignType) *RowNode {
-	// TODO(Ariel): Add real position
-	row := t.newRow(1)
+func (t *Tree) parseCells(kind int, items []item, align []AlignType) *RowNode {
+	// First cell position
+	row := t.newRow(0)
 	for i, item := range items {
-		// Cell contain nodes
-		var s string
-		cell := t.newCell(item[0].pos, kind, align[i])
-		for _, tkn := range item {
-			s += tkn.val
-		}
-		// Used before: `^[ |\t]*|[ |\t]*$`
-		cell.Nodes = t.parseText(strings.TrimSpace(s))
+		cell := t.newCell(item.pos, kind, align[i])
+		cell.Nodes = t.parseText(item.val)
 		row.append(cell)
 	}
 	return row

@@ -2,7 +2,6 @@ package mark
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"strings"
 	"unicode/utf8"
@@ -86,7 +85,7 @@ var block = map[itemType]*regexp.Regexp{
 	itemListItem:  regexp.MustCompile(`^ *([*+-]|\d+\.) +`),
 	itemLooseItem: regexp.MustCompile(`(?m)\n\n(.*)`),
 	// leading-pipe table
-	itemLpTable:    regexp.MustCompile(`^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*`),
+	itemLpTable:    regexp.MustCompile(`(^ *\|.+)\n( *\| *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*`),
 	itemTable:      regexp.MustCompile(`^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*`),
 	itemBlockQuote: regexp.MustCompile(`^( *>[^\n]+(\n[^\n]+)*\n*)+`),
 	itemHTML:       regexp.MustCompile(`^<(\w+)(?:"[^"]*"|'[^']*'|[^'">])*?>`),
@@ -579,27 +578,34 @@ func lexBlockQuote(l *lexer) stateFn {
 	return lexText
 }
 
+// lexTable - WIP
 func lexTable(l *lexer) stateFn {
 	re := block[itemTable]
 	if l.peek() == '|' {
 		re = block[itemLpTable]
 	}
+	table := re.FindStringSubmatch(l.input[l.pos:])
+	// TODO: Fix position to be identical to rows/cells
+	l.pos += Pos(len(table[0]))
+	l.start = l.pos
 	// Ignore the first match, and flat all rows(by splitting)
-	rows := re.FindStringSubmatch(l.input[l.pos:])
-	rows = append(rows[1:3], strings.Split(rows[3], "\n")...)
+	rows := append(table[1:3], strings.Split(table[3], "\n")...)
 	trim := regexp.MustCompile(`^ *\| *| *\| *$`)
 	split := regexp.MustCompile(` *\| *`)
+	// Loop over the rows
 	for _, row := range rows {
+		// Replace "\n$" with "" above
+		if row == "" {
+			continue
+		}
 		l.emit(itemTableRow)
-		fmt.Println(row, len(row))
 		rawCells := trim.ReplaceAllString(row, "")
 		cells := split.Split(rawCells, -1)
+		// Emit cells in the current row
 		for _, cell := range cells {
 			l.emit(itemTableCell, cell)
-			fmt.Println("cell:", cell)
 		}
 	}
-	fmt.Println(len(l.input))
-	os.Exit(1)
+	// Reduce the gap
 	return lexAny
 }
