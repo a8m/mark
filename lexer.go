@@ -325,11 +325,11 @@ func (l *lexer) nextItem() item {
 // TODO: Refactor
 func (l *lexer) lexInline() {
 	// Drain text before emitting
-	emit := func(item itemType, pos Pos) {
+	emit := func(item itemType, pos int) {
 		if l.pos > l.start {
 			l.emit(itemText)
 		}
-		l.pos += pos
+		l.pos += Pos(pos)
 		l.emit(item)
 	}
 Loop:
@@ -343,7 +343,7 @@ Loop:
 		case ' ':
 			if m := span[itemBr].FindString(l.input[l.pos:]); m != "" {
 				// pos - length of new-line
-				emit(itemBr, Pos(len(m)))
+				emit(itemBr, len(m))
 				break
 			}
 			l.next()
@@ -352,22 +352,22 @@ Loop:
 			input := l.input[l.pos:]
 			// Strong
 			if m := span[itemStrong].FindString(input); m != "" {
-				emit(itemStrong, Pos(len(m)))
+				emit(itemStrong, len(m))
 				break
 			}
 			// Italic
 			if m := span[itemItalic].FindString(input); m != "" {
-				emit(itemItalic, Pos(len(m)))
+				emit(itemItalic, len(m))
 				break
 			}
 			// Strike
 			if m := span[itemStrike].FindString(input); m != "" {
-				emit(itemStrike, Pos(len(m)))
+				emit(itemStrike, len(m))
 				break
 			}
 			// InlineCode
 			if m := span[itemCode].FindString(input); m != "" {
-				emit(itemCode, Pos(len(m)))
+				emit(itemCode, len(m))
 				break
 			}
 			l.next()
@@ -375,7 +375,7 @@ Loop:
 		case '[', '<', '!':
 			input := l.input[l.pos:]
 			if m := span[itemLink].FindString(input); m != "" {
-				pos := Pos(len(m))
+				pos := len(m)
 				if r == '[' {
 					emit(itemLink, pos)
 				} else {
@@ -384,7 +384,7 @@ Loop:
 				break
 			}
 			if m := span[itemRefLink].FindString(input); m != "" {
-				pos := Pos(len(m))
+				pos := len(m)
 				if r == '[' {
 					emit(itemRefLink, pos)
 				} else {
@@ -393,14 +393,14 @@ Loop:
 				break
 			}
 			if m := span[itemAutoLink].FindString(input); m != "" {
-				emit(itemAutoLink, Pos(len(m)))
+				emit(itemAutoLink, len(m))
 				break
 			}
 			l.next()
 		default:
 			input := l.input[l.pos:]
 			if m := span[itemGfmLink].FindString(input); m != "" {
-				emit(itemGfmLink, Pos(len(m)))
+				emit(itemGfmLink, len(m))
 				break
 			}
 			l.next()
