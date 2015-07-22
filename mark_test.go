@@ -1,7 +1,6 @@
 package mark
 
 import (
-	"github.com/a8m/expect"
 	"io/ioutil"
 	"regexp"
 	"strings"
@@ -9,7 +8,6 @@ import (
 )
 
 func TestRender(t *testing.T) {
-	expect := expect.New(t)
 	cases := map[string]string{
 		"foobar":               "<p>foobar</p>",
 		"  foo bar":            "<p>  foo bar</p>",
@@ -74,13 +72,14 @@ func TestRender(t *testing.T) {
 		"2. two\n 3. three":        "<ol><li>two\n<ol><li>three</li></ol></li></ol>",
 	}
 	for actual, expected := range cases {
-		expect(Render(actual)).To.Equal(expected)
+		if res := Render(actual); res != expected {
+			t.Errorf("%s: got\n\t%+v\nexpected\n\t%+v", actual, res, expected)
+		}
 	}
 }
 
 func TestData(t *testing.T) {
 	var testFiles []string
-	var expect = expect.New(t)
 	files, err := ioutil.ReadDir("test")
 	if err != nil {
 		t.Error("Couldn't open 'test' directory")
@@ -100,8 +99,11 @@ func TestData(t *testing.T) {
 		if err != nil {
 			t.Errorf("Error to read text file: %s", file)
 		}
+		// Remove '\n'
 		sHtml := re.ReplaceAllLiteralString(string(html), "")
 		sText := re.ReplaceAllLiteralString(Render(string(text)), "")
-		expect(sHtml).To.Equal(sText)
+		if sHtml != sText {
+			t.Errorf("%s: got\n\t%+v\nexpected\n\t%+v", file, sText, sHtml)
+		}
 	}
 }

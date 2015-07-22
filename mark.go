@@ -2,16 +2,43 @@ package mark
 
 import "strings"
 
-// Just for test right now
-func Render(text string) string {
-	// Preproessing
-	// 1. Replace all tabs with 4-spaces
-	text = strings.Replace(text, "\t", "    ", -1)
-	// TODO: Use/ot remove name option
-	t := &Tree{lex: lex(text), links: make(map[string]*DefLinkNode)}
-	t.parse()
-	// PostProcessing
-	// 1. HTML escaping(<, >, ...)
-	t.render()
-	return t.output
+// Hook function, used for preprocessing
+type HookFn func(string) string
+
+// Mark
+type Mark struct {
+	Input   string
+	Options Options
+	Pre     []HookFn
+}
+
+// Mark options
+type Options struct {
+	Gfm, Tables bool
+}
+
+// Default pre function replace tabs with 4 spaces
+func tabReplacer(s string) string {
+	return strings.Replace(s, "\t", "    ", -1)
+}
+
+// Return new Mark
+func New(input string) *Mark {
+	return &Mark{
+		Input: input,
+		Pre:   []HookFn{tabReplacer},
+	}
+}
+
+// Staic render function
+func Render(input string) string {
+	m := New(input)
+	// PreProcessing
+	for _, fn := range m.Pre {
+		m.Input = fn(m.Input)
+	}
+	tr := &Tree{lex: lex(m.Input), links: make(map[string]*DefLinkNode)}
+	tr.parse()
+	tr.render()
+	return tr.output
 }
