@@ -1,20 +1,48 @@
-## TODO
-- Inline
+# Mark
+> A [markdown](http://daringfireball.net/projects/markdown/) processor written in Go. built for fun.
 
-- Blocks
-3. table(refactor lexing and parsing)
+This project ispired from [Rob Pike - Lexical Scanning talk](https://www.youtube.com/watch?v=HxaD_trXwRE) and [marked](https://github.com/chjj/marked) project.
+Please note that this is a __WIP__ project and any contribution is welcomed and appreciated,
+so feel free to take some task here.
 
-- Misc
-0. Should we support def/refLink with link break?
-1. Escaping regex in lexer.go
+## Table of contents:
+- [Usage](#get-started)
+- [TODO](#todo)
+
+### Usage
+#### Installation
+```sh
+$ go get github.com/a8m/mark
+```
+#### Add to your project
+```go
+import (
+	"fmt"
+	"github.com/a8m/mark"
+)
+
+func main() {
+	html := mark.Render("I am using __markdown__.")
+	fmt.Println(html)
+	// <p>I am using <strong>markdown</strong>.</p>
+}
+```
+
+
+### TODO
+1. Should we support def/refLink with link break?
 2. backslash escape(inline and blocks)
-3. Add peek() to lexer instead to backup all the times
-4. text interpolation
-5. Configuration, gfm or not(heading, tables, spanTags, etc...)
-6. IMPORTANT: Ignore compile regex every using(use closure, or move to grammer file or something)
+3. Configuration options
+	- gfm, table
+	- heading(auto hashing)
+	- smartypants
+	- etc...
+5. V0.2.0 - Regex is slowww, we should leave it.
 
-Stash
------
+
+### License
+MIT
+
 
 
 
