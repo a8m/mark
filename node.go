@@ -58,7 +58,7 @@ func (n *ParagraphNode) Render() (s string) {
 	for _, node := range n.Nodes {
 		s += node.Render()
 	}
-	return render("p", s)
+	return wrap("p", s)
 }
 
 func (t *ParagraphNode) append(n Node) {
@@ -175,7 +175,7 @@ func (n *EmphasisNode) Render() string {
 	for _, node := range n.Nodes {
 		s += node.Render()
 	}
-	return render(n.Tag(), s)
+	return wrap(n.Tag(), s)
 }
 
 func (n *EmphasisNode) append(node Node) {
@@ -222,7 +222,7 @@ func (n *CodeNode) Render() string {
 		attr = fmt.Sprintf(" class=\"lang-%s\"", n.Lang)
 	}
 	code := fmt.Sprintf("<%[1]s%s>%s</%[1]s>", "code", attr, n.Text)
-	return render("pre", code)
+	return wrap("pre", code)
 }
 
 func (t *Tree) newCode(pos Pos, lang, text string) *CodeNode {
@@ -346,7 +346,7 @@ func (n *ListNode) Render() (s string) {
 	for _, item := range n.Items {
 		s += item.Render()
 	}
-	return render(tag, s)
+	return wrap(tag, s)
 }
 
 func (t *Tree) newList(pos Pos, ordered bool) *ListNode {
@@ -369,7 +369,7 @@ func (n *ListItemNode) Render() (s string) {
 	for _, node := range n.Nodes {
 		s += node.Render()
 	}
-	return render("li", s)
+	return wrap("li", s)
 }
 
 func (t *Tree) newListItem(pos Pos) *ListItemNode {
@@ -393,7 +393,7 @@ func (n *TableNode) Render() string {
 	for i, row := range n.Rows {
 		switch i {
 		case 0:
-			s += render("thead", row.Render())
+			s += wrap("thead", row.Render())
 		case 1:
 			s += "<tbody>"
 			fallthrough
@@ -404,7 +404,7 @@ func (n *TableNode) Render() string {
 			}
 		}
 	}
-	return render("table", s)
+	return wrap("table", s)
 }
 
 func (t *Tree) newTable(pos Pos) *TableNode {
@@ -427,7 +427,7 @@ func (n *RowNode) Render() string {
 	for _, cell := range n.Cells {
 		s += cell.Render()
 	}
-	return render("tr", s)
+	return wrap("tr", s)
 }
 
 func (t *Tree) newRow(pos Pos) *RowNode {
@@ -516,16 +516,15 @@ func (n *BlockQuoteNode) Render() string {
 	for _, node := range n.Nodes {
 		s += node.Render()
 	}
-	return render("blockquote", s)
+	return wrap("blockquote", s)
 }
 
 func (t *Tree) newBlockQuote(pos Pos) *BlockQuoteNode {
 	return &BlockQuoteNode{NodeType: NodeBlockQuote, Pos: pos}
 }
 
-// TODO(Ariel): rename to wrap()
 // Wrap text with specific tag.
-func render(tag, body string) string {
+func wrap(tag, body string) string {
 	return fmt.Sprintf("<%[1]s>%s</%[1]s>", tag, body)
 }
 
