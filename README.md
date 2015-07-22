@@ -7,7 +7,7 @@ so feel free to take some task here.
 
 ## Table of contents:
 - [Usage](#get-started)
-- [TODO](#todo)
+- [Todo](#todo)
 
 ### Usage
 #### Installation
@@ -29,15 +29,14 @@ func main() {
 ```
 
 
-### TODO
-1. Should we support def/refLink with link break?
-2. backslash escape(inline and blocks)
-3. Configuration options
+### Todo
+- Backslash escape
+- Configuration options
 	- gfm, table
 	- heading(auto hashing)
 	- smartypants
 	- etc...
-5. V0.2.0 - Regex is slowww, we should leave it.
+- __v0.2.0__ - Regex is slowww, we should leave it.
 
 
 ### License
