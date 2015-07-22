@@ -70,6 +70,13 @@ func TestRender(t *testing.T) {
 		"1. one\n2. two\n3. three": "<ol><li>one</li><li>two</li><li>three</li></ol>",
 		"1. one\n 1. one of one":   "<ol><li>one\n<ol><li>one of one</li></ol></li></ol>",
 		"2. two\n 3. three":        "<ol><li>two\n<ol><li>three</li></ol></li></ol>",
+		// Escaping
+		"< hello":   "<p>&lt; hello</p>",
+		"hello >":   "<p>hello &gt;</p>",
+		"foo & bar": "<p>foo &amp; bar</p>",
+		"'foo'":     "<p>&#39;foo&#39;</p>",
+		"\"foo\"":   "<p>&quot;foo&quot;</p>",
+		"&copy;":    "<p>&copy;</p>",
 	}
 	for actual, expected := range cases {
 		if res := Render(actual); res != expected {
