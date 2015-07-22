@@ -1,7 +1,6 @@
 package mark
 
 import (
-	fmt "github.com/k0kubun/pp"
 	"regexp"
 	"strings"
 	"unicode"
@@ -54,12 +53,11 @@ Loop:
 			}
 			t.backup2(space)
 			fallthrough
-		case itemText:
+		// itemText
+		default:
 			tmp := t.newParagraph(p.pos)
 			tmp.Nodes = t.parseText(t.next().val)
 			n = tmp
-		default:
-			t.next()
 		}
 		if n != nil {
 			t.append(n)
@@ -124,7 +122,7 @@ func (t *Tree) backup2(t1 item) {
 	t.peekCount = 2
 }
 
-// parseText scan until itemBr occur.
+// parseText
 func (t *Tree) parseText(input string) (nodes []Node) {
 	// HACK: if there's more 'itemText' in the way, make it one.
 	for {
@@ -165,10 +163,9 @@ func (t *Tree) parseText(input string) (nodes []Node) {
 		case itemRefLink, itemRefImage:
 			match := span[itemRefLink].FindStringSubmatch(token.val)
 			node = t.newRef(token.typ, token.pos, token.val, match[1], match[2])
-		case itemText:
-			node = t.newText(token.pos, token.val)
+		// itemText
 		default:
-			fmt.Println("Matching not found for this token:", token)
+			node = t.newText(token.pos, token.val)
 		}
 		nodes = append(nodes, node)
 	}
