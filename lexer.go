@@ -73,12 +73,11 @@ var (
 
 // Block Grammer
 var block = map[itemType]*regexp.Regexp{
-	itemDefLink:   regexp.MustCompile(reDefLink),
-	itemHeading:   regexp.MustCompile(`^ *(#{1,6}) +([^\n]+?) *#* *(?:\n+|$)`),
-	itemLHeading:  regexp.MustCompile(`^([^\n]+)\n *(=|-){2,} *(?:\n+|$)`),
-	itemHr:        regexp.MustCompile(`^( *[-*_]){3,} *(?:\n+|$)`),
-	itemCodeBlock: regexp.MustCompile(`^( {4}[^\n]+\n*)+`),
-	// Backreferences is unavailable
+	itemDefLink:      regexp.MustCompile(reDefLink),
+	itemHeading:      regexp.MustCompile(`^ *(#{1,6}) +([^\n]+?) *#* *(?:\n+|$)`),
+	itemLHeading:     regexp.MustCompile(`^([^\n]+)\n *(=|-){2,} *(?:\n+|$)`),
+	itemHr:           regexp.MustCompile(`^( *[-*_]){3,} *(?:\n+|$)`),
+	itemCodeBlock:    regexp.MustCompile(`^( {4}[^\n]+\n*)+`),
 	itemGfmCodeBlock: regexp.MustCompile(fmt.Sprintf(reGfmCode, "`") + "|" + fmt.Sprintf(reGfmCode, "~")),
 	// itemListRegexp it's actually similar to item, but scan whole line
 	itemList:      regexp.MustCompile(`^( *)(?:[*+-]|\d+\.) (.*)(?:\n|)`),
@@ -103,8 +102,7 @@ var span = map[itemType]*regexp.Regexp{
 	itemRefLink:  regexp.MustCompile(`^!?\[((?:\[[^\]]*\]|[^\[\]]|\])*)\](?:\s*\[([^\]]*)\])?`),
 	itemAutoLink: regexp.MustCompile(`^<([^ >]+(@|:\/)[^ >]+)>`),
 	itemGfmLink:  regexp.MustCompile(`^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])`),
-	// Image
-	// TODO(Ariel): DRY
+	// Image, TODO(Ariel): DRY
 	itemImage: regexp.MustCompile(fmt.Sprintf(`^!?\[(%s)\]\(%s\)`, reLinkText, reLinkHref)),
 }
 
@@ -182,9 +180,11 @@ func lexAny(l *lexer) stateFn {
 		return lexDefLink
 	case '#':
 		return lexHeading
+	case '`', '~':
+		return lexGfmCode
 	case ' ':
 		// Should be here ?
-		// TODO(Ariel): test that it's a codeBlock and not list for sure
+		// TODO(Ariel): test that it's a codeBlock
 		if block[itemCodeBlock].MatchString(l.input[l.pos:]) {
 			return lexCode
 		}
@@ -194,13 +194,6 @@ func lexAny(l *lexer) stateFn {
 		}
 		l.emit(itemIndent)
 		return lexAny
-	case '`', '~':
-		// if it's gfm-code
-		c := l.input[l.pos : l.pos+2]
-		if c == "``" || c == "~~" {
-			return lexGfmCode
-		}
-		fallthrough
 	case '|':
 		if m := block[itemLpTable].MatchString(l.input[l.pos:]); m {
 			l.emit(itemLpTable)
@@ -398,8 +391,7 @@ Loop:
 			}
 			l.next()
 		default:
-			input := l.input[l.pos:]
-			if m := span[itemGfmLink].FindString(input); m != "" {
+			if m := span[itemGfmLink].FindString(l.input[l.pos:]); m != "" {
 				emit(itemGfmLink, len(m))
 				break
 			}
@@ -411,7 +403,7 @@ Loop:
 
 // lexHtml.
 func lexHtml(l *lexer) stateFn {
-	if match, res := l.MatchHtml(l.input[l.pos:]); match {
+	if match, res := l.matchHtml(l.input[l.pos:]); match {
 		l.pos += Pos(len(res))
 		l.emit(itemHTML)
 		return lexAny
@@ -420,7 +412,7 @@ func lexHtml(l *lexer) stateFn {
 }
 
 // Test if the given input is match the HTML pattern(blocks only)
-func (l *lexer) MatchHtml(input string) (bool, string) {
+func (l *lexer) matchHtml(input string) (bool, string) {
 	// TODO: DRY regexp - multiline comment
 	comment := regexp.MustCompile(`(?s)<!--.*?-->`)
 	if m := comment.FindString(input); m != "" {
@@ -463,7 +455,7 @@ func lexDefLink(l *lexer) stateFn {
 
 // lexList scans ordered and unordered lists.
 func lexList(l *lexer) stateFn {
-	match, items := l.MatchList(l.input[l.pos:])
+	match, items := l.matchList(l.input[l.pos:])
 	if !match {
 		return lexText
 	}
@@ -503,7 +495,7 @@ func lexList(l *lexer) stateFn {
 	return lexAny
 }
 
-func (l *lexer) MatchList(input string) (bool, []string) {
+func (l *lexer) matchList(input string) (bool, []string) {
 	var res []string
 	reItem := block[itemList]
 	reScan := regexp.MustCompile(`^(.*)(?:\n|)`)
@@ -550,7 +542,7 @@ func (l *lexer) MatchList(input string) (bool, []string) {
 }
 
 // Test if the given input match blockquote
-func (l *lexer) MatchBlockQuote(input string) (bool, string) {
+func (l *lexer) matchBlockQuote(input string) (bool, string) {
 	match := block[itemBlockQuote].FindString(input)
 	if match == "" {
 		return false, match
@@ -568,7 +560,7 @@ func (l *lexer) MatchBlockQuote(input string) (bool, string) {
 
 // lexBlockQuote
 func lexBlockQuote(l *lexer) stateFn {
-	if match, res := l.MatchBlockQuote(l.input[l.pos:]); match {
+	if match, res := l.matchBlockQuote(l.input[l.pos:]); match {
 		l.pos += Pos(len(res))
 		l.emit(itemBlockQuote)
 		return lexAny

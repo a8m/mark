@@ -282,8 +282,7 @@ func (t *Tree) parseListItem() *ListItemNode {
 
 // parse table
 func (t *Tree) parseTable() *TableNode {
-	token := t.next()
-	table := t.newTable(token.pos)
+	table := t.newTable(t.next().pos)
 	// Align	[ None, Left, Right, ... ]
 	// Header	[ Cells: [ ... ] ]
 	// Data:	[ Rows: [ Cells: [ ... ] ] ]
@@ -329,9 +328,11 @@ Loop:
 
 // Should return typ []CellNode
 func (t *Tree) parseCells(kind int, items []item, align []AlignType) *RowNode {
-	// First cell position
-	row := t.newRow(0)
+	var row *RowNode
 	for i, item := range items {
+		if i == 0 {
+			row = t.newRow(item.pos)
+		}
 		cell := t.newCell(item.pos, kind, align[i])
 		cell.Nodes = t.parseText(item.val)
 		row.append(cell)
@@ -342,8 +343,6 @@ func (t *Tree) parseCells(kind int, items []item, align []AlignType) *RowNode {
 // get align-string and return the align type of it
 // e.g: ":---", "---:", ":---:", "---"
 func parseAlign(s string) (typ AlignType) {
-	// Trim spaces before
-	s = strings.TrimSpace(s)
 	sfx, pfx := strings.HasSuffix(s, ":"), strings.HasPrefix(s, ":")
 	switch {
 	case sfx && pfx:
