@@ -1,7 +1,7 @@
 # Mark
 > A [markdown](http://daringfireball.net/projects/markdown/) processor written in Go. built for fun.
 
-This project ispired from [Rob Pike - Lexical Scanning talk](https://www.youtube.com/watch?v=HxaD_trXwRE) and [marked](https://github.com/chjj/marked) project.
+This project ispired from [Rob Pike - Lexical Scanning talk](https://www.youtube.com/watch?v=HxaD_trXwRE) and [marked](https://github.com/chjj/marked) project.  
 Please note that this is a __WIP__ project and any contribution is welcomed and appreciated,
 so feel free to take some task here.
 
