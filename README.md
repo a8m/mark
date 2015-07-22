@@ -1,4 +1,6 @@
 # Mark
+[![Test coverage][coveralls-image]][coveralls-url]
+[![Build status][travis-image]][travis-url]
 > A [markdown](http://daringfireball.net/projects/markdown/) processor written in Go. built for fun.
 
 This project ispired from [Rob Pike - Lexical Scanning talk](https://www.youtube.com/watch?v=HxaD_trXwRE) and [marked](https://github.com/chjj/marked) project.  
@@ -42,6 +44,8 @@ func main() {
 ### License
 MIT
 
-
-
+[travis-url]: https://travis-ci.org/a8m/mark
+[travis-image]: https://img.shields.io/travis/a8m/mark.svg?style=flat-square
+[coveralls-image]: https://img.shields.io/coveralls/a8m/mark.svg?style=flat-square
+[coveralls-url]: https://coveralls.io/r/a8m/mark
 
