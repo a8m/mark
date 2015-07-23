@@ -173,7 +173,7 @@ func lexAny(l *lexer) stateFn {
 	case '+', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 		return lexList
 	case '<':
-		return lexHtml
+		return lexHTML
 	case '>':
 		return lexBlockQuote
 	case '[':
@@ -401,9 +401,9 @@ Loop:
 	close(l.items)
 }
 
-// lexHtml.
-func lexHtml(l *lexer) stateFn {
-	if match, res := l.matchHtml(l.input[l.pos:]); match {
+// lexHTML.
+func lexHTML(l *lexer) stateFn {
+	if match, res := l.matchHTML(l.input[l.pos:]); match {
 		l.pos += Pos(len(res))
 		l.emit(itemHTML)
 		return lexAny
@@ -412,7 +412,7 @@ func lexHtml(l *lexer) stateFn {
 }
 
 // Test if the given input is match the HTML pattern(blocks only)
-func (l *lexer) matchHtml(input string) (bool, string) {
+func (l *lexer) matchHTML(input string) (bool, string) {
 	// TODO: DRY regexp - multiline comment
 	comment := regexp.MustCompile(`(?s)<!--.*?-->`)
 	if m := comment.FindString(input); m != "" {

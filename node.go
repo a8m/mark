@@ -422,9 +422,9 @@ func (r *RowNode) append(cell *CellNode) {
 	r.Cells = append(r.Cells, cell)
 }
 
-func (n *RowNode) Render() string {
+func (r *RowNode) Render() string {
 	var s string
-	for _, cell := range n.Cells {
+	for _, cell := range r.Cells {
 		s += cell.Render()
 	}
 	return wrap("tr", s)
@@ -467,27 +467,27 @@ type CellNode struct {
 	Nodes []Node
 }
 
-func (t *CellNode) append(n Node) {
-	t.Nodes = append(t.Nodes, n)
+func (c *CellNode) append(n Node) {
+	c.Nodes = append(c.Nodes, n)
 }
 
 // Return the html reprenestation of table-cell
-func (n *CellNode) Render() string {
+func (c *CellNode) Render() string {
 	var s string
 	tag := "td"
-	if n.Kind == Header {
+	if c.Kind == Header {
 		tag = "th"
 	}
-	for _, node := range n.Nodes {
+	for _, node := range c.Nodes {
 		s += node.Render()
 	}
-	return fmt.Sprintf("<%[1]s%s>%s</%[1]s>", tag, n.Style(), s)
+	return fmt.Sprintf("<%[1]s%s>%s</%[1]s>", tag, c.Style(), s)
 }
 
 // Return the cell-style based on alignment
-func (n *CellNode) Style() string {
+func (c *CellNode) Style() string {
 	s := " style=\"text-align:"
-	switch n.Align() {
+	switch c.Align() {
 	case Right:
 		s += "right\""
 	case Left:
