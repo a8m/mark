@@ -31,6 +31,7 @@ func main() {
 
 ### Todo
 - Backslash escape
+- Add Renderer interface + type used as a nodes container(add the ability to overide rendering methods)
 - Configuration options
 	- gfm, table
 	- heading(auto hashing)
