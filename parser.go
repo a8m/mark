@@ -7,19 +7,18 @@ import (
 	"unicode/utf8"
 )
 
-type Tree struct {
-	lex   Lexer
-	tr    *Tree
-	Nodes []Node
-	// Parsing only
+type Parse struct {
+	lex       Lexer
+	tr        *Parse
+	Nodes     []Node
 	token     [3]item // three-token lookahead for parser
 	peekCount int
 	output    string
 	links     map[string]*DefLinkNode
 }
 
-// Parse convert the raw text to NodeTree.
-func (t *Tree) parse() {
+// Parse convert the raw text to NodeParse.
+func (t *Parse) parse() {
 Loop:
 	for {
 		var n Node
@@ -66,7 +65,7 @@ Loop:
 }
 
 // Root getter
-func (t *Tree) root() *Tree {
+func (t *Parse) root() *Parse {
 	if t.tr == nil {
 		return t
 	}
@@ -74,7 +73,7 @@ func (t *Tree) root() *Tree {
 }
 
 // Render parse nodes to the wanted output
-func (t *Tree) render() {
+func (t *Parse) render() {
 	var last Node
 	last = t.newLine(0)
 	for _, node := range t.Nodes {
@@ -86,12 +85,12 @@ func (t *Tree) render() {
 }
 
 // append new node to nodes-list
-func (t *Tree) append(n Node) {
+func (t *Parse) append(n Node) {
 	t.Nodes = append(t.Nodes, n)
 }
 
 // next returns the next token
-func (t *Tree) next() item {
+func (t *Parse) next() item {
 	if t.peekCount > 0 {
 		t.peekCount--
 	} else {
@@ -101,7 +100,7 @@ func (t *Tree) next() item {
 }
 
 // peek returns but does not consume the next token.
-func (t *Tree) peek() item {
+func (t *Parse) peek() item {
 	if t.peekCount > 0 {
 		return t.token[t.peekCount-1]
 	}
@@ -111,19 +110,19 @@ func (t *Tree) peek() item {
 }
 
 // backup backs the input stream tp one token
-func (t *Tree) backup() {
+func (t *Parse) backup() {
 	t.peekCount++
 }
 
 // backup2 backs the input stream up two tokens.
 // The zeroth token is already there.
-func (t *Tree) backup2(t1 item) {
+func (t *Parse) backup2(t1 item) {
 	t.token[1] = t1
 	t.peekCount = 2
 }
 
 // parseText
-func (t *Tree) parseText(input string) (nodes []Node) {
+func (t *Parse) parseText(input string) (nodes []Node) {
 	// HACK: if there's more 'itemText' in the way, make it one.
 	for {
 		tkn := t.next()
@@ -173,7 +172,7 @@ func (t *Tree) parseText(input string) (nodes []Node) {
 }
 
 // Parse inline emphasis
-func (t *Tree) parseEmphasis(typ itemType, pos Pos, val string) *EmphasisNode {
+func (t *Parse) parseEmphasis(typ itemType, pos Pos, val string) *EmphasisNode {
 	node := t.newEmphasis(pos, typ)
 	match := span[typ].FindStringSubmatch(val)
 	text := match[len(match)-1]
@@ -185,7 +184,7 @@ func (t *Tree) parseEmphasis(typ itemType, pos Pos, val string) *EmphasisNode {
 }
 
 // parse heading block
-func (t *Tree) parseHeading() (node *HeadingNode) {
+func (t *Parse) parseHeading() (node *HeadingNode) {
 	token := t.next()
 	match := block[token.typ].FindStringSubmatch(token.val)
 	if token.typ == itemHeading {
@@ -201,7 +200,7 @@ func (t *Tree) parseHeading() (node *HeadingNode) {
 	return
 }
 
-func (t *Tree) parseDefLink() *DefLinkNode {
+func (t *Parse) parseDefLink() *DefLinkNode {
 	token := t.next()
 	match := block[itemDefLink].FindStringSubmatch(token.val)
 	name := strings.ToLower(match[1])
@@ -213,7 +212,7 @@ func (t *Tree) parseDefLink() *DefLinkNode {
 }
 
 // parse codeBlock
-func (t *Tree) parseCodeBlock() *CodeNode {
+func (t *Parse) parseCodeBlock() *CodeNode {
 	var lang, text string
 	token := t.next()
 	if token.typ == itemGfmCodeBlock {
@@ -230,13 +229,13 @@ func (t *Tree) parseCodeBlock() *CodeNode {
 	return t.newCode(token.pos, lang, text)
 }
 
-func (t *Tree) parseBlockQuote() (n *BlockQuoteNode) {
+func (t *Parse) parseBlockQuote() (n *BlockQuoteNode) {
 	token := t.next()
 	// replacer
 	re := regexp.MustCompile(`(?m)^> ?`)
 	raw := re.ReplaceAllString(token.val, "")
 	// TODO(Ariel): not work right now with defLink(inside the blockQuote)
-	tr := &Tree{lex: lex(raw)}
+	tr := &Parse{lex: lex(raw)}
 	tr.parse()
 	n = t.newBlockQuote(token.pos)
 	n.Nodes = tr.Nodes
@@ -244,7 +243,7 @@ func (t *Tree) parseBlockQuote() (n *BlockQuoteNode) {
 }
 
 // parse list
-func (t *Tree) parseList() *ListNode {
+func (t *Parse) parseList() *ListNode {
 	token := t.next()
 	list := t.newList(token.pos, isDigit(token.val))
 Loop:
@@ -261,10 +260,10 @@ Loop:
 
 // parse listItem
 // Add ignore list(e.g: table should parse as a text)
-func (t *Tree) parseListItem() *ListItemNode {
+func (t *Parse) parseListItem() *ListItemNode {
 	token := t.next()
 	item := t.newListItem(token.pos)
-	tr := &Tree{lex: lex(strings.TrimSpace(token.val))}
+	tr := &Parse{lex: lex(strings.TrimSpace(token.val))}
 	tr.parse()
 	for _, node := range tr.Nodes {
 		// wrap with paragraph only when it's loose item
@@ -278,7 +277,7 @@ func (t *Tree) parseListItem() *ListItemNode {
 }
 
 // parse table
-func (t *Tree) parseTable() *TableNode {
+func (t *Parse) parseTable() *TableNode {
 	table := t.newTable(t.next().pos)
 	// Align	[ None, Left, Right, ... ]
 	// Header	[ Cells: [ ... ] ]
@@ -324,7 +323,7 @@ Loop:
 }
 
 // Should return typ []CellNode
-func (t *Tree) parseCells(kind int, items []item, align []AlignType) *RowNode {
+func (t *Parse) parseCells(kind int, items []item, align []AlignType) *RowNode {
 	var row *RowNode
 	for i, item := range items {
 		if i == 0 {

@@ -83,7 +83,7 @@ var blockParseTests = []parseTest{
 }
 
 func collectNodes(t *parseTest) []Node {
-	tr := &Tree{lex: NewMockLex(t.items), links: make(map[string]*DefLinkNode)}
+	tr := &Parse{lex: NewMockLex(t.items), links: make(map[string]*DefLinkNode)}
 	tr.parse()
 	return tr.Nodes
 }

@@ -65,7 +65,7 @@ func (t *ParagraphNode) append(n Node) {
 	t.Nodes = append(t.Nodes, n)
 }
 
-func (t *Tree) newParagraph(pos Pos) *ParagraphNode {
+func (t *Parse) newParagraph(pos Pos) *ParagraphNode {
 	return &ParagraphNode{NodeType: NodeParagraph, Pos: pos}
 }
 
@@ -81,7 +81,7 @@ func (n *TextNode) Render() string {
 	return escape(string(n.Text))
 }
 
-func (t *Tree) newText(pos Pos, text string) *TextNode {
+func (t *Parse) newText(pos Pos, text string) *TextNode {
 	return &TextNode{NodeType: NodeText, Pos: pos, Text: []byte(text)}
 }
 
@@ -97,7 +97,7 @@ func (n *HTMLNode) Render() string {
 	return string(n.Src)
 }
 
-func (t *Tree) newHTML(pos Pos, src string) *HTMLNode {
+func (t *Parse) newHTML(pos Pos, src string) *HTMLNode {
 	return &HTMLNode{NodeType: NodeHTML, Pos: pos, Src: []byte(src)}
 }
 
@@ -112,7 +112,7 @@ func (n *NewLineNode) Render() string {
 	return "\n"
 }
 
-func (t *Tree) newLine(pos Pos) *NewLineNode {
+func (t *Parse) newLine(pos Pos) *NewLineNode {
 	return &NewLineNode{NodeType: NodeNewLine, Pos: pos}
 }
 
@@ -127,7 +127,7 @@ func (n *HrNode) Render() string {
 	return "<hr>"
 }
 
-func (t *Tree) newHr(pos Pos) *HrNode {
+func (t *Parse) newHr(pos Pos) *HrNode {
 	return &HrNode{NodeType: NodeHr, Pos: pos}
 }
 
@@ -142,7 +142,7 @@ func (n *BrNode) Render() string {
 	return "<br>"
 }
 
-func (t *Tree) newBr(pos Pos) *BrNode {
+func (t *Parse) newBr(pos Pos) *BrNode {
 	return &BrNode{NodeType: NodeBr, Pos: pos}
 }
 
@@ -182,7 +182,7 @@ func (n *EmphasisNode) append(node Node) {
 	n.Nodes = append(n.Nodes, node)
 }
 
-func (t *Tree) newEmphasis(pos Pos, style itemType) *EmphasisNode {
+func (t *Parse) newEmphasis(pos Pos, style itemType) *EmphasisNode {
 	return &EmphasisNode{NodeType: NodeEmphasis, Pos: pos, Style: style}
 }
 
@@ -203,7 +203,7 @@ func (n *HeadingNode) Render() string {
 	return fmt.Sprintf("<%[1]s id=\"%s\">%s</%[1]s>", "h"+strconv.Itoa(n.Level), id, n.Text)
 }
 
-func (t *Tree) newHeading(pos Pos, level int, text string) *HeadingNode {
+func (t *Parse) newHeading(pos Pos, level int, text string) *HeadingNode {
 	return &HeadingNode{NodeType: NodeHeading, Pos: pos, Level: level, Text: []byte(text)}
 }
 
@@ -225,7 +225,7 @@ func (n *CodeNode) Render() string {
 	return wrap("pre", code)
 }
 
-func (t *Tree) newCode(pos Pos, lang, text string) *CodeNode {
+func (t *Parse) newCode(pos Pos, lang, text string) *CodeNode {
 	return &CodeNode{NodeType: NodeCode, Pos: pos, Lang: lang, Text: []byte(text)}
 }
 
@@ -246,7 +246,7 @@ func (n *LinkNode) Render() string {
 	return fmt.Sprintf("<a %s>%s</a>", attrs, n.Text)
 }
 
-func (t *Tree) newLink(pos Pos, title, href, text string) *LinkNode {
+func (t *Parse) newLink(pos Pos, title, href, text string) *LinkNode {
 	return &LinkNode{NodeType: NodeLink, Pos: pos, Title: title, Href: href, Text: []byte(text)}
 }
 
@@ -254,7 +254,7 @@ func (t *Tree) newLink(pos Pos, title, href, text string) *LinkNode {
 type RefNode struct {
 	NodeType
 	Pos
-	tr             *Tree
+	tr             *Parse
 	Text, Ref, Raw string
 }
 
@@ -276,7 +276,7 @@ func (n *RefNode) Render() string {
 }
 
 // create newReferenceNode(Image/Link)
-func (t *Tree) newRef(typ itemType, pos Pos, raw, text, ref string) *RefNode {
+func (t *Parse) newRef(typ itemType, pos Pos, raw, text, ref string) *RefNode {
 	nType := NodeRefLink
 	if typ == itemRefImage {
 		nType = NodeRefImage
@@ -300,7 +300,7 @@ func (n *DefLinkNode) Render() string {
 	return ""
 }
 
-func (t *Tree) newDefLink(pos Pos, name, href, title string) *DefLinkNode {
+func (t *Parse) newDefLink(pos Pos, name, href, title string) *DefLinkNode {
 	return &DefLinkNode{NodeType: NodeLink, Pos: pos, Name: name, Href: href, Title: title}
 }
 
@@ -321,7 +321,7 @@ func (n *ImageNode) Render() string {
 	return fmt.Sprintf("<img %s>", attrs)
 }
 
-func (t *Tree) newImage(pos Pos, title, src, alt string) *ImageNode {
+func (t *Parse) newImage(pos Pos, title, src, alt string) *ImageNode {
 	return &ImageNode{NodeType: NodeImage, Pos: pos, Title: title, Src: src, Alt: []byte(alt)}
 }
 
@@ -349,7 +349,7 @@ func (n *ListNode) Render() (s string) {
 	return wrap(tag, s)
 }
 
-func (t *Tree) newList(pos Pos, ordered bool) *ListNode {
+func (t *Parse) newList(pos Pos, ordered bool) *ListNode {
 	return &ListNode{NodeType: NodeList, Pos: pos, Ordered: ordered}
 }
 
@@ -372,7 +372,7 @@ func (n *ListItemNode) Render() (s string) {
 	return wrap("li", s)
 }
 
-func (t *Tree) newListItem(pos Pos) *ListItemNode {
+func (t *Parse) newListItem(pos Pos) *ListItemNode {
 	return &ListItemNode{NodeType: NodeListItem, Pos: pos}
 }
 
@@ -407,7 +407,7 @@ func (n *TableNode) Render() string {
 	return wrap("table", s)
 }
 
-func (t *Tree) newTable(pos Pos) *TableNode {
+func (t *Parse) newTable(pos Pos) *TableNode {
 	return &TableNode{NodeType: NodeTable, Pos: pos}
 }
 
@@ -430,7 +430,7 @@ func (r *RowNode) Render() string {
 	return wrap("tr", s)
 }
 
-func (t *Tree) newRow(pos Pos) *RowNode {
+func (t *Parse) newRow(pos Pos) *RowNode {
 	return &RowNode{NodeType: NodeRow, Pos: pos}
 }
 
@@ -500,7 +500,7 @@ func (c *CellNode) Style() string {
 	return s
 }
 
-func (t *Tree) newCell(pos Pos, kind int, align AlignType) *CellNode {
+func (t *Parse) newCell(pos Pos, kind int, align AlignType) *CellNode {
 	return &CellNode{NodeType: NodeCell, Pos: pos, Kind: kind, AlignType: align}
 }
 
@@ -519,7 +519,7 @@ func (n *BlockQuoteNode) Render() string {
 	return wrap("blockquote", s)
 }
 
-func (t *Tree) newBlockQuote(pos Pos) *BlockQuoteNode {
+func (t *Parse) newBlockQuote(pos Pos) *BlockQuoteNode {
 	return &BlockQuoteNode{NodeType: NodeBlockQuote, Pos: pos}
 }
 

@@ -37,7 +37,7 @@ func Render(input string) string {
 	for _, fn := range m.Pre {
 		m.Input = fn(m.Input)
 	}
-	tr := &Tree{lex: lex(m.Input), links: make(map[string]*DefLinkNode)}
+	tr := &Parse{lex: lex(m.Input), links: make(map[string]*DefLinkNode)}
 	tr.parse()
 	tr.render()
 	return tr.output
