@@ -110,7 +110,7 @@ var span = map[itemType]*regexp.Regexp{
 type stateFn func(*lexer) stateFn
 
 // Lexer interface, used to composed it inside the Parser
-type Lex interface {
+type Lexer interface {
 	nextItem() item
 }
 

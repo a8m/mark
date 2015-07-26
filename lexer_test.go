@@ -277,7 +277,7 @@ func equal(i1, i2 []item, checkPos bool) bool {
 	return true
 }
 
-func TestBlockLex(t *testing.T) {
+func TestBlockLexer(t *testing.T) {
 	for _, test := range blockTests {
 		items := collect(&test, false)
 		if !equal(items, test.items, false) {
@@ -286,7 +286,7 @@ func TestBlockLex(t *testing.T) {
 	}
 }
 
-func TestInlineLex(t *testing.T) {
+func TestInlineLexer(t *testing.T) {
 	for _, test := range inlineTests {
 		items := collect(&test, true)
 		if !equal(items, test.items, false) {

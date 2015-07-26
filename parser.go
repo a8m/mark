@@ -8,7 +8,7 @@ import (
 )
 
 type Tree struct {
-	lex   Lex
+	lex   Lexer
 	tr    *Tree
 	Nodes []Node
 	// Parsing only
