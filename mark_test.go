@@ -114,3 +114,22 @@ func TestData(t *testing.T) {
 		}
 	}
 }
+
+// TODO: Add more tests for it.
+func TestRenderFn(t *testing.T) {
+	m := New("hello world")
+	m.AddRenderFn(NodeParagraph, func(n Node) (s string) {
+		if p, ok := n.(*ParagraphNode); ok {
+			s += "<p class=\"mv-msg\">"
+			for _, pp := range p.Nodes {
+				s += pp.Render()
+			}
+			s += "</p>"
+		}
+		return
+	})
+	expected := "<p class=\"mv-msg\">hello world</p>"
+	if actual := m.Render(); actual != expected {
+		t.Errorf("RenderFn: got\n\t%+v\nexpected\n\t%+v", actual, expected)
+	}
+}
