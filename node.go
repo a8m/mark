@@ -22,6 +22,9 @@ func (t NodeType) Type() NodeType {
 	return t
 }
 
+// Render function, used for overriding default rendering.
+type RenderFn func(Node) string
+
 const (
 	NodeText NodeType = iota // Plain text.
 	NodeParagraph
@@ -34,13 +37,13 @@ const (
 	NodeRefImage
 	NodeList
 	NodeListItem
-	NodeCode // Code block.
 	NodeLink
 	NodeRefLink
 	NodeDefLink
 	NodeTable
 	NodeRow
 	NodeCell
+	NodeCode       // Code block.
 	NodeBlockQuote // Blockquote block.
 	NodeHTML
 )

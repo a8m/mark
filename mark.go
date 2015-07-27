@@ -2,14 +2,11 @@ package mark
 
 import "strings"
 
-// Hook function, used for preprocessing
-type HookFn func(string) string
-
 // Mark
 type Mark struct {
+	*Parse
 	Input   string
 	Options Options
-	Pre     []HookFn
 }
 
 // Mark options
@@ -17,28 +14,31 @@ type Options struct {
 	Gfm, Tables bool
 }
 
-// Default pre function replace tabs with 4 spaces
-func tabReplacer(s string) string {
-	return strings.Replace(s, "\t", "    ", -1)
-}
-
 // Return new Mark
 func New(input string) *Mark {
+	// Preprocessing
+	input = strings.Replace(input, "\t", "    ", -1)
 	return &Mark{
 		Input: input,
-		Pre:   []HookFn{tabReplacer},
+		Parse: newParse(input),
 	}
+}
+
+// Parse and render input
+func (m *Mark) Render() string {
+	m.parse()
+	m.render()
+	return m.output
+}
+
+// AddRenderFn let you pass NodeType, and RenderFn function
+// and override the default Node rendering
+func (m *Mark) AddRenderFn(typ NodeType, fn RenderFn) {
+	m.renderFn[typ] = fn
 }
 
 // Staic render function
 func Render(input string) string {
 	m := New(input)
-	// PreProcessing
-	for _, fn := range m.Pre {
-		m.Input = fn(m.Input)
-	}
-	tr := &Parse{lex: lex(m.Input), links: make(map[string]*DefLinkNode)}
-	tr.parse()
-	tr.render()
-	return tr.output
+	return m.Render()
 }

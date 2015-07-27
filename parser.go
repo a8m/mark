@@ -8,13 +8,23 @@ import (
 )
 
 type Parse struct {
+	Nodes     []Node
 	lex       Lexer
 	tr        *Parse
-	Nodes     []Node
-	token     [3]item // three-token lookahead for parser
-	peekCount int
 	output    string
-	links     map[string]*DefLinkNode
+	peekCount int
+	token     [3]item                 // three-token lookahead for parser
+	links     map[string]*DefLinkNode // Deflink parsing, used RefLinks
+	renderFn  map[NodeType]RenderFn   // Custom overriden fns
+}
+
+// Return new Parser
+func newParse(input string) *Parse {
+	return &Parse{
+		lex:      lex(input),
+		links:    make(map[string]*DefLinkNode),
+		renderFn: make(map[NodeType]RenderFn),
+	}
 }
 
 // Parse convert the raw text to NodeParse.
@@ -78,7 +88,12 @@ func (t *Parse) render() {
 	last = t.newLine(0)
 	for _, node := range t.Nodes {
 		if last.Type() != NodeNewLine || node.Type() != last.Type() {
-			t.output += node.Render()
+			// If there's a custom render function, use it instead.
+			if fn, ok := t.renderFn[node.Type()]; ok {
+				t.output += fn(node)
+			} else {
+				t.output += node.Render()
+			}
 		}
 		last = node
 	}
