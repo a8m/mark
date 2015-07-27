@@ -27,9 +27,8 @@ const (
 	itemEOF
 	itemNewLine
 	itemHTML
-	// Block Elements
 	itemHeading
-	itemLHeading // Setext-style headers
+	itemLHeading
 	itemBlockQuote
 	itemList
 	itemListItem
@@ -42,8 +41,6 @@ const (
 	itemLpTable
 	itemTableRow
 	itemTableCell
-	// Span Elements
-	itemText
 	// Emphasis
 	itemStrong
 	itemItalic
@@ -58,6 +55,7 @@ const (
 	// Images
 	itemImage
 	itemRefImage
+	itemText
 	itemBr
 	itemPipe
 	itemIndent
@@ -568,7 +566,7 @@ func lexBlockQuote(l *lexer) stateFn {
 	return lexText
 }
 
-// lexTable - WIP
+// lexTable
 func lexTable(l *lexer) stateFn {
 	re := block[itemTable]
 	if l.peek() == '|' {
@@ -578,7 +576,7 @@ func lexTable(l *lexer) stateFn {
 	// TODO: Fix position to be identical to rows/cells
 	l.pos += Pos(len(table[0]))
 	l.start = l.pos
-	// Ignore the first match, and flat all rows(by splitting)
+	// Ignore the first match, and flat all rows(by splitting \n)
 	rows := append(table[1:3], strings.Split(table[3], "\n")...)
 	trim := regexp.MustCompile(`^ *\| *| *\| *$`)
 	split := regexp.MustCompile(` *\| *`)
@@ -596,6 +594,5 @@ func lexTable(l *lexer) stateFn {
 			l.emit(itemTableCell, cell)
 		}
 	}
-	// Reduce the gap
 	return lexAny
 }

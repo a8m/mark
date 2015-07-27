@@ -7,6 +7,7 @@ import (
 	"unicode/utf8"
 )
 
+// parse holds the state of the parser.
 type Parse struct {
 	Nodes     []Node
 	lex       Lexer
@@ -56,7 +57,7 @@ Loop:
 			n = p.parseBlockQuote()
 		case itemIndent:
 			space := p.next()
-			// If it's no follow by text
+			// If it isn't followed by
 			if p.peek().typ != itemText {
 				continue
 			}
