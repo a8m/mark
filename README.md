@@ -27,11 +27,29 @@ func main() {
 	// <p>I am using <strong>markdown</strong>.</p>
 }
 ```
+#### Override default rendering
+**Usage:** `m.AddRenderFn(NodeType, func(Node) string)`
+```go
+func main() {
+	m := mark.New("hello")
+	m.AddRenderFn(mark.NodeParagraph, func(n mark.Node) (s string) {
+		if p, ok := n.(*mark.ParagraphNode); ok {
+			s += "<p class=\"mv-msg\">"
+			for _, node := range p.Nodes {
+				s += node.Render()
+			}
+			s += "</p>"
+		}
+		return
+	})
+	fmt.Println(m.Render())
+	// <p class="mv-msg">hello</p>
+}
+```
 
 
 ### Todo
 - Backslash escape
-- Add Renderer interface + type used as a nodes container(add the ability to overide rendering methods)
 - Configuration options
 	- gfm, table
 	- heading(auto hashing)
