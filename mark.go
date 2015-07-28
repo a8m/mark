@@ -11,7 +11,9 @@ type Mark struct {
 
 // Mark options
 type Options struct {
-	Gfm, Tables bool
+	Gfm         bool
+	Tables      bool
+	Smartypants bool
 }
 
 // Return new Mark
