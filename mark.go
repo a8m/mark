@@ -16,7 +16,8 @@ type Options struct {
 	Smartypants bool
 }
 
-// Return new Mark
+// New return a new Mark
+// TODO(Ariel): add an 'options' parameter(see above).
 func New(input string) *Mark {
 	// Preprocessing
 	input = strings.Replace(input, "\t", "    ", -1)

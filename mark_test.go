@@ -107,10 +107,10 @@ func TestData(t *testing.T) {
 			t.Errorf("Error to read text file: %s", file)
 		}
 		// Remove '\n'
-		sHtml := re.ReplaceAllLiteralString(string(html), "")
+		sHTML := re.ReplaceAllLiteralString(string(html), "")
 		sText := re.ReplaceAllLiteralString(Render(string(text)), "")
 		if sHtml != sText {
-			t.Errorf("%s: got\n\t%+v\nexpected\n\t%+v", file, sText, sHtml)
+			t.Errorf("%s: got\n\t%+v\nexpected\n\t%+v", file, sText, sHTML)
 		}
 	}
 }

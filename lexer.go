@@ -100,7 +100,7 @@ var span = map[itemType]*regexp.Regexp{
 	itemRefLink:  regexp.MustCompile(`^!?\[((?:\[[^\]]*\]|[^\[\]]|\])*)\](?:\s*\[([^\]]*)\])?`),
 	itemAutoLink: regexp.MustCompile(`^<([^ >]+(@|:\/)[^ >]+)>`),
 	itemGfmLink:  regexp.MustCompile(`^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])`),
-	// Image, TODO(Ariel): DRY
+	// Image
 	itemImage: regexp.MustCompile(fmt.Sprintf(`^!?\[(%s)\]\(%s\)`, reLinkText, reLinkHref)),
 }
 

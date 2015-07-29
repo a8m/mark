@@ -26,26 +26,26 @@ func (t NodeType) Type() NodeType {
 type RenderFn func(Node) string
 
 const (
-	NodeText NodeType = iota // Plain text.
-	NodeParagraph
-	NodeEmphasis
-	NodeHeading
-	NodeNewLine
-	NodeBr
-	NodeHr
-	NodeImage
-	NodeRefImage
-	NodeList
-	NodeListItem
-	NodeLink
-	NodeRefLink
-	NodeDefLink
-	NodeTable
-	NodeRow
-	NodeCell
-	NodeCode       // Code block.
-	NodeBlockQuote // Blockquote block.
-	NodeHTML
+	NodeText       NodeType = iota // A plain text
+	NodeParagraph                  // A Paragraph
+	NodeEmphasis                   // An emphasis(strong, em, ...)
+	NodeHeading                    // A heading (h1, h2, ...)
+	NodeNewLine                    // A newLine as a plain text
+	NodeBr                         // A link break
+	NodeHr                         // A horizontal rule
+	NodeImage                      // An image
+	NodeRefImage                   // A image reference
+	NodeList                       // A list of ListItems
+	NodeListItem                   // A list item node
+	NodeLink                       // A link(href)
+	NodeRefLink                    // A link reference
+	NodeDefLink                    // A link definition
+	NodeTable                      // A table of NodeRows
+	NodeRow                        // A row of NodeCells
+	NodeCell                       // A table-cell(td)
+	NodeCode                       // A code block(wrapped with pre)
+	NodeBlockQuote                 // A blockquote
+	NodeHTML                       // An inline HTML
 )
 
 // ParagraphNode hold simple paragraph node contains text
