@@ -194,20 +194,21 @@ type HeadingNode struct {
 	NodeType
 	Pos
 	Level int
-	Text  []byte
+	Text  *TextNode
 }
 
 // Render return the html representation based on heading level.
 func (n *HeadingNode) Render() string {
+	text := n.Text.Render()
 	re := regexp.MustCompile(`[^\w]+`)
-	id := re.ReplaceAllString(string(n.Text), "-")
+	id := re.ReplaceAllString(text, "-")
 	// ToLowerCase
 	id = strings.ToLower(id)
-	return fmt.Sprintf("<%[1]s id=\"%s\">%s</%[1]s>", "h"+strconv.Itoa(n.Level), id, n.Text)
+	return fmt.Sprintf("<%[1]s id=\"%s\">%s</%[1]s>", "h"+strconv.Itoa(n.Level), id, text)
 }
 
 func (t *Parse) newHeading(pos Pos, level int, text string) *HeadingNode {
-	return &HeadingNode{NodeType: NodeHeading, Pos: pos, Level: level, Text: []byte(text)}
+	return &HeadingNode{NodeType: NodeHeading, Pos: pos, Level: level, Text: t.newText(pos, text)}
 }
 
 // Code holds CodeBlock node with specific lang
@@ -507,13 +508,14 @@ func (t *Parse) newCell(pos Pos, kind int, align AlignType) *CellNode {
 	return &CellNode{NodeType: NodeCell, Pos: pos, Kind: kind, AlignType: align}
 }
 
-// BlockQuote element
+// BlockQuote represent
 type BlockQuoteNode struct {
 	NodeType
 	Pos
 	Nodes []Node
 }
 
+// Render return the html representation of BlockQuote
 func (n *BlockQuoteNode) Render() string {
 	var s string
 	for _, node := range n.Nodes {

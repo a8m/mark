@@ -313,7 +313,7 @@ func (l *lexer) nextItem() item {
 }
 
 // One phase lexing(inline reason)
-// TODO: Refactor
+// TODO: refactor
 func (l *lexer) lexInline() {
 	// Drain text before emitting
 	emit := func(item itemType, pos int) {

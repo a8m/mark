@@ -109,7 +109,7 @@ func TestData(t *testing.T) {
 		// Remove '\n'
 		sHTML := re.ReplaceAllLiteralString(string(html), "")
 		sText := re.ReplaceAllLiteralString(Render(string(text)), "")
-		if sHtml != sText {
+		if sHTML != sText {
 			t.Errorf("%s: got\n\t%+v\nexpected\n\t%+v", file, sText, sHTML)
 		}
 	}

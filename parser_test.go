@@ -22,7 +22,7 @@ func (l *mockLexer) nextItem() (t item) {
 	return
 }
 
-func NewMockLex(items []item) *mockLexer {
+func newMockLex(items []item) *mockLexer {
 	return &mockLexer{items: items}
 }
 
@@ -83,7 +83,7 @@ var blockParseTests = []parseTest{
 }
 
 func collectNodes(t *parseTest) []Node {
-	tr := &Parse{lex: NewMockLex(t.items), links: make(map[string]*DefLinkNode)}
+	tr := &Parse{lex: newMockLex(t.items), links: make(map[string]*DefLinkNode)}
 	tr.parse()
 	return tr.Nodes
 }

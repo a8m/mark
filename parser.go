@@ -16,7 +16,7 @@ type Parse struct {
 	peekCount int
 	token     [3]item                 // three-token lookahead for parser
 	links     map[string]*DefLinkNode // Deflink parsing, used RefLinks
-	renderFn  map[NodeType]RenderFn   // Custom overriden fns
+	renderFn  map[NodeType]RenderFn   // Custom overridden fns
 }
 
 // Return new Parser
