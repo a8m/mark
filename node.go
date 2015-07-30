@@ -194,12 +194,12 @@ type HeadingNode struct {
 	NodeType
 	Pos
 	Level int
-	Text  *TextNode
+	Text  string
 }
 
 // Render return the html representation based on heading level.
 func (n *HeadingNode) Render() string {
-	text := n.Text.Render()
+	text := escape(n.Text)
 	re := regexp.MustCompile(`[^\w]+`)
 	id := re.ReplaceAllString(text, "-")
 	// ToLowerCase
@@ -208,7 +208,7 @@ func (n *HeadingNode) Render() string {
 }
 
 func (t *Parse) newHeading(pos Pos, level int, text string) *HeadingNode {
-	return &HeadingNode{NodeType: NodeHeading, Pos: pos, Level: level, Text: t.newText(pos, text)}
+	return &HeadingNode{NodeType: NodeHeading, Pos: pos, Level: level, Text: text}
 }
 
 // Code holds CodeBlock node with specific lang
