@@ -55,8 +55,6 @@ func main() {
 	- heading(auto hashing)
 	- smartypants
 	- etc...
-- __v0.2.0__ - Regex is slowww, we should leave it.
-
 
 ### License
 MIT
