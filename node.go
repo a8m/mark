@@ -76,32 +76,32 @@ func (t *Parse) newParagraph(pos Pos) *ParagraphNode {
 type TextNode struct {
 	NodeType
 	Pos
-	Text []byte
+	Text string
 }
 
 // Render return the string representation of TexNode
 func (n *TextNode) Render() string {
-	return escape(string(n.Text))
+	return escape(n.Text)
 }
 
 func (t *Parse) newText(pos Pos, text string) *TextNode {
-	return &TextNode{NodeType: NodeText, Pos: pos, Text: []byte(text)}
+	return &TextNode{NodeType: NodeText, Pos: pos, Text: text}
 }
 
 // HTMLNode holds html source.
 type HTMLNode struct {
 	NodeType
 	Pos
-	Src []byte
+	Src string
 }
 
 // Render return the src of the HTMLNode
 func (n *HTMLNode) Render() string {
-	return string(n.Src)
+	return n.Src
 }
 
 func (t *Parse) newHTML(pos Pos, src string) *HTMLNode {
-	return &HTMLNode{NodeType: NodeHTML, Pos: pos, Src: []byte(src)}
+	return &HTMLNode{NodeType: NodeHTML, Pos: pos, Src: src}
 }
 
 // NewLineNode represent simple `\n`.
@@ -215,8 +215,7 @@ func (t *Parse) newHeading(pos Pos, level int, text string) *HeadingNode {
 type CodeNode struct {
 	NodeType
 	Pos
-	Lang string
-	Text []byte
+	Lang, Text string
 }
 
 // Return the html representation of codeBlock
@@ -225,20 +224,19 @@ func (n *CodeNode) Render() string {
 	if n.Lang != "" {
 		attr = fmt.Sprintf(" class=\"lang-%s\"", n.Lang)
 	}
-	code := fmt.Sprintf("<%[1]s%s>%s</%[1]s>", "code", attr, n.Text)
+	code := fmt.Sprintf("<%[1]s%s>%s</%[1]s>", "code", attr, escape(n.Text))
 	return wrap("pre", code)
 }
 
 func (t *Parse) newCode(pos Pos, lang, text string) *CodeNode {
-	return &CodeNode{NodeType: NodeCode, Pos: pos, Lang: lang, Text: []byte(text)}
+	return &CodeNode{NodeType: NodeCode, Pos: pos, Lang: lang, Text: text}
 }
 
 // Link holds a tag with optional title
 type LinkNode struct {
 	NodeType
 	Pos
-	Title, Href string
-	Text        []byte
+	Title, Href, Text string
 }
 
 // Return the html representation of link node
@@ -247,11 +245,11 @@ func (n *LinkNode) Render() string {
 	if n.Title != "" {
 		attrs += fmt.Sprintf(" title=\"%s\"", n.Title)
 	}
-	return fmt.Sprintf("<a %s>%s</a>", attrs, n.Text)
+	return fmt.Sprintf("<a %s>%s</a>", attrs, escape(n.Text))
 }
 
 func (t *Parse) newLink(pos Pos, title, href, text string) *LinkNode {
-	return &LinkNode{NodeType: NodeLink, Pos: pos, Title: title, Href: href, Text: []byte(text)}
+	return &LinkNode{NodeType: NodeLink, Pos: pos, Title: title, Href: href, Text: text}
 }
 
 // RefLink holds link with refrence to link definition
@@ -312,8 +310,7 @@ func (t *Parse) newDefLink(pos Pos, name, href, title string) *DefLinkNode {
 type ImageNode struct {
 	NodeType
 	Pos
-	Title, Src string
-	Alt        []byte
+	Title, Src, Alt string
 }
 
 // Return the html representation on img node
@@ -326,7 +323,7 @@ func (n *ImageNode) Render() string {
 }
 
 func (t *Parse) newImage(pos Pos, title, src, alt string) *ImageNode {
-	return &ImageNode{NodeType: NodeImage, Pos: pos, Title: title, Src: src, Alt: []byte(alt)}
+	return &ImageNode{NodeType: NodeImage, Pos: pos, Title: title, Src: src, Alt: alt}
 }
 
 // List holds list items nodes in ordered or unordered states.
