@@ -88,7 +88,7 @@ func (t *Parse) newText(pos Pos, text string) *TextNode {
 	return &TextNode{NodeType: NodeText, Pos: pos, Text: text}
 }
 
-// HTMLNode holds html source.
+// HTMLNode holds the raw html source.
 type HTMLNode struct {
 	NodeType
 	Pos
@@ -134,13 +134,13 @@ func (t *Parse) newHr(pos Pos) *HrNode {
 	return &HrNode{NodeType: NodeHr, Pos: pos}
 }
 
-// BrNode represent br element
+// BrNode represent a link-break element.
 type BrNode struct {
 	NodeType
 	Pos
 }
 
-// Render return the html representation of br.
+// Render return the html representation of line-break.
 func (n *BrNode) Render() string {
 	return "<br>"
 }
@@ -149,7 +149,8 @@ func (t *Parse) newBr(pos Pos) *BrNode {
 	return &BrNode{NodeType: NodeBr, Pos: pos}
 }
 
-// EmphasisNode holds text with style.
+// EmphasisNode holds plain-text wrapped with style.
+// (strong, em, del, code)
 type EmphasisNode struct {
 	NodeType
 	Pos
@@ -157,7 +158,7 @@ type EmphasisNode struct {
 	Nodes []Node
 }
 
-// Tag return the tagName based on Style field
+// Tag return the tagName based on the Style field.
 func (n *EmphasisNode) Tag() (s string) {
 	switch n.Style {
 	case itemStrong:
@@ -172,7 +173,7 @@ func (n *EmphasisNode) Tag() (s string) {
 	return
 }
 
-// Return the html representation of emphasis text(string, italic, ..).
+// Return the html representation of emphasis text.
 func (n *EmphasisNode) Render() string {
 	var s string
 	for _, node := range n.Nodes {
@@ -189,7 +190,7 @@ func (t *Parse) newEmphasis(pos Pos, style itemType) *EmphasisNode {
 	return &EmphasisNode{NodeType: NodeEmphasis, Pos: pos, Style: style}
 }
 
-// Heading holds heaing node with specific level.
+// Heading holds heaing element with specific level(1-6).
 type HeadingNode struct {
 	NodeType
 	Pos
@@ -211,7 +212,7 @@ func (t *Parse) newHeading(pos Pos, level int, text string) *HeadingNode {
 	return &HeadingNode{NodeType: NodeHeading, Pos: pos, Level: level, Text: text}
 }
 
-// Code holds CodeBlock node with specific lang
+// Code holds CodeBlock node with specific lang field.
 type CodeNode struct {
 	NodeType
 	Pos
