@@ -362,8 +362,8 @@ Loop:
 				break
 			}
 			l.next()
-		// itemLink, itemAutoLink, itemImage, itemRefLink, itemRefImage
-		case '[', '<', '!':
+		// itemLink, itemImage, itemRefLink, itemRefImage
+		case '[', '!':
 			input := l.input[l.pos:]
 			if m := span[itemLink].FindString(input); m != "" {
 				pos := len(m)
@@ -383,7 +383,10 @@ Loop:
 				}
 				break
 			}
-			if m := span[itemAutoLink].FindString(input); m != "" {
+			l.next()
+		// itemAutoLink,
+		case '<':
+			if m := span[itemAutoLink].FindString(l.input[l.pos:]); m != "" {
 				emit(itemAutoLink, len(m))
 				break
 			}
