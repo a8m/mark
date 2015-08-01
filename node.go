@@ -378,19 +378,18 @@ func (t *TableNode) append(row *RowNode) {
 func (n *TableNode) Render() string {
 	var s string
 	for i, row := range n.Rows {
+		s += "\n"
 		switch i {
 		case 0:
-			s += wrap("thead", row.Render())
+			s += wrap("thead", "\n"+row.Render()+"\n")
 		case 1:
-			s += "<tbody>"
+			s += "<tbody>\n"
 			fallthrough
 		default:
 			s += row.Render()
-			if i == len(n.Rows)-1 {
-				s += "</tbody>"
-			}
 		}
 	}
+	s += "\n</tbody>\n"
 	return wrap("table", s)
 }
 
@@ -412,8 +411,9 @@ func (r *RowNode) append(cell *CellNode) {
 func (r *RowNode) Render() string {
 	var s string
 	for _, cell := range r.Cells {
-		s += cell.Render()
+		s += "\n" + cell.Render()
 	}
+	s += "\n"
 	return wrap("tr", s)
 }
 

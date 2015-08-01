@@ -85,7 +85,7 @@ func TestRender(t *testing.T) {
 	}
 }
 
-func xxTestData(t *testing.T) {
+func TestData(t *testing.T) {
 	var testFiles []string
 	files, err := ioutil.ReadDir("test")
 	if err != nil {
