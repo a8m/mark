@@ -30,7 +30,6 @@ const (
 	NodeParagraph                  // A Paragraph
 	NodeEmphasis                   // An emphasis(strong, em, ...)
 	NodeHeading                    // A heading (h1, h2, ...)
-	NodeNewLine                    // A newLine as a plain text
 	NodeBr                         // A link break
 	NodeHr                         // A horizontal rule
 	NodeImage                      // An image
@@ -102,21 +101,6 @@ func (n *HTMLNode) Render() string {
 
 func (t *Parse) newHTML(pos Pos, src string) *HTMLNode {
 	return &HTMLNode{NodeType: NodeHTML, Pos: pos, Src: src}
-}
-
-// NewLineNode represent simple `\n`.
-type NewLineNode struct {
-	NodeType
-	Pos
-}
-
-// Render return the string \n for representing new line.
-func (n *NewLineNode) Render() string {
-	return "\n"
-}
-
-func (t *Parse) newLine(pos Pos) *NewLineNode {
-	return &NewLineNode{NodeType: NodeNewLine, Pos: pos}
 }
 
 // HrNode represent horizontal rule
@@ -346,8 +330,9 @@ func (n *ListNode) Render() (s string) {
 		tag = "ol"
 	}
 	for _, item := range n.Items {
-		s += item.Render()
+		s += "\n" + item.Render()
 	}
+	s += "\n"
 	return wrap(tag, s)
 }
 

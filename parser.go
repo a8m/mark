@@ -37,7 +37,7 @@ Loop:
 		case itemEOF, itemError:
 			break Loop
 		case itemNewLine:
-			n = p.newLine(p.next().pos)
+			p.next()
 		case itemHr:
 			n = p.newHr(p.next().pos)
 		case itemHTML:
@@ -85,18 +85,16 @@ func (p *Parse) root() *Parse {
 
 // Render parse nodes to the wanted output
 func (p *Parse) render() {
-	var last Node
-	last = p.newLine(0)
-	for _, node := range p.Nodes {
-		if last.Type() != NodeNewLine || node.Type() != last.Type() {
-			// If there's a custom render function, use it instead.
-			if fn, ok := p.renderFn[node.Type()]; ok {
-				p.output += fn(node)
-			} else {
-				p.output += node.Render()
-			}
+	for i, node := range p.Nodes {
+		// If there's a custom render function, use it instead.
+		if fn, ok := p.renderFn[node.Type()]; ok {
+			p.output += fn(node)
+		} else {
+			p.output += node.Render()
 		}
-		last = node
+		if i != len(p.Nodes)-1 {
+			p.output += "\n"
+		}
 	}
 }
 

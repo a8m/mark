@@ -47,7 +47,7 @@ var blockParseTests = []parseTest{
 			item{itemNewLine, 0, "\n\n"},
 			item{itemText, 0, "world"},
 		},
-		[]NodeType{NodeParagraph, NodeNewLine, NodeNewLine, NodeParagraph},
+		[]NodeType{NodeParagraph, NodeParagraph},
 	},
 	{"header",
 		[]item{
