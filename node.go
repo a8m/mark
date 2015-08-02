@@ -291,14 +291,14 @@ func (p *Parse) newDefLink(pos Pos, name, href, title string) *DefLinkNode {
 	return &DefLinkNode{NodeType: NodeLink, Pos: pos, Name: name, Href: href, Title: title}
 }
 
-// Image holds img tag with optional title
+// ImageNode represent an image element with optional alt and title attributes.
 type ImageNode struct {
 	NodeType
 	Pos
 	Title, Src, Alt string
 }
 
-// Return the html representation on img node
+// Render return the html representation on image node
 func (n *ImageNode) Render() string {
 	attrs := fmt.Sprintf("src=\"%s\" alt=\"%s\"", n.Src, n.Alt)
 	if n.Title != "" {
@@ -311,7 +311,7 @@ func (p *Parse) newImage(pos Pos, title, src, alt string) *ImageNode {
 	return &ImageNode{NodeType: NodeImage, Pos: pos, Title: title, Src: src, Alt: alt}
 }
 
-// List holds list items nodes in ordered or unordered states.
+// ListNode holds list items nodes in ordered or unordered states.
 type ListNode struct {
 	NodeType
 	Pos
@@ -323,7 +323,7 @@ func (t *ListNode) append(item *ListItemNode) {
 	t.Items = append(t.Items, item)
 }
 
-// Return the html representation of list(ul|ol)
+// Render return the html representation of orderd(ol) or unordered(ul) list.
 func (n *ListNode) Render() (s string) {
 	tag := "ul"
 	if n.Ordered {
@@ -351,7 +351,7 @@ func (t *ListItemNode) append(n Node) {
 	t.Nodes = append(t.Nodes, n)
 }
 
-// Return the html representation of listItem
+// Render return the html representation of list-item
 func (n *ListItemNode) Render() (s string) {
 	for _, node := range n.Nodes {
 		s += node.Render()
@@ -363,18 +363,18 @@ func (p *Parse) newListItem(pos Pos) *ListItemNode {
 	return &ListItemNode{NodeType: NodeListItem, Pos: pos}
 }
 
-// TableNode represent table elment contains head and body
+// TableNode represent table element contains head and body
 type TableNode struct {
 	NodeType
 	Pos
 	Rows []*RowNode
 }
 
-func (t *TableNode) append(row *RowNode) {
-	t.Rows = append(t.Rows, row)
+func (n *TableNode) append(row *RowNode) {
+	n.Rows = append(n.Rows, row)
 }
 
-// Return the htnml representation of a table
+// Render return the html representation of a table
 func (n *TableNode) Render() string {
 	var s string
 	for i, row := range n.Rows {
@@ -397,7 +397,7 @@ func (p *Parse) newTable(pos Pos) *TableNode {
 	return &TableNode{NodeType: NodeTable, Pos: pos}
 }
 
-// TableRowNode represnt tr that holds batch of table-data/cells
+// RowNode represnt tr that holds list of cell-nodes
 type RowNode struct {
 	NodeType
 	Pos
@@ -408,6 +408,7 @@ func (r *RowNode) append(cell *CellNode) {
 	r.Cells = append(r.Cells, cell)
 }
 
+// Render return the html representation of table-row
 func (r *RowNode) Render() string {
 	var s string
 	for _, cell := range r.Cells {
@@ -444,7 +445,7 @@ const (
 	Data
 )
 
-// TableCellNode represent table-data/cell that holds simple text(may be emphasis)
+// CellNode represent table-data/cell that holds simple text(may be emphasis)
 // Note: the text in <th> elements are bold and centered by default.
 type CellNode struct {
 	NodeType
@@ -458,7 +459,7 @@ func (c *CellNode) append(n Node) {
 	c.Nodes = append(c.Nodes, n)
 }
 
-// Return the html reprenestation of table-cell
+// Render return the html reprenestation of table-cell
 func (c *CellNode) Render() string {
 	var s string
 	tag := "td"
@@ -471,7 +472,7 @@ func (c *CellNode) Render() string {
 	return fmt.Sprintf("<%[1]s%s>%s</%[1]s>", tag, c.Style(), s)
 }
 
-// Return the cell-style based on alignment
+// Style return the cell-style based on alignment field
 func (c *CellNode) Style() string {
 	s := " style=\"text-align:"
 	switch c.Align() {
