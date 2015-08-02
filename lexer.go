@@ -77,31 +77,27 @@ var block = map[itemType]*regexp.Regexp{
 	itemHr:           regexp.MustCompile(`^( *[-*_]){3,} *(?:\n+|$)`),
 	itemCodeBlock:    regexp.MustCompile(`^( {4}[^\n]+\n*)+`),
 	itemGfmCodeBlock: regexp.MustCompile(fmt.Sprintf(reGfmCode, "`") + "|" + fmt.Sprintf(reGfmCode, "~")),
-	// itemListRegexp it's actually similar to item, but scan whole line
-	itemList:      regexp.MustCompile(`^( *)(?:[*+-]|\d+\.) (.*)(?:\n|)`),
-	itemListItem:  regexp.MustCompile(`^ *([*+-]|\d+\.) +`),
-	itemLooseItem: regexp.MustCompile(`(?m)\n\n(.*)`),
-	// leading-pipe table
-	itemLpTable:    regexp.MustCompile(`(^ *\|.+)\n( *\| *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*`),
-	itemTable:      regexp.MustCompile(`^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*`),
-	itemBlockQuote: regexp.MustCompile(`^( *>[^\n]+(\n[^\n]+)*\n*)+`),
-	itemHTML:       regexp.MustCompile(`^<(\w+)(?:"[^"]*"|'[^']*'|[^'">])*?>`),
+	itemList:         regexp.MustCompile(`^( *)(?:[*+-]|\d+\.) (.*)(?:\n|)`),
+	itemListItem:     regexp.MustCompile(`^ *([*+-]|\d+\.) +`),
+	itemLooseItem:    regexp.MustCompile(`(?m)\n\n(.*)`),
+	itemLpTable:      regexp.MustCompile(`(^ *\|.+)\n( *\| *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*`),
+	itemTable:        regexp.MustCompile(`^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*`),
+	itemBlockQuote:   regexp.MustCompile(`^( *>[^\n]+(\n[^\n]+)*\n*)+`),
+	itemHTML:         regexp.MustCompile(`^<(\w+)(?:"[^"]*"|'[^']*'|[^'">])*?>`),
 }
 
 // Inline Grammer
 var span = map[itemType]*regexp.Regexp{
-	itemItalic: regexp.MustCompile(fmt.Sprintf(reEmphasise, 1)),
-	itemStrong: regexp.MustCompile(fmt.Sprintf(reEmphasise, 2)),
-	itemStrike: regexp.MustCompile(`(?s)^~{2}(.+?)~{2}`),
-	itemCode:   regexp.MustCompile("(?s)^`{1,2}\\s*(.*?[^`])\\s*`{1,2}"),
-	itemBr:     regexp.MustCompile(`^ {2,}\n`),
-	// Links
+	itemItalic:   regexp.MustCompile(fmt.Sprintf(reEmphasise, 1)),
+	itemStrong:   regexp.MustCompile(fmt.Sprintf(reEmphasise, 2)),
+	itemStrike:   regexp.MustCompile(`(?s)^~{2}(.+?)~{2}`),
+	itemCode:     regexp.MustCompile("(?s)^`{1,2}\\s*(.*?[^`])\\s*`{1,2}"),
+	itemBr:       regexp.MustCompile(`^ {2,}\n`),
 	itemLink:     regexp.MustCompile(fmt.Sprintf(`^!?\[(%s)\]\(%s\)`, reLinkText, reLinkHref)),
 	itemRefLink:  regexp.MustCompile(`^!?\[((?:\[[^\]]*\]|[^\[\]]|\])*)\](?:\s*\[([^\]]*)\])?`),
 	itemAutoLink: regexp.MustCompile(`^<([^ >]+(@|:\/)[^ >]+)>`),
 	itemGfmLink:  regexp.MustCompile(`^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])`),
-	// Image
-	itemImage: regexp.MustCompile(fmt.Sprintf(`^!?\[(%s)\]\(%s\)`, reLinkText, reLinkHref)),
+	itemImage:    regexp.MustCompile(fmt.Sprintf(`^!?\[(%s)\]\(%s\)`, reLinkText, reLinkHref)),
 }
 
 // stateFn represents the state of the scanner as a function that returns the next state.
@@ -181,13 +177,11 @@ func lexAny(l *lexer) stateFn {
 	case '`', '~':
 		return lexGfmCode
 	case ' ':
-		// Should be here ?
-		// TODO(Ariel): test that it's a codeBlock
+		// TODO(Ariel): Should be here ?
 		if block[itemCodeBlock].MatchString(l.input[l.pos:]) {
 			return lexCode
 		}
-		// Keep moving forward until we get all the
-		// indentation size
+		// Keep moving forward until we get all the indentation size
 		for ; r == l.peek(); r = l.next() {
 		}
 		l.emit(itemIndent)
