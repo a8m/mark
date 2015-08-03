@@ -308,6 +308,7 @@ func (l *lexer) nextItem() item {
 
 // One phase lexing(inline reason)
 func (l *lexer) lexInline() {
+	escape := regexp.MustCompile("^\\\\([\\`*{}\\[\\]()#+\\-.!_>])")
 	// Drain text before emitting
 	emit := func(item itemType, pos int) {
 		if l.pos > l.start {
@@ -381,6 +382,17 @@ Loop:
 		case '<':
 			if m := span[itemAutoLink].FindString(l.input[l.pos:]); m != "" {
 				emit(itemAutoLink, len(m))
+				break
+			}
+			l.next()
+		// backslash escaping
+		case '\\':
+			if m := escape.FindStringSubmatch(l.input[l.pos:]); len(m) != 0 {
+				if l.pos > l.start {
+					l.emit(itemText)
+				}
+				l.pos += Pos(len(m[0]))
+				l.emit(itemText, m[1])
 				break
 			}
 			l.next()
@@ -578,7 +590,6 @@ func lexTable(l *lexer) stateFn {
 	split := regexp.MustCompile(` *\| *`)
 	// Loop over the rows
 	for _, row := range rows {
-		// Replace "\n$" with "" above
 		if row == "" {
 			continue
 		}
