@@ -49,8 +49,7 @@ func main() {
 
 
 ### Todo
-- Backslash escape
-- Expand documation
+- Expand documentation
 - Configuration options
 	- gfm, table
 	- heading(auto hashing)
