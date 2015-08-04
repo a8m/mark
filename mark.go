@@ -45,3 +45,8 @@ func Render(input string) string {
 	m := New(input)
 	return m.Render()
 }
+
+// Smartypanths transformations
+func smartypants(text string) string {
+	// ...
+}
