@@ -549,3 +549,19 @@ func escape(str string) (cpy string) {
 	}
 	return
 }
+
+// Smartypants transformation helper, translate from marked.js
+func smartypants(text string) string {
+	//	em-dashes, en-dashes, ellipses
+	re := strings.NewReplacer("---", "\u2014", "--", "\u2013", "...", "\u2026")
+	text = re.Replace(text)
+	// opening singles
+	text = regexp.MustCompile("(^|[-\u2014/(\\[{\"\\s])'").ReplaceAllString(text, "$1\u2018")
+	// closing singles & apostrophes
+	text = strings.Replace(text, "'", "\u2019", -1)
+	// opening doubles
+	text = regexp.MustCompile("(^|[-\u2014/(\\[{\u2018\\s])\"").ReplaceAllString(text, "$1\u201c")
+	// closing doubles
+	text = strings.Replace(text, "\"", "\u201d", -1)
+	fmt.Println(text)
+}
