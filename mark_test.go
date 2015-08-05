@@ -81,6 +81,8 @@ func TestRender(t *testing.T) {
 		"\\**foo\\**":       "<p>*<em>foo*</em></p>",
 		"\\*foo\\*":         "<p>*foo*</p>",
 		"\\_underscores\\_": "<p>_underscores_</p>",
+		"\\## header":       "<p>## header</p>",
+		"header\n\\===":     "<p>header\n\\===</p>",
 	}
 	for actual, expected := range cases {
 		if res := Render(actual); res != expected {
