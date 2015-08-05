@@ -565,3 +565,23 @@ func smartypants(text string) string {
 	text = strings.Replace(text, "\"", "\u201d", -1)
 	fmt.Println(text)
 }
+
+// Smartyfractions transformation helper.
+func smartyfractions(text string) string {
+	re := regexp.MustCompile(`(\d+)(/\d+)(/\d+|)`)
+	return re.ReplaceAllStringFunc(text, func(str string) string {
+		var match []string
+		// If it's date like
+		if match = re.FindStringSubmatch(str); match[3] != "" {
+			return str
+		}
+		switch n := match[1] + match[2]; n {
+		case "1/2", "1/3", "2/3", "1/4", "3/4", "1/5", "2/5", "3/5", "4/5",
+			"1/6", "5/6", "1/7", "1/8", "3/8", "5/8", "7/8":
+			return fmt.Sprintf("&frac%s;", strings.Replace(n, "/", "", 1))
+		default:
+			return fmt.Sprintf("<sup>%s</sup>&frasl;<sub>%s</sub>",
+				match[1], strings.Replace(match[2], "/", "", 1))
+		}
+	})
+}
