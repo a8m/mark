@@ -32,14 +32,13 @@ func main() {
 ```go
 func main() {
 	m := mark.New("hello")
-	m.AddRenderFn(mark.NodeParagraph, func(n mark.Node) (s string) {
-		if p, ok := n.(*mark.ParagraphNode); ok {
-			s += "<p class=\"mv-msg\">"
-			for _, node := range p.Nodes {
-				s += node.Render()
-			}
-			s += "</p>"
+	m.AddRenderFn(mark.NodeParagraph, func(node mark.Node) (s string) {
+		p, _ := node.(*mark.ParagraphNode)
+		s += "<p class=\"mv-msg\">"
+		for _, n := range p.Nodes {
+			s += n.Render()
 		}
+		s += "</p>"
 		return
 	})
 	fmt.Println(m.Render())
