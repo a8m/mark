@@ -1,0 +1,63 @@
+These should all get escaped:
+
+Backtick: \`
+
+Asterisk: \*
+
+Underscore: \_
+
+Left brace: \{
+
+Right brace: \}
+
+Left bracket: \[
+
+Right bracket: \]
+
+Left paren: \(
+
+Right paren: \)
+
+Hash: \#
+
+Period: \.
+
+Bang: \!
+
+Plus: \+
+
+Minus: \-
+
+These should not, because they occur within a code block:
+
+	Backslash: \\
+
+	Backtick: \`
+
+	Asterisk: \*
+
+	Underscore: \_
+
+	Left brace: \{
+
+	Right brace: \}
+
+	Left bracket: \[
+
+	Right bracket: \]
+
+	Left paren: \(
+
+	Right paren: \)
+
+	Greater-than: \>
+
+	Hash: \#
+
+	Period: \.
+
+	Bang: \!
+
+	Plus: \+
+
+	Minus: \-

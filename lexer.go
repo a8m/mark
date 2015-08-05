@@ -308,7 +308,7 @@ func (l *lexer) nextItem() item {
 
 // One phase lexing(inline reason)
 func (l *lexer) lexInline() {
-	escape := regexp.MustCompile("^\\\\([\\`*{}\\[\\]()#+\\-.!_>])")
+	escape := regexp.MustCompile("^\\\\([\\`*{}\\[\\]()#+\\-.!_>~|])")
 	// Drain text before emitting
 	emit := func(item itemType, pos int) {
 		if l.pos > l.start {

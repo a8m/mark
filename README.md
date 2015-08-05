@@ -49,6 +49,8 @@ func main() {
 
 
 ### Todo
+- Backslash escaping
+	- should ignore inside code spans
 - Expand documentation
 - Configuration options
 	- gfm, table

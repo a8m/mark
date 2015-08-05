@@ -46,7 +46,9 @@ func Render(input string) string {
 	return m.Render()
 }
 
-// Smartypanths transformations
-func smartypants(text string) string {
-	// ...
-}
+// Escaping:
+// >, \,
+// // Smartypanths transformations
+// func smartypants(text string) string {
+// 	// ...
+// }
