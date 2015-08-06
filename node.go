@@ -563,7 +563,7 @@ func smartypants(text string) string {
 	text = regexp.MustCompile("(^|[-\u2014/(\\[{\u2018\\s])\"").ReplaceAllString(text, "$1\u201c")
 	// closing doubles
 	text = strings.Replace(text, "\"", "\u201d", -1)
-	fmt.Println(text)
+	return text
 }
 
 // Smartyfractions transformation helper.
