@@ -31,7 +31,7 @@ func main() {
 **Usage:** `m.AddRenderFn(NodeType, func(Node) string)`
 ```go
 func main() {
-	m := mark.New("hello")
+	m := mark.New("hello", nil)
 	m.AddRenderFn(mark.NodeParagraph, func(node mark.Node) (s string) {
 		p, _ := node.(*mark.ParagraphNode)
 		s += "<p class=\"mv-msg\">"
@@ -45,7 +45,17 @@ func main() {
 	// <p class="mv-msg">hello</p>
 }
 ```
-
+#### Mark support [smartypants](http://daringfireball.net/projects/smartypants/) and smartfractions rendering
+```go
+func main() {
+	opts := mark.DefaultOptions()
+	opts.Smartypants = true
+	opts.Fractions = true
+	m := mark.New("hello", opts)
+	fmt.Println(m.Render())
+	// ‘hello’, ½ beer please…
+}
+```
 
 ### Todo
 - Backslash escaping
@@ -54,8 +64,6 @@ func main() {
 - Configuration options
 	- gfm, table
 	- heading(auto hashing)
-	- smartypants
-	- etc...
 
 ### License
 MIT
