@@ -115,9 +115,13 @@ func TestData(t *testing.T) {
 		// Remove '\n'
 		sHTML := re.ReplaceAllLiteralString(string(html), "")
 		output := Render(string(text))
+		opts := DefaultOptions()
 		if strings.Contains(file, "smartypants") {
-			opts := DefaultOptions()
 			opts.Smartypants = true
+			output = New(string(text), opts).Render()
+		}
+		if strings.Contains(file, "smartyfractions") {
+			opts.Fractions = true
 			output = New(string(text), opts).Render()
 		}
 		sText := re.ReplaceAllLiteralString(output, "")
