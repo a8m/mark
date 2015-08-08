@@ -63,10 +63,6 @@ func (n *ParagraphNode) Render() (s string) {
 	return wrap("p", s)
 }
 
-func (t *ParagraphNode) append(n Node) {
-	t.Nodes = append(t.Nodes, n)
-}
-
 func (p *Parse) newParagraph(pos Pos) *ParagraphNode {
 	return &ParagraphNode{NodeType: NodeParagraph, Pos: pos}
 }
@@ -164,10 +160,6 @@ func (n *EmphasisNode) Render() string {
 		s += node.Render()
 	}
 	return wrap(n.Tag(), s)
-}
-
-func (n *EmphasisNode) append(node Node) {
-	n.Nodes = append(n.Nodes, node)
 }
 
 func (p *Parse) newEmphasis(pos Pos, style itemType) *EmphasisNode {
@@ -451,10 +443,6 @@ type CellNode struct {
 	AlignType
 	Kind  int
 	Nodes []Node
-}
-
-func (c *CellNode) append(n Node) {
-	c.Nodes = append(c.Nodes, n)
 }
 
 // Render return the html reprenestation of table-cell
