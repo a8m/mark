@@ -51,7 +51,7 @@ func main() {
 	opts := mark.DefaultOptions()
 	opts.Smartypants = true
 	opts.Fractions = true
-	m := mark.New("hello", opts)
+	m := mark.New("'hello', 1/2 beer please...", opts)
 	fmt.Println(m.Render())
 	// ‘hello’, ½ beer please…
 }
