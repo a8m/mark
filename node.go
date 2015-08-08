@@ -80,11 +80,11 @@ type TextNode struct {
 
 // Render return the string representation of TexNode
 func (n *TextNode) Render() string {
-	return escape(n.Text)
+	return n.Text
 }
 
 func (p *Parse) newText(pos Pos, text string) *TextNode {
-	return &TextNode{NodeType: NodeText, Pos: pos, Text: text}
+	return &TextNode{NodeType: NodeText, Pos: pos, Text: p.text(text)}
 }
 
 // HTMLNode holds the raw html source.
@@ -100,7 +100,7 @@ func (n *HTMLNode) Render() string {
 }
 
 func (p *Parse) newHTML(pos Pos, src string) *HTMLNode {
-	return &HTMLNode{NodeType: NodeHTML, Pos: pos, Src: src}
+	return &HTMLNode{NodeType: NodeHTML, Pos: pos, Src: p.text(src)}
 }
 
 // HrNode represent horizontal rule
@@ -184,16 +184,15 @@ type HeadingNode struct {
 
 // Render return the html representation based on heading level.
 func (n *HeadingNode) Render() string {
-	text := escape(n.Text)
 	re := regexp.MustCompile(`[^\w]+`)
-	id := re.ReplaceAllString(text, "-")
+	id := re.ReplaceAllString(n.Text, "-")
 	// ToLowerCase
 	id = strings.ToLower(id)
-	return fmt.Sprintf("<%[1]s id=\"%s\">%s</%[1]s>", "h"+strconv.Itoa(n.Level), id, text)
+	return fmt.Sprintf("<%[1]s id=\"%s\">%s</%[1]s>", "h"+strconv.Itoa(n.Level), id, n.Text)
 }
 
 func (p *Parse) newHeading(pos Pos, level int, text string) *HeadingNode {
-	return &HeadingNode{NodeType: NodeHeading, Pos: pos, Level: level, Text: text}
+	return &HeadingNode{NodeType: NodeHeading, Pos: pos, Level: level, Text: p.text(text)}
 }
 
 // Code holds CodeBlock node with specific lang field.
@@ -209,12 +208,12 @@ func (n *CodeNode) Render() string {
 	if n.Lang != "" {
 		attr = fmt.Sprintf(" class=\"lang-%s\"", n.Lang)
 	}
-	code := fmt.Sprintf("<%[1]s%s>%s</%[1]s>", "code", attr, escape(n.Text))
+	code := fmt.Sprintf("<%[1]s%s>%s</%[1]s>", "code", attr, n.Text)
 	return wrap("pre", code)
 }
 
 func (p *Parse) newCode(pos Pos, lang, text string) *CodeNode {
-	return &CodeNode{NodeType: NodeCode, Pos: pos, Lang: lang, Text: text}
+	return &CodeNode{NodeType: NodeCode, Pos: pos, Lang: lang, Text: p.text(text)}
 }
 
 // Link holds a tag with optional title
@@ -230,11 +229,11 @@ func (n *LinkNode) Render() string {
 	if n.Title != "" {
 		attrs += fmt.Sprintf(" title=\"%s\"", n.Title)
 	}
-	return fmt.Sprintf("<a %s>%s</a>", attrs, escape(n.Text))
+	return fmt.Sprintf("<a %s>%s</a>", attrs, n.Text)
 }
 
 func (p *Parse) newLink(pos Pos, title, href, text string) *LinkNode {
-	return &LinkNode{NodeType: NodeLink, Pos: pos, Title: title, Href: href, Text: text}
+	return &LinkNode{NodeType: NodeLink, Pos: pos, Title: p.text(title), Href: p.text(href), Text: p.text(text)}
 }
 
 // RefLink holds link with refrence to link definition
@@ -246,7 +245,6 @@ type RefNode struct {
 }
 
 // rendering based type
-// TODO: Text should be TextNode(with escaping etc..)
 func (n *RefNode) Render() string {
 	var node Node
 	ref := strings.ToLower(n.Ref)
@@ -272,7 +270,7 @@ func (p *Parse) newRef(typ itemType, pos Pos, raw, text, ref string) *RefNode {
 	if ref == "" {
 		ref = text
 	}
-	return &RefNode{NodeType: nType, Pos: pos, tr: p.root(), Raw: raw, Text: text, Ref: ref}
+	return &RefNode{NodeType: nType, Pos: pos, tr: p.root(), Raw: raw, Text: p.text(text), Ref: ref}
 }
 
 // DefLinkNode refresent single reference to link-definition
@@ -308,7 +306,7 @@ func (n *ImageNode) Render() string {
 }
 
 func (p *Parse) newImage(pos Pos, title, src, alt string) *ImageNode {
-	return &ImageNode{NodeType: NodeImage, Pos: pos, Title: title, Src: src, Alt: alt}
+	return &ImageNode{NodeType: NodeImage, Pos: pos, Title: p.text(title), Src: p.text(src), Alt: p.text(alt)}
 }
 
 // ListNode holds list items nodes in ordered or unordered states.
@@ -515,6 +513,19 @@ func (p *Parse) newBlockQuote(pos Pos) *BlockQuoteNode {
 // Wrap text with specific tag.
 func wrap(tag, body string) string {
 	return fmt.Sprintf("<%[1]s>%s</%[1]s>", tag, body)
+}
+
+// group all text configuration in one place(escaping, smartypants, etc..)
+func (p *Parse) text(input string) string {
+	opts := p.root().options
+	input = escape(input)
+	if opts.Smartypants {
+		input = smartypants(input)
+	}
+	if opts.Fractions {
+		input = smartyfractions(input)
+	}
+	return input
 }
 
 // helper escaper

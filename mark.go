@@ -14,16 +14,28 @@ type Options struct {
 	Gfm         bool
 	Tables      bool
 	Smartypants bool
+	Fractions   bool
+}
+
+// DefaultOptions return an options struct with default configuration
+// it's means that only Gfm, and Tables set to true.
+func DefaultOptions() *Options {
+	return &Options{
+		Gfm:    true,
+		Tables: true,
+	}
 }
 
 // New return a new Mark
-// TODO(Ariel): add an 'options' parameter(see above).
-func New(input string) *Mark {
+func New(input string, opts *Options) *Mark {
 	// Preprocessing
 	input = strings.Replace(input, "\t", "    ", -1)
+	if opts == nil {
+		opts = DefaultOptions()
+	}
 	return &Mark{
 		Input: input,
-		Parse: newParse(input),
+		Parse: newParse(input, opts),
 	}
 }
 
@@ -42,6 +54,6 @@ func (m *Mark) AddRenderFn(typ NodeType, fn RenderFn) {
 
 // Staic render function
 func Render(input string) string {
-	m := New(input)
+	m := New(input, nil)
 	return m.Render()
 }

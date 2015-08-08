@@ -123,7 +123,7 @@ func TestData(t *testing.T) {
 
 // TODO: Add more tests for it.
 func TestRenderFn(t *testing.T) {
-	m := New("hello world")
+	m := New("hello world", nil)
 	m.AddRenderFn(NodeParagraph, func(n Node) (s string) {
 		if p, ok := n.(*ParagraphNode); ok {
 			s += "<p class=\"mv-msg\">"

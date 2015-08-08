@@ -11,6 +11,7 @@ import (
 type Parse struct {
 	Nodes     []Node
 	lex       Lexer
+	options   *Options
 	tr        *Parse
 	output    string
 	peekCount int
@@ -20,9 +21,10 @@ type Parse struct {
 }
 
 // Return new Parser
-func newParse(input string) *Parse {
+func newParse(input string, opts *Options) *Parse {
 	return &Parse{
 		lex:      lex(input),
+		options:  opts,
 		links:    make(map[string]*DefLinkNode),
 		renderFn: make(map[NodeType]RenderFn),
 	}
@@ -249,7 +251,7 @@ func (p *Parse) parseBlockQuote() (n *BlockQuoteNode) {
 	re := regexp.MustCompile(`(?m)^> ?`)
 	raw := re.ReplaceAllString(token.val, "")
 	// TODO(Ariel): not work right now with defLink(inside the blockQuote)
-	tr := &Parse{lex: lex(raw)}
+	tr := &Parse{lex: lex(raw), tr: p}
 	tr.parse()
 	n = p.newBlockQuote(token.pos)
 	n.Nodes = tr.Nodes
@@ -277,7 +279,7 @@ Loop:
 func (p *Parse) parseListItem() *ListItemNode {
 	token := p.next()
 	item := p.newListItem(token.pos)
-	tr := &Parse{lex: lex(strings.TrimSpace(token.val))}
+	tr := &Parse{lex: lex(strings.TrimSpace(token.val)), tr: p}
 	tr.parse()
 	for _, node := range tr.Nodes {
 		// wrap with paragraph only when it's loose item
