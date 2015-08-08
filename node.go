@@ -518,14 +518,13 @@ func wrap(tag, body string) string {
 // group all text configuration in one place(escaping, smartypants, etc..)
 func (p *Parse) text(input string) string {
 	opts := p.root().options
-	input = escape(input)
 	if opts.Smartypants {
 		input = smartypants(input)
 	}
 	if opts.Fractions {
 		input = smartyfractions(input)
 	}
-	return input
+	return escape(input)
 }
 
 // helper escaper
@@ -555,7 +554,7 @@ func escape(str string) (cpy string) {
 				cpy += "&amp;"
 			}
 		default:
-			cpy += string(s)
+			cpy += str[i : i+1]
 		}
 	}
 	return

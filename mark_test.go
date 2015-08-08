@@ -114,7 +114,13 @@ func TestData(t *testing.T) {
 		}
 		// Remove '\n'
 		sHTML := re.ReplaceAllLiteralString(string(html), "")
-		sText := re.ReplaceAllLiteralString(Render(string(text)), "")
+		output := Render(string(text))
+		if strings.Contains(file, "smartypants") {
+			opts := DefaultOptions()
+			opts.Smartypants = true
+			output = New(string(text), opts).Render()
+		}
+		sText := re.ReplaceAllLiteralString(output, "")
 		if sHTML != sText {
 			t.Errorf("%s: got\n\t%+v\nexpected\n\t%+v", file, sText, sHTML)
 		}
