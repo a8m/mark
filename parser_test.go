@@ -26,7 +26,7 @@ func newMockLex(items []item) *mockLexer {
 	return &mockLexer{items: items}
 }
 
-var blockParseTests = []parseTest{
+var blockparseTests = []parseTest{
 	{"eof", []item{}, []NodeType{}},
 	{"text-1",
 		[]item{item{itemText, 0, "hello"}},
@@ -83,7 +83,7 @@ var blockParseTests = []parseTest{
 }
 
 func collectNodes(t *parseTest) []Node {
-	tr := &Parse{
+	tr := &parse{
 		lex:     newMockLex(t.items),
 		links:   make(map[string]*DefLinkNode),
 		options: DefaultOptions(),
@@ -104,8 +104,8 @@ func equalTypes(n1 []Node, n2 []NodeType) bool {
 	return true
 }
 
-func TestBlocksParse(t *testing.T) {
-	for _, test := range blockParseTests {
+func TestBlocksparse(t *testing.T) {
+	for _, test := range blockparseTests {
 		nodes := collectNodes(&test)
 		if !equalTypes(nodes, test.nodes) {
 			t.Errorf("%s: got\n\t%+v\nexpected\n\t%+v", test.name, nodes, test.nodes)

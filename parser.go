@@ -8,11 +8,11 @@ import (
 )
 
 // parse holds the state of the parser.
-type Parse struct {
+type parse struct {
 	Nodes     []Node
 	lex       Lexer
 	options   *Options
-	tr        *Parse
+	tr        *parse
 	output    string
 	peekCount int
 	token     [3]item                 // three-token lookahead for parser
@@ -20,9 +20,9 @@ type Parse struct {
 	renderFn  map[NodeType]RenderFn   // Custom overridden fns
 }
 
-// Return new Parser
-func newParse(input string, opts *Options) *Parse {
-	return &Parse{
+// Return new parser
+func newParse(input string, opts *Options) *parse {
+	return &parse{
 		lex:      lex(input),
 		options:  opts,
 		links:    make(map[string]*DefLinkNode),
@@ -30,8 +30,8 @@ func newParse(input string, opts *Options) *Parse {
 	}
 }
 
-// Parse convert the raw text to NodeParse.
-func (p *Parse) parse() {
+// parse convert the raw text to Nodeparse.
+func (p *parse) parse() {
 Loop:
 	for {
 		var n Node
@@ -78,7 +78,7 @@ Loop:
 }
 
 // Root getter
-func (p *Parse) root() *Parse {
+func (p *parse) root() *parse {
 	if p.tr == nil {
 		return p
 	}
@@ -86,7 +86,7 @@ func (p *Parse) root() *Parse {
 }
 
 // Render parse nodes to the wanted output
-func (p *Parse) render() {
+func (p *parse) render() {
 	for i, node := range p.Nodes {
 		// If there's a custom render function, use it instead.
 		if fn, ok := p.renderFn[node.Type()]; ok {
@@ -101,12 +101,12 @@ func (p *Parse) render() {
 }
 
 // append new node to nodes-list
-func (p *Parse) append(n Node) {
+func (p *parse) append(n Node) {
 	p.Nodes = append(p.Nodes, n)
 }
 
 // next returns the next token
-func (p *Parse) next() item {
+func (p *parse) next() item {
 	if p.peekCount > 0 {
 		p.peekCount--
 	} else {
@@ -116,7 +116,7 @@ func (p *Parse) next() item {
 }
 
 // peek returns but does not consume the next token.
-func (p *Parse) peek() item {
+func (p *parse) peek() item {
 	if p.peekCount > 0 {
 		return p.token[p.peekCount-1]
 	}
@@ -126,19 +126,19 @@ func (p *Parse) peek() item {
 }
 
 // backup backs the input stream tp one token
-func (p *Parse) backup() {
+func (p *parse) backup() {
 	p.peekCount++
 }
 
 // backup2 backs the input stream up two tokens.
 // The zeroth token is already there.
-func (p *Parse) backup2(t1 item) {
+func (p *parse) backup2(t1 item) {
 	p.token[1] = t1
 	p.peekCount = 2
 }
 
 // parseText
-func (p *Parse) parseText(input string) (nodes []Node) {
+func (p *parse) parseText(input string) (nodes []Node) {
 	// HACK: if there's more 'itemText' in the way, make it one.
 	for {
 		tkn := p.next()
@@ -187,8 +187,8 @@ func (p *Parse) parseText(input string) (nodes []Node) {
 	return nodes
 }
 
-// Parse inline emphasis
-func (p *Parse) parseEmphasis(typ itemType, pos Pos, val string) *EmphasisNode {
+// parse inline emphasis
+func (p *parse) parseEmphasis(typ itemType, pos Pos, val string) *EmphasisNode {
 	node := p.newEmphasis(pos, typ)
 	match := span[typ].FindStringSubmatch(val)
 	text := match[len(match)-1]
@@ -200,7 +200,7 @@ func (p *Parse) parseEmphasis(typ itemType, pos Pos, val string) *EmphasisNode {
 }
 
 // parse heading block
-func (p *Parse) parseHeading() (node *HeadingNode) {
+func (p *parse) parseHeading() (node *HeadingNode) {
 	token := p.next()
 	match := block[token.typ].FindStringSubmatch(token.val)
 	if token.typ == itemHeading {
@@ -216,7 +216,7 @@ func (p *Parse) parseHeading() (node *HeadingNode) {
 	return
 }
 
-func (p *Parse) parseDefLink() *DefLinkNode {
+func (p *parse) parseDefLink() *DefLinkNode {
 	token := p.next()
 	match := block[itemDefLink].FindStringSubmatch(token.val)
 	name := strings.ToLower(match[1])
@@ -228,7 +228,7 @@ func (p *Parse) parseDefLink() *DefLinkNode {
 }
 
 // parse codeBlock
-func (p *Parse) parseCodeBlock() *CodeNode {
+func (p *parse) parseCodeBlock() *CodeNode {
 	var lang, text string
 	token := p.next()
 	if token.typ == itemGfmCodeBlock {
@@ -245,13 +245,13 @@ func (p *Parse) parseCodeBlock() *CodeNode {
 	return p.newCode(token.pos, lang, text)
 }
 
-func (p *Parse) parseBlockQuote() (n *BlockQuoteNode) {
+func (p *parse) parseBlockQuote() (n *BlockQuoteNode) {
 	token := p.next()
 	// replacer
 	re := regexp.MustCompile(`(?m)^> ?`)
 	raw := re.ReplaceAllString(token.val, "")
 	// TODO(Ariel): not work right now with defLink(inside the blockQuote)
-	tr := &Parse{lex: lex(raw), tr: p}
+	tr := &parse{lex: lex(raw), tr: p}
 	tr.parse()
 	n = p.newBlockQuote(token.pos)
 	n.Nodes = tr.Nodes
@@ -259,7 +259,7 @@ func (p *Parse) parseBlockQuote() (n *BlockQuoteNode) {
 }
 
 // parse list
-func (p *Parse) parseList() *ListNode {
+func (p *parse) parseList() *ListNode {
 	token := p.next()
 	list := p.newList(token.pos, isDigit(token.val))
 Loop:
@@ -276,10 +276,10 @@ Loop:
 
 // parse listItem
 // Add ignore list(e.g: table should parse as a text)
-func (p *Parse) parseListItem() *ListItemNode {
+func (p *parse) parseListItem() *ListItemNode {
 	token := p.next()
 	item := p.newListItem(token.pos)
-	tr := &Parse{lex: lex(strings.TrimSpace(token.val)), tr: p}
+	tr := &parse{lex: lex(strings.TrimSpace(token.val)), tr: p}
 	tr.parse()
 	for _, node := range tr.Nodes {
 		// wrap with paragraph only when it's loose item
@@ -293,7 +293,7 @@ func (p *Parse) parseListItem() *ListItemNode {
 }
 
 // parse table
-func (p *Parse) parseTable() *TableNode {
+func (p *parse) parseTable() *TableNode {
 	table := p.newTable(p.next().pos)
 	// Align	[ None, Left, Right, ... ]
 	// Header	[ Cells: [ ... ] ]
@@ -339,7 +339,7 @@ Loop:
 }
 
 // parse cells and return new row
-func (p *Parse) parseCells(kind int, items []item, align []AlignType) *RowNode {
+func (p *parse) parseCells(kind int, items []item, align []AlignType) *RowNode {
 	var row *RowNode
 	for i, item := range items {
 		if i == 0 {

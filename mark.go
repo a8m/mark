@@ -4,9 +4,8 @@ import "strings"
 
 // Mark
 type Mark struct {
-	*Parse
-	Input   string
-	Options Options
+	*parse
+	Input string
 }
 
 // Mark options
@@ -35,13 +34,13 @@ func New(input string, opts *Options) *Mark {
 	}
 	return &Mark{
 		Input: input,
-		Parse: newParse(input, opts),
+		parse: newParse(input, opts),
 	}
 }
 
-// Parse and render input
+// parse and render input
 func (m *Mark) Render() string {
-	m.parse()
+	m.parse.parse()
 	m.render()
 	return m.output
 }

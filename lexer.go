@@ -103,7 +103,7 @@ var span = map[itemType]*regexp.Regexp{
 // stateFn represents the state of the scanner as a function that returns the next state.
 type stateFn func(*lexer) stateFn
 
-// Lexer interface, used to composed it inside the Parser
+// Lexer interface, used to composed it inside the parser
 type Lexer interface {
 	nextItem() item
 }
