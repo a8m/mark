@@ -2,19 +2,28 @@
 > A [markdown](http://daringfireball.net/projects/markdown/) processor written in Go. built for fun.
 
 This project inspired from [Rob Pike - Lexical Scanning talk](https://www.youtube.com/watch?v=HxaD_trXwRE) and [marked](https://github.com/chjj/marked) project.  
-Please note that this is a __WIP__ project and any contribution is welcomed and appreciated,
+Please note that this is a WIP project and any contribution is welcomed and appreciated,
 so feel free to take some task here.
 
 ## Table of contents:
-- [Usage](#usage)
+- [Get Started](#get-started)
+- [Examples](#examples)
+- [Documentation](#documentation)
+    - [Render](#render)
+    - [type Mark](#mark)
+        - [New](#new)
+        - [AddRenderFn](#markaddrenderfn)
+        - [Render](#markrender)
+    - [smartypants and smartfractions](smartypants-and-smartfractions)
 - [Todo](#todo)
 
-### Usage
+### Get Started
 #### Installation
 ```sh
 $ go get github.com/a8m/mark
 ```
-#### Add to your project
+#### Examples
+__Add to your project:__
 ```go
 import (
 	"fmt"
@@ -28,30 +37,60 @@ func main() {
 }
 ```
 
-#### Using [mark-cli](https://github.com/a8m/mark-cli)
+__or using [mark-cli](https://github.com/a8m/mark-cli)__
 ```sh
 $ echo 'hello __world__...' | mark-cli -smartypants
 ```
 
-#### Override default rendering
-**Usage:** `m.AddRenderFn(NodeType, func(Node) string)`
+#### Documentation
+##### Render
+Staic rendering function.
 ```go
-func main() {
-	m := mark.New("hello", nil)
-	m.AddRenderFn(mark.NodeParagraph, func(node mark.Node) (s string) {
-		p, _ := node.(*mark.ParagraphNode)
-		s += "<p class=\"mv-msg\">"
-		for _, n := range p.Nodes {
-			s += n.Render()
-		}
-		s += "</p>"
-		return
-	})
-	fmt.Println(m.Render())
-	// <p class="mv-msg">hello</p>
-}
+html := mark.Render("I am using __markdown__.")
+fmt.Println(html)
+// <p>I am using <strong>markdown</strong>.</p>
 ```
-#### Mark support [smartypants](http://daringfireball.net/projects/smartypants/) and smartfractions rendering
+
+##### Mark
+##### New
+New get string and an input, and mark.Options as configuration and return a new `Mark`.
+```go
+m := mark.New("hello world...", &mark.Options{
+    Smartypants: true,
+})
+fmt.Println(m.Render())
+// <p>hello world…</p>
+// Note: you can instantiate it like so: mark.New("...", nil) to get the default options.
+```
+
+##### Mark.AddRenderFn
+`AddRenderFn` let you pass `NodeType`, and `RenderFn` function and override the default `Node` rendering.  
+To get all Nodes type and their fields/methods, see the full documentation: [go-doc](http://godoc.org/github.com/a8m/mark)
+```go
+m := mark.New("hello", nil)
+m.AddRenderFn(mark.NodeParagraph, func(node mark.Node) (s string) {
+    p, _ := node.(*mark.ParagraphNode)
+    s += "<p class=\"mv-msg\">"
+    for _, n := range p.Nodes {
+        s += n.Render()
+    }
+    s += "</p>"
+    return
+})
+fmt.Println(m.Render())
+// <p class="mv-msg">hello</p>
+```
+
+##### Mark.Render
+Parse and render input.
+```go
+m := mark.New("hello", nil)
+fmt.Println(m.Render())
+// <p>hello</p>
+```
+
+#### Smartypants and Smartfractions
+Mark also support [smartypants](http://daringfireball.net/projects/smartypants/) and smartfractions rendering
 ```go
 func main() {
 	opts := mark.DefaultOptions()
@@ -78,4 +117,3 @@ MIT
 [travis-image]: https://img.shields.io/travis/a8m/mark.svg?style=flat-square
 [coveralls-image]: https://img.shields.io/coveralls/a8m/mark.svg?style=flat-square
 [coveralls-url]: https://coveralls.io/r/a8m/mark
-
