@@ -65,7 +65,9 @@ fmt.Println(m.Render())
 
 ##### Mark.AddRenderFn
 `AddRenderFn` let you pass `NodeType`, and `RenderFn` function and override the default `Node` rendering.  
-To get all Nodes type and their fields/methods, see the full documentation: [go-doc](http://godoc.org/github.com/a8m/mark)
+To get all Nodes type and their fields/methods, see the full documentation: [go-doc](http://godoc.org/github.com/a8m/mark)  
+
+Example 1:
 ```go
 m := mark.New("hello", nil)
 m.AddRenderFn(mark.NodeParagraph, func(node mark.Node) (s string) {
@@ -79,6 +81,20 @@ m.AddRenderFn(mark.NodeParagraph, func(node mark.Node) (s string) {
 })
 fmt.Println(m.Render())
 // <p class="mv-msg">hello</p>
+```
+
+Example 2:
+```go
+m := mark.New("# Hello world", &mark.Options{
+	Smartypants: true,
+	Fractions:   true,
+})
+m.AddRenderFn(mark.NodeHeading, func(node mark.Node) string {
+	h, _ := node.(*mark.HeadingNode)
+	return fmt.Sprintf("<angular-heading-directive level=\"%d\" text=\"%s\"/>", h.Level, h.Text)
+})
+fmt.Println(m.Render())
+// <angular-heading-directive level="1" text="Hello world"/>
 ```
 
 ##### Mark.Render
