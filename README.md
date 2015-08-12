@@ -53,7 +53,7 @@ fmt.Println(html)
 
 ##### Mark
 ##### New
-New get string and an input, and mark.Options as configuration and return a new `Mark`.
+`New` get string as an input, and `mark.Options` as configuration and return a new `Mark`.
 ```go
 m := mark.New("hello world...", &mark.Options{
     Smartypants: true,
