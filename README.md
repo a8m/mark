@@ -27,6 +27,12 @@ func main() {
 	// <p>I am using <strong>markdown</strong>.</p>
 }
 ```
+
+#### Using [mark-cli](https://github.com/a8m/mark-cli)
+```sh
+$ echo 'hello __world__...' | mark-cli -smartypants
+```
+
 #### Override default rendering
 **Usage:** `m.AddRenderFn(NodeType, func(Node) string)`
 ```go
