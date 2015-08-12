@@ -550,7 +550,7 @@ func escape(str string) (cpy string) {
 
 // Smartypants transformation helper, translate from marked.js
 func smartypants(text string) string {
-	//	em-dashes, en-dashes, ellipses
+	// em-dashes, en-dashes, ellipses
 	re := strings.NewReplacer("---", "\u2014", "--", "\u2013", "...", "\u2026")
 	text = re.Replace(text)
 	// opening singles
