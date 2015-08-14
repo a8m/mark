@@ -303,7 +303,6 @@ func (p *parse) parseTable() *TableNode {
 		Header []item
 		Cells  [][]item
 	}{}
-	// Collect items
 Loop:
 	for i := 0; ; {
 		switch token := p.next(); token.typ {

@@ -264,6 +264,11 @@ Loop:
 			emit(itemEOF, Pos(0))
 			break Loop
 		case '\n':
+			// CM 4.4: An indented code block cannot interrupt a paragraph.
+			if l.pos > l.start && strings.HasPrefix(l.input[l.pos+1:], "    ") {
+				l.next()
+				continue
+			}
 			emit(itemNewLine, l.width)
 			break Loop
 		default:
@@ -581,7 +586,6 @@ func lexTable(l *lexer) stateFn {
 		re = block[itemLpTable]
 	}
 	table := re.FindStringSubmatch(l.input[l.pos:])
-	// TODO: Fix position to be identical to rows/cells
 	l.pos += Pos(len(table[0]))
 	l.start = l.pos
 	// Ignore the first match, and flat all rows(by splitting \n)

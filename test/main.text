@@ -18,8 +18,10 @@ markdown.js doesnt acknowledge arbitrary html blocks =/</aside>
     Hi, this is a list item.
   * New List Item 2
     Another item
+
         Code goes here.
         Lots of it...
+        
   * New List Item 3
     The last item
 
