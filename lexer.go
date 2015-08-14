@@ -36,23 +36,19 @@ const (
 	itemCodeBlock
 	itemGfmCodeBlock
 	itemHr
-	// Tables
 	itemTable
 	itemLpTable
 	itemTableRow
 	itemTableCell
-	// Emphasis
 	itemStrong
 	itemItalic
 	itemStrike
 	itemCode
-	// Links
 	itemLink
 	itemDefLink
 	itemRefLink
 	itemAutoLink
 	itemGfmLink
-	// Images
 	itemImage
 	itemRefImage
 	itemText
