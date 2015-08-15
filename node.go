@@ -205,7 +205,9 @@ func (n *CodeNode) Render() string {
 }
 
 func (p *parse) newCode(pos Pos, lang, text string) *CodeNode {
-	return &CodeNode{NodeType: NodeCode, Pos: pos, Lang: lang, Text: p.text(text)}
+	// DRY: see `escape()` below
+	text = strings.NewReplacer("<", "&lt;", ">", "&gt;", "\"", "&quot;", "&", "&amp;").Replace(text)
+	return &CodeNode{NodeType: NodeCode, Pos: pos, Lang: lang, Text: text}
 }
 
 // Link holds a tag with optional title
