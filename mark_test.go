@@ -84,9 +84,9 @@ func TestRender(t *testing.T) {
 		"\\## header":       "<p>## header</p>",
 		"header\n\\===":     "<p>header\n\\===</p>",
 	}
-	for actual, expected := range cases {
-		if res := Render(actual); res != expected {
-			t.Errorf("%s: got\n%+v\nexpected\n%+v", actual, res, expected)
+	for input, expected := range cases {
+		if actual := Render(input); actual != expected {
+			t.Errorf("%s: got\n%+v\nexpected\n%+v", input, actual, expected)
 		}
 	}
 }
@@ -147,5 +147,171 @@ func TestRenderFn(t *testing.T) {
 	expected := "<p class=\"mv-msg\">hello world</p>"
 	if actual := m.Render(); actual != expected {
 		t.Errorf("RenderFn: got\n\t%+v\nexpected\n\t%+v", actual, expected)
+	}
+}
+
+type CommonMarkSpec struct {
+	name     string
+	input    string
+	expected string
+}
+
+var CMCases = []CommonMarkSpec{
+	{"6", "- `one\n- two`", "<ul><li>`one</li><li>two`</li></ul>"},
+	{"7", "***\n---\n___", "<hr><hr><hr>"},
+	{"8", "+++", "<p>+++</p>"},
+	{"9", "===", "<p>===</p>"},
+	{"10", "--\n**\n__", "<p>--**__</p>"},
+	{"11", " ***\n  ***\n   ***", "<hr><hr><hr>"},
+	{"12", "    ***", "<pre><code>***</code></pre>"},
+	{"14", "_____________________________________", "<hr>"},
+	{"15", " - - -", "<hr>"},
+	{"16", " **  * ** * ** * **", "<hr>"},
+	{"17", "-     -      -      -", "<hr>"},
+	{"18", "- - - -    ", "<hr>"},
+	{"21", "- foo\n***\n- bar", "<ul>\n<li>foo</li>\n</ul>\n<hr>\n<ul>\n<li>bar</li>\n</ul>"},
+	{"22", "Foo\n***\nbar", "<p>Foo</p><hr><p>bar</p>"},
+	{"23", "Foo\n---\nbar", "<h2>Foo</h2><p>bar</p>"},
+	{"24", "* Foo\n* * *\n* Bar", "<ul>\n<li>Foo</li>\n</ul>\n<hr>\n<ul>\n<li>Bar</li>\n</ul>"},
+	{"25", "- Foo\n- * * *", "<ul>\n<li>Foo</li>\n<li>\n<hr>\n</li>\n</ul>"},
+	{"26", `# foo
+## foo
+### foo
+#### foo
+##### foo
+###### foo`, `<h1>foo</h1>
+<h2>foo</h2>
+<h3>foo</h3>
+<h4>foo</h4>
+<h5>foo</h5>
+<h6>foo</h6>`},
+	{"27", "####### foo", "<p>####### foo</p>"},
+	{"28", "#5 bolt\n\n#foobar", "<p>#5 bolt</p>\n<p>#foobar</p>"},
+	{"29", "\\## foo", "<p>## foo</p>"},
+	{"31", "#                  foo                     ", "<h1>foo</h1>"},
+	{"32", ` ### foo
+  ## foo
+   # foo`, `<h3>foo</h3>
+<h2>foo</h2>
+<h1>foo</h1>`},
+	{"33", "    # foo", "<pre><code># foo</code></pre>"},
+	{"35", `## foo ##
+  ###   bar    ###`, `<h2>foo</h2>
+<h3>bar</h3>`},
+	{"36", `# foo ##################################
+##### foo ##`, `<h1>foo</h1>
+<h5>foo</h5>`},
+	{"37", "### foo ###     ", "<h3>foo</h3>"},
+	{"38", "### foo ### b", "<h3>foo ### b</h3>"},
+	{"41", `****
+## foo
+****`, `<hr>
+<h2>foo</h2>
+<hr>`},
+	{"42", `Foo bar
+# baz
+Bar foo`, `<p>Foo bar</p>
+<h1>baz</h1>
+<p>Bar foo</p>`},
+	{"45", `Foo
+-------------------------
+
+Foo
+=`, `<h2>Foo</h2>
+<h1>Foo</h1>`},
+	{"46", `   Foo
+---
+
+  Foo
+-----
+
+  Foo
+  ===`, `<h2>Foo</h2>
+<h2>Foo</h2>
+<h1>Foo</h1>`},
+	{"47", `    Foo
+    ---
+
+    Foo
+---`, `<pre><code>Foo
+---
+
+Foo
+</code></pre>
+<hr>`},
+	{"48", `Foo
+   ----      `, "<h2>Foo</h2>"},
+	{"50", `Foo
+= =
+
+Foo
+--- -`, `<p>Foo
+= =</p>
+<p>Foo</p>
+<hr>`},
+	{"51", `Foo  
+-----`, "<h2>Foo</h2>"},
+	{"52", `Foo\
+----`, "<h2>Foo\\</h2>"},
+	{"53", "`Foo\n----\n`\n\n<a title=\"a lot\n---\nof dashes\"/>", "<h2>`Foo</h2>\n<p>`</p>\n<h2>&lt;a title=&quot;a lot</h2>\n<p>of dashes&quot;/&gt;</p>"},
+	{"55", `- Foo
+---`, `<ul>
+<li>Foo</li>
+</ul>
+<hr>`},
+	{"57", `---
+Foo
+---
+Bar
+---
+Baz`, `<hr>
+<h2>Foo</h2>
+<h2>Bar</h2>
+<p>Baz</p>`},
+	{"58", "====", "<p>====</p>"},
+	{"59", `---
+---`, "<hr><hr>"},
+	{"60", `- foo
+-----`, `<ul>
+<li>foo</li>
+</ul>
+<hr>`},
+	{"61", `    foo
+---`, `<pre><code>foo
+</code></pre>
+<hr>`},
+	{"64", `    a simple
+      indented code block`, `<pre><code>a simple
+  indented code block
+</code></pre>`},
+	{"66", `1.  foo
+
+    - bar`, `<ol>
+<li>
+<p>foo</p>
+<ul>
+<li>bar</li>
+</ul>
+</li>
+</ol>`},
+	{"67", `    <a/>
+    *hi*
+
+    - one`, `<pre><code>&lt;a/&gt;
+*hi*
+
+- one
+</code></pre>`},
+}
+
+func TestCommonMark(t *testing.T) {
+	reId := regexp.MustCompile(` +?id=".*"`)
+	for _, c := range CMCases {
+		// Remove the auto-hashing until it'll be in the configuration
+		actual := reId.ReplaceAllString(Render(c.input), "")
+		if strings.Replace(actual, "\n", "", -1) != strings.Replace(c.expected, "\n", "", -1) {
+			t.Errorf("\ninput:%s\ngot:\n%s\nexpected:\n%s\nlink: http://spec.commonmark.org/0.21/#example-%s\n",
+				c.input, actual, c.expected, c.name)
+		}
 	}
 }
