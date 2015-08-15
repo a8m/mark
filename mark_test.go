@@ -302,6 +302,89 @@ Baz`, `<hr>
 
 - one
 </code></pre>`},
+	{"69", `    chunk1
+      
+      chunk2`, `<pre><code>chunk1
+  
+  chunk2
+</code></pre>`},
+	{"71", `    foo
+bar`, `<pre><code>foo
+</code></pre>
+<p>bar</p>`},
+	{"72", `# Header
+    foo
+Header
+------
+    foo
+----`, `<h1>Header</h1>
+<pre><code>foo
+</code></pre>
+<h2>Header</h2>
+<pre><code>foo
+</code></pre>
+<hr>`},
+	{"73", `        foo
+    bar`, `<pre><code>    foo
+bar
+</code></pre>`},
+	{"74", `    
+    foo
+    `, `<pre><code>foo
+</code></pre>`},
+	{"75", "    foo  ", `<pre><code>foo  
+</code></pre>`},
+	{"76", "```\n< \n>\n```", `<pre><code>&lt;
+ &gt;
+</code></pre>`},
+	{"77", `~~~
+<
+ >
+~~~`, `<pre><code>&lt;
+ &gt;
+</code></pre>`},
+	{"78", "```\naaa\n~~~\n```", `<pre><code>aaa
+~~~
+</code></pre>`},
+	{"79", "~~~\naaa\n```\n~~~", "<pre><code>aaa\n```\n</code></pre>"},
+	{"86", "```\n```", `<pre><code></code></pre>`},
+	{"90", "    ```\n    aaa\n    ```", "<pre><code>```\naaa\n```\n</code></pre>"},
+	{"91", "```\naaa\n  ```", `<pre><code>aaa
+</code></pre>`},
+	{"92", "   ```\naaa\n  ```", `<pre><code>aaa
+</code></pre>`},
+	{"96", "foo\n```\nbar\n```\nbaz", `<p>foo</p>
+<pre><code>bar
+</code></pre>
+<p>baz</p>`},
+	{"97", `foo
+---
+~~~
+bar
+~~~
+# baz`, `<h2>foo</h2>
+<pre><code>bar
+</code></pre>
+<h1>baz</h1>`},
+	{"102", "```\n``` aaa\n```", "<pre><code>``` aaa\n</code></pre>"},
+	{"103", `
+<table>
+  <tr>
+    <td>
+           hi
+    </td>
+  </tr>
+</table>
+
+okay.`, `
+<table>
+  <tr>
+    <td>
+           hi
+    </td>
+  </tr>
+</table>
+<p>okay.</p>`},
 }
 
 func TestCommonMark(t *testing.T) {
