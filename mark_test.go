@@ -385,6 +385,92 @@ okay.`, `
   </tr>
 </table>
 <p>okay.</p>`},
+	// Move out the id, beacuse the regexp below
+	{"107", `
+<div
+  class="bar">
+</div>`, `
+<div
+  class="bar">
+</div>`},
+	{"108", `
+<div class="bar
+  baz">
+</div>`, `
+<div class="bar
+  baz">
+</div>`},
+	{"113", `<div><a href="bar">*foo*</a></div>`, `<div><a href="bar">*foo*</a></div>`},
+	{"114", `
+<table><tr><td>
+foo
+</td></tr></table>`, `
+<table><tr><td>
+foo
+</td></tr></table>`},
+	{"117", `
+<Warning>
+*bar*
+</Warning>`, `
+<Warning>
+*bar*
+</Warning>`},
+	{"121", "<del>*foo*</del>", "<p><del><em>foo</em></del></p>"},
+	{"122", `
+<pre language="haskell"><code>
+import Text.HTML.TagSoup
+
+main :: IO ()
+main = print $ parseTags tags
+</code></pre>`, `
+<pre language="haskell"><code>
+import Text.HTML.TagSoup
+
+main :: IO ()
+main = print $ parseTags tags
+</code></pre>`},
+	{"123", `
+<script type="text/javascript">
+// JavaScript example
+
+document.getElementById("demo").innerHTML = "Hello JavaScript!";
+</script>`, `
+<script type="text/javascript">
+// JavaScript example
+
+document.getElementById("demo").innerHTML = "Hello JavaScript!";
+</script>`},
+	{"124", `
+<style
+  type="text/css">
+h1 {color:red;}
+
+p {color:blue;}
+</style>`, `
+<style
+  type="text/css">
+h1 {color:red;}
+
+p {color:blue;}
+</style>`},
+	{"127", `
+- <div>
+- foo`, `
+<ul>
+<li>
+<div>
+</li>
+<li>foo</li>
+</ul>`},
+	{"136", `
+Foo
+<div>
+bar
+</div>`, `
+<p>Foo</p>
+<div>
+bar
+</div>`},
 }
 
 func TestCommonMark(t *testing.T) {
