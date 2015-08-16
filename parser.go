@@ -223,7 +223,9 @@ func (p *parse) parseDefLink() *DefLinkNode {
 	// name(lowercase), href, title
 	n := p.newDefLink(token.pos, name, match[2], match[3])
 	// store in links
-	p.links[name] = n
+	if _, ok := p.links[name]; !ok {
+		p.links[name] = n
+	}
 	return n
 }
 
