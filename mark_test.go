@@ -462,7 +462,7 @@ p {color:blue;}
 </li>
 <li>foo</li>
 </ul>`},
-	{"136", `
+	{"137", `
 Foo
 <div>
 bar
@@ -471,6 +471,98 @@ bar
 <div>
 bar
 </div>`},
+	{"139", `
+Foo
+<a href="bar">
+baz`, `
+<p>Foo
+<a href="bar">
+baz</p>`},
+	{"141", `
+<div>
+*Emphasized* text.
+</div>`, `
+<div>
+*Emphasized* text.
+</div>
+`},
+	{"142", `
+<table>
+
+<tr>
+
+<td>
+Hi
+</td>
+
+</tr>
+
+</table>`, `
+<table>
+<tr>
+<td>
+Hi
+</td>
+</tr>
+</table>
+`},
+	{"144", `
+[foo]: /url "title"
+
+[foo]`, `<p><a href="/url" title="title">foo</a></p>`},
+	{"148", `
+[foo]: /url '
+title
+line1
+line2
+'
+
+[foo]`, `
+<p><a href="/url" title="
+title
+line1
+line2
+">foo</a></p>`},
+	{"151", `
+[foo]:
+
+[foo]`, `
+<p>[foo]:</p>
+<p>[foo]</p>`},
+	{"153", `
+[foo]
+
+[foo]: url`, `<p><a href="url">foo</a></p>`},
+	{"154", `
+[foo]
+
+[foo]: first
+[foo]: second`, `<p><a href="first">foo</a></p>`},
+	{"155", `
+[FOO]: /url
+
+[Foo]`, `<p><a href="/url">Foo</a></p>`},
+	{"157", "[foo]: /url", ""},
+	{"158", `
+[
+foo
+]: /url
+bar`, "<p>bar</p>"},
+	{"159", `[foo]: /url "title" ok`, "<p>[foo]: /url &quot;title&quot; ok</p>"},
+	{"160", `
+[foo]: /url
+"title" ok`, "<p>&quot;title&quot; ok</p>"},
+	{"161", `
+    [foo]: /url "title"
+
+[foo]`, `
+<pre><code>[foo]: /url &quot;title&quot;
+</code></pre>
+<p>[foo]</p>`},
+	{"162", "```\n[foo]: /url\n```\n\n[foo]", `
+<pre><code>[foo]: /url
+</code></pre>
+<p>[foo]</p>`},
 }
 
 func TestCommonMark(t *testing.T) {
