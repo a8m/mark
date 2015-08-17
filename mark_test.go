@@ -563,6 +563,88 @@ bar`, "<p>bar</p>"},
 <pre><code>[foo]: /url
 </code></pre>
 <p>[foo]</p>`},
+	{"166", `
+[foo]
+
+> [foo]: /url`, `
+<p><a href="/url">foo</a></p>
+<blockquote>
+</blockquote>`},
+	{"167", `
+aaa
+
+bbb`, `
+<p>aaa</p>
+<p>bbb</p>`},
+	{"168", `
+aaa
+bbb
+
+ccc
+ddd`, `
+<p>aaa
+bbb</p>
+<p>ccc
+ddd</p>`},
+	{"169", `
+aaa
+
+
+bbb`, `
+<p>aaa</p>
+<p>bbb</p>`},
+	{"173", `
+    aaa
+bbb`, `
+<pre><code>aaa
+</code></pre>
+<p>bbb</p>`},
+	{"175", `
+  
+
+aaa
+  
+
+# aaa
+
+  `, `
+<p>aaa</p>
+<h1>aaa</h1>`},
+	{"176", `
+> # Foo
+> bar
+> baz`, `
+<blockquote>
+<h1>Foo</h1>
+<p>bar
+baz</p>
+</blockquote>`},
+	{"177", `
+># Foo
+>bar
+> baz`, `
+<blockquote>
+<h1>Foo</h1>
+<p>bar
+baz</p>
+</blockquote>`},
+	{"179", `
+    > # Foo
+    > bar
+    > baz`, `
+<pre><code>&gt; # Foo
+&gt; bar
+&gt; baz
+</code></pre>`},
+	{"180", `
+> # Foo
+> bar
+baz`, `
+<blockquote>
+<h1>Foo</h1>
+<p>bar
+baz</p>
+</blockquote>`},
 }
 
 func TestCommonMark(t *testing.T) {
