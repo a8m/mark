@@ -645,6 +645,226 @@ baz`, `
 <p>bar
 baz</p>
 </blockquote>`},
+	{"181", `
+> bar
+baz
+> foo`, `
+<blockquote>
+<p>bar
+baz
+foo</p>
+</blockquote>`},
+	{"188", `
+>
+> foo
+>  `, `
+<blockquote>
+<p>foo</p>
+</blockquote>`},
+	{"190", `
+> foo
+> bar`, `
+<blockquote>
+<p>foo
+bar</p>
+</blockquote>`},
+	{"191", `
+> foo
+>
+> bar`, `
+<blockquote>
+<p>foo</p>
+<p>bar</p>
+</blockquote>`},
+	{"192", `
+foo
+> bar`, `
+<p>foo</p>
+<blockquote>
+<p>bar</p>
+</blockquote>`},
+	{"194", `
+> bar
+baz`, `
+<blockquote>
+<p>bar
+baz</p>
+</blockquote>`},
+	{"195", `
+> bar
+
+baz`, `
+<blockquote>
+<p>bar</p>
+</blockquote>
+<p>baz</p>`},
+	{"197", `
+> > > foo
+bar`, `
+<blockquote>
+<blockquote>
+<blockquote>
+<p>foo
+bar</p>
+</blockquote>
+</blockquote>
+</blockquote>`},
+	{"198", `
+>>> foo
+> bar
+>>baz`, `
+<blockquote>
+<blockquote>
+<blockquote>
+<p>foo
+bar
+baz</p>
+</blockquote>
+</blockquote>
+</blockquote>`},
+	{"200", `
+A paragraph
+with two lines.
+
+    indented code
+
+> A block quote.`, `
+<p>A paragraph
+with two lines.</p>
+<pre><code>indented code
+</code></pre>
+<blockquote>
+<p>A block quote.</p>
+</blockquote>`},
+	{"201", `
+1.  A paragraph
+    with two lines.
+
+        indented code
+
+    > A block quote.`, `
+<ol>
+<li>
+<p>A paragraph
+with two lines.</p>
+<pre><code>indented code
+</code></pre>
+<blockquote>
+<p>A block quote.</p>
+</blockquote>
+</li>
+</ol>`},
+	{"203", `
+- one
+
+  two`, `
+<ul>
+<li>
+<p>one</p>
+<p>two</p>
+</li>
+</ul>`},
+	{"206", `
+   > > 1.  one
+>>
+>>     two`, `
+<blockquote>
+<blockquote>
+<ol>
+<li>
+<p>one</p>
+<p>two</p>
+</li>
+</ol>
+</blockquote>
+</blockquote>`},
+	{"208", `-one
+
+2.two`, `
+<p>-one</p>
+<p>2.two</p>`},
+	{"210", `
+1.  foo
+
+    ~~~
+    bar
+    ~~~
+
+    baz
+
+    > bam`, `
+<ol>
+<li>
+<p>foo</p>
+<pre><code>bar
+</code></pre>
+<p>baz</p>
+<blockquote>
+<p>bam</p>
+</blockquote>
+</li>
+</ol>`},
+	{"212", `1234567890. not ok`, `<p>1234567890. not ok</p>`},
+	{"215", `-1. not ok`, `<p>-1. not ok</p>`},
+	{"216", `
+- foo
+
+      bar`, `
+<ul>
+<li>
+<p>foo</p>
+<pre><code>bar
+</code></pre>
+</li>
+</ul>`},
+	{"218", `
+    indented code
+
+paragraph
+
+    more code`, `
+<pre><code>indented code
+</code></pre>
+<p>paragraph</p>
+<pre><code>more code
+</code></pre>`},
+	{"223", `
+-  foo
+
+   bar`, `
+<ul>
+<li>
+<p>foo</p>
+<p>bar</p>
+</li>
+</ul>`},
+	{"226", `
+- foo
+-   
+- bar`, `
+<ul>
+<li>foo</li>
+<li></li>
+<li>bar</li>
+</ul>`},
+	{"229", `
+ 1.  A paragraph
+     with two lines.
+
+         indented code
+
+     > A block quote.`, `
+<ol>
+<li>
+<p>A paragraph
+with two lines.</p>
+<pre><code>indented code
+</code></pre>
+<blockquote>
+<p>A block quote.</p>
+</blockquote>
+</li>
+</ol>`},
 }
 
 func TestCommonMark(t *testing.T) {
