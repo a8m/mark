@@ -73,12 +73,12 @@ var block = map[itemType]*regexp.Regexp{
 	itemHr:           regexp.MustCompile(`^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *(?:\n+|$)`),
 	itemCodeBlock:    regexp.MustCompile(`^( {4}[^\n]+\n*)+`),
 	itemGfmCodeBlock: regexp.MustCompile(fmt.Sprintf(reGfmCode, "`") + "|" + fmt.Sprintf(reGfmCode, "~")),
-	itemList:         regexp.MustCompile(`^( *)(?:[*+-]|\d+\.) (.*)(?:\n|)`),
+	itemList:         regexp.MustCompile(`^( *)(?:[*+-]|\d{1,9}\.) (.*)(?:\n|)`),
 	itemListItem:     regexp.MustCompile(`^ *([*+-]|\d+\.) +`),
 	itemLooseItem:    regexp.MustCompile(`(?m)\n\n(.*)`),
 	itemLpTable:      regexp.MustCompile(`(^ *\|.+)\n( *\| *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*`),
 	itemTable:        regexp.MustCompile(`^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*`),
-	itemBlockQuote:   regexp.MustCompile(`^( *>[^\n]+(\n[^\n]+)*\n*)+`),
+	itemBlockQuote:   regexp.MustCompile(`^( *>[^\n]*(\n[^\n]+)*\n*)+`),
 	itemHTML:         regexp.MustCompile(`^<(\w+)(?:"[^"]*"|'[^']*'|[^'">])*?>`),
 }
 
