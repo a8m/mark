@@ -847,24 +847,237 @@ paragraph
 <li></li>
 <li>bar</li>
 </ul>`},
-	{"229", `
- 1.  A paragraph
-     with two lines.
+	{"232", `
+    1.  A paragraph
+        with two lines.
 
-         indented code
+            indented code
 
-     > A block quote.`, `
+        > A block quote.`, `
+<pre><code>1.  A paragraph
+    with two lines.
+
+        indented code
+
+    &gt; A block quote.
+</code></pre>`},
+	{"234", `
+  1.  A paragraph
+    with two lines.`, `
+<ol>
+<li>A paragraph
+with two lines.</li>
+</ol>`},
+	{"235", `
+> 1. > Blockquote
+continued here.`, `
+<blockquote>
 <ol>
 <li>
-<p>A paragraph
-with two lines.</p>
-<pre><code>indented code
-</code></pre>
 <blockquote>
-<p>A block quote.</p>
+<p>Blockquote
+continued here.</p>
 </blockquote>
 </li>
-</ol>`},
+</ol>
+</blockquote>`},
+	{"236", `
+> 1. > Blockquote
+continued here.`, `
+<blockquote>
+<ol>
+<li>
+<blockquote>
+<p>Blockquote
+continued here.</p>
+</blockquote>
+</li>
+</ol>
+</blockquote>`},
+	{"237", `
+- foo
+  - bar
+    - baz`, `
+<ul>
+<li>foo
+<ul>
+<li>bar
+<ul>
+<li>baz</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>`},
+	{"241", "- - foo", `
+<ul>
+<li>
+<ul>
+<li>foo</li>
+</ul>
+</li>
+</ul>`},
+	{"243", `
+- # Foo
+- Bar
+  ---
+  baz`, `
+<ul>
+<li>
+<h1>Foo</h1>
+</li>
+<li>
+<h2>Bar</h2>
+baz</li>
+</ul>`},
+	{"246", `
+Foo
+- bar
+- baz`, `
+<p>Foo</p>
+<ul>
+<li>bar</li>
+<li>baz</li>
+</ul>`},
+	{"248", `
+- foo
+
+- bar
+
+
+- baz`, `
+<ul>
+<li>
+<p>foo</p>
+</li>
+<li>
+<p>bar</p>
+</li>
+</ul>
+<ul>
+<li>baz</li>
+</ul>`},
+	{"250", `
+- foo
+  - bar
+    - baz
+
+
+      bim`, `
+<ul>
+<li>foo
+<ul>
+<li>bar
+<ul>
+<li>baz</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<pre><code>  bim
+</code></pre>`},
+	{"251", `
+- foo
+- bar
+
+
+- baz
+- bim`, `
+<ul>
+<li>foo</li>
+<li>bar</li>
+</ul>
+<ul>
+<li>baz</li>
+<li>bim</li>
+</ul>`},
+	{"252", `
+-   foo
+
+    notcode
+
+-   foo
+
+
+    code`, `
+<ul>
+<li>
+<p>foo</p>
+<p>notcode</p>
+</li>
+<li>
+<p>foo</p>
+</li>
+</ul>
+<pre><code>code
+</code></pre>`},
+	{"261", `
+* a
+  > b
+  >
+* c`, `
+<ul>
+<li>a
+<blockquote>
+<p>b</p>
+</blockquote>
+</li>
+<li>c</li>
+</ul>`},
+	{"263", "- a", `
+<ul>
+<li>a</li>
+</ul>`},
+	{"264", `
+- a
+  - b`, `
+<ul>
+<li>a
+<ul>
+<li>b</li>
+</ul>
+</li>
+</ul>`},
+	{"266", `
+* foo
+  * bar
+
+  baz`, `
+<ul>
+<li>
+<p>foo</p>
+<ul>
+<li>bar</li>
+</ul>
+<p>baz</p>
+</li>
+</ul>`},
+	{"267", `
+- a
+  - b
+  - c
+
+- d
+  - e
+  - f`, `
+<ul>
+<li>
+<p>a</p>
+<ul>
+<li>b</li>
+<li>c</li>
+</ul>
+</li>
+<li>
+<p>d</p>
+<ul>
+<li>e</li>
+<li>f</li>
+</ul>
+</li>
+</ul>`},
+	{"268", "`hi`lo`", "<p><code>hi</code>lo`</p>"},
 }
 
 func TestCommonMark(t *testing.T) {
