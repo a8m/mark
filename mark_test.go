@@ -1078,6 +1078,14 @@ Foo
 </li>
 </ul>`},
 	{"268", "`hi`lo`", "<p><code>hi</code>lo`</p>"},
+	{"275", `    \[\]`, `<pre><code>\[\]
+</code></pre>`},
+	{"276", `
+~~~
+\[\]
+~~~`, `
+<pre><code>\[\]
+</code></pre>`},
 }
 
 func TestCommonMark(t *testing.T) {
