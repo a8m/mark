@@ -126,6 +126,7 @@ func main() {
 - Configuration options
 	- gfm, table
 	- heading(auto hashing)
+- Commonmark support v0.2
 
 ### License
 MIT
