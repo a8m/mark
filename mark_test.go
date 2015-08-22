@@ -1086,6 +1086,10 @@ Foo
 ~~~`, `
 <pre><code>\[\]
 </code></pre>`},
+	{"294", "`foo`", `<p><code>foo</code></p>`},
+	{"300", "`foo\\`bar`", "<p><code>foo\\</code>bar`</p>"},
+	{"303", "`<a href=\"`\">`", "<p><code>&lt;a href=&quot;</code>&quot;&gt;`</p>"},
+	{"308", "`foo", "<p>`foo</p>"},
 }
 
 func TestCommonMark(t *testing.T) {
