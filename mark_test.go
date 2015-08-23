@@ -1090,6 +1090,22 @@ Foo
 	{"300", "`foo\\`bar`", "<p><code>foo\\</code>bar`</p>"},
 	{"303", "`<a href=\"`\">`", "<p><code>&lt;a href=&quot;</code>&quot;&gt;`</p>"},
 	{"308", "`foo", "<p>`foo</p>"},
+	{"309", "*foo bar*", "<p><em>foo bar</em></p>"},
+	{"313", "foo*bar*", "<p>foo<em>bar</em></p>"},
+	{"314", "5*6*78", "<p>5<em>6</em>78</p>"},
+	{"315", "_foo bar_", "<p><em>foo bar</em></p>"},
+	{"322", "foo-_(bar)_", "<p>foo-<em>(bar)</em></p>"},
+	{"323", "_foo*", "<p>_foo*</p>"},
+	{"328", "*foo*bar", "<p><em>foo</em>bar</p>"},
+	{"335", "_(bar)_.", "<p><em>(bar)</em>.</p>"},
+	{"336", "**foo bar**", "<p><strong>foo bar</strong></p>"},
+	{"339", "foo**bar**", "<p>foo<strong>bar</strong></p>"},
+	{"340", "__foo bar__", "<p><strong>foo bar</strong></p>"},
+	{"348", "foo-__(bar)__", "<p>foo-<strong>(bar)</strong></p>"},
+	{"352", "**Gomphocarpus (*Gomphocarpus physocarpus*, syn.*Asclepias physocarpa*)**",
+		"<p><strong>Gomphocarpus (<em>Gomphocarpus physocarpus</em>, syn.<em>Asclepias physocarpa</em>)</strong></p>"},
+	{"353", "**foo \"*bar*\" foo**", "<p><strong>foo &quot;<em>bar</em>&quot; foo</strong></p>"},
+	{"354", "**foo**bar", "<p><strong>foo</strong>bar</p>"},
 }
 
 func TestCommonMark(t *testing.T) {
