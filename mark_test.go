@@ -1136,6 +1136,179 @@ Foo
 	{"439", "[link](/uri)", "<p><a href=\"/uri\">link</a></p>"},
 	{"440", "[link]()", "<p><a href=\"\">link</a></p>"},
 	{"441", "[link](<>)", "<p><a href=\"\">link</a></p>"},
+	{"451", `
+[link](#fragment)
+
+[link](http://example.com#fragment)
+
+[link](http://example.com?foo=bar&baz#fragment)`, `
+<p><a href="#fragment">link</a></p>
+<p><a href="http://example.com#fragment">link</a></p>
+<p><a href="http://example.com?foo=bar&amp;baz#fragment">link</a></p>`},
+	{"455", `
+[link](/url "title")
+[link](/url 'title')
+[link](/url (title))`, `
+<p><a href="/url" title="title">link</a>
+<a href="/url" title="title">link</a>
+<a href="/url" title="title">link</a></p>`},
+	{"458", `[link](/url 'title "and" title')`, `<p><a href="/url" title="title &quot;and&quot; title">link</a></p>`},
+	{"460", "[link] (/uri)", "<p>[link] (/uri)</p>"},
+	{"461", "[link [foo [bar]]](/uri)", `<p><a href="/uri">link [foo [bar]]</a></p>`},
+	{"463", "[link [bar](/uri)", `<p>[link <a href="/uri">bar</a></p>`},
+	{"471", "[foo *bar](baz*)", `<p><a href="baz*">foo *bar</a></p>`},
+	{"472", "*foo [bar* baz]", "<p><em>foo [bar</em> baz]</p>"},
+	{"476", `
+[foo][bar]
+
+[bar]: /url "title"`, `<p><a href="/url" title="title">foo</a></p>`},
+	{"477", `
+[link [foo [bar]]][ref]
+
+[ref]: /uri`, `<p><a href="/uri">link [foo [bar]]</a></p>`},
+	{"484", `
+[foo *bar][ref]
+
+[ref]: /uri`, `<p><a href="/uri">foo *bar</a></p>`},
+	{"488", `
+[foo][BaR]
+
+[bar]: /url "title"`, `<p><a href="/url" title="title">foo</a></p>`},
+	{"489", `
+[Толпой][Толпой] is a Russian word.
+
+[ТОЛПОЙ]: /url`, `<p><a href="/url">Толпой</a> is a Russian word.</p>`},
+	{"491", `
+[foo] [bar]
+
+[bar]: /url "title"`, `<p><a href="/url" title="title">foo</a></p>`},
+	{"492", `
+[foo]
+[bar]
+
+[bar]: /url "title"`, `<p><a href="/url" title="title">foo</a></p>`},
+	{"493", `
+[foo]: /url1
+
+[foo]: /url2
+
+[bar][foo]`, `<p><a href="/url1">bar</a></p>`},
+	{"496", `
+[foo][ref[bar]]
+
+[ref[bar]]: /uri`, `
+<p>[foo][ref[bar]]</p>
+<p>[ref[bar]]: /uri</p>`},
+	{"497", `
+[[[foo]]]
+
+[[[foo]]]: /url`, `
+<p>[[[foo]]]</p>
+<p>[[[foo]]]: /url</p>`},
+	{"498", `
+[foo][ref\[]
+
+[ref\[]: /uri`, `<p><a href="/uri">foo</a></p>`},
+	{"499", `
+[]
+
+[]: /uri`, `
+<p>[]</p>
+<p>[]: /uri</p>`},
+	{"501", `
+[foo][]
+
+[foo]: /url "title"`, `<p><a href="/url" title="title">foo</a></p>`},
+	{"503", `
+[Foo][]
+
+[foo]: /url "title"`, `<p><a href="/url" title="title">Foo</a></p>`},
+	{"504", `
+[foo] 
+[]
+
+[foo]: /url "title"`, `<p><a href="/url" title="title">foo</a></p>`},
+	{"505", `
+[foo]
+
+[foo]: /url "title"`, `<p><a href="/url" title="title">foo</a></p>`},
+	{"508", `
+[[bar [foo]
+
+[foo]: /url`, `<p>[[bar <a href="/url">foo</a></p>`},
+	{"509", `
+[Foo]
+
+[foo]: /url "title"`, `<p><a href="/url" title="title">Foo</a></p>`},
+	{"510", `
+[foo] bar
+
+[foo]: /url`, `<p><a href="/url">foo</a> bar</p>`},
+	{"511", `
+\[foo]
+
+[foo]: /url "title"`, `<p>[foo]</p>`},
+	{"513", `
+[foo][bar]
+
+[foo]: /url1
+[bar]: /url2`, `<p><a href="/url2">foo</a></p>`},
+	{"517", `![foo](/url "title")`, `<p><img src="/url" alt="foo" title="title"></p>`},
+	{"523", `![foo](train.jpg)`, `<p><img src="train.jpg" alt="foo"></p>`},
+	{"524", `My ![foo bar](/path/to/train.jpg  "title"   )`,
+		`<p>My <img src="/path/to/train.jpg" alt="foo bar" title="title"></p>`},
+	{"525", `![foo](<url>)`, `<p><img src="url" alt="foo"></p>`},
+	{"526", `![](/url)`, `<p><img src="/url" alt=""></p>`},
+	{"527", `
+![foo] [bar]
+
+[bar]: /url`, `<p><img src="/url" alt="foo"></p>`},
+	{"528", `
+![foo] [bar]
+
+[BAR]: /url`, `<p><img src="/url" alt="foo"></p>`},
+	{"529", `
+![foo][]
+
+[foo]: /url "title"`, `<p><img src="/url" alt="foo" title="title"></p>`},
+	{"531", `
+![Foo][]
+
+[foo]: /url "title"`, `<p><img src="/url" alt="Foo" title="title"></p>`},
+	{"532", `
+![foo] 
+[]
+
+[foo]: /url "title"`, `<p><img src="/url" alt="foo" title="title"></p>`},
+	{"533", `
+![foo]
+
+[foo]: /url "title"`, `<p><img src="/url" alt="foo" title="title"></p>`},
+	{"535", `
+![[foo]]
+
+[[foo]]: /url "title"`, `
+<p>![[foo]]</p>
+<p>[[foo]]: /url &quot;title&quot;</p>`},
+	{"536", `
+![Foo]
+
+[foo]: /url "title"`, `<p><img src="/url" alt="Foo" title="title"></p>`},
+	{"537", `
+\!\[foo]
+
+[foo]: /url "title"`, `<p>![foo]</p>`},
+	{"538", `
+\![foo]
+
+[foo]: /url "title"`, `<p>!<a href="/url" title="title">foo</a></p>`},
+	{"539", `<http://foo.bar.baz>`, `<p><a href="http://foo.bar.baz">http://foo.bar.baz</a></p>`},
+	{"540", `<http://foo.bar.baz/test?q=hello&id=22&boolean>`,
+		`<p><a href="http://foo.bar.baz/test?q=hello&amp;id=22&amp;boolean">http://foo.bar.baz/test?q=hello&amp;id=22&amp;boolean</a></p>`},
+	{"541", `<irc://foo.bar:2233/baz>`, `<p><a href="irc://foo.bar:2233/baz">irc://foo.bar:2233/baz</a></p>`},
+	{"542", `<MAILTO:FOO@BAR.BAZ>`, `<p><a href="MAILTO:FOO@BAR.BAZ">MAILTO:FOO@BAR.BAZ</a></p>`},
+	{"548", "<>", "<p>&lt;&gt;</p>"},
+	{"554", `foo@bar.example.com`, `<p>foo@bar.example.com</p>`},
 }
 
 func TestCommonMark(t *testing.T) {
