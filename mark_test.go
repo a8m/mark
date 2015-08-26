@@ -10,7 +10,7 @@ import (
 func TestRender(t *testing.T) {
 	cases := map[string]string{
 		"foobar":               "<p>foobar</p>",
-		"  foo bar":            "<p>  foo bar</p>",
+		"  foo bar":            "<p>foo bar</p>",
 		"foo|bar":              "<p>foo|bar</p>",
 		"foo  \nbar":           "<p>foo<br>bar</p>",
 		"__bar__ foo":          "<p><strong>bar</strong> foo</p>",
@@ -169,6 +169,7 @@ var CMCases = []CommonMarkSpec{
 	{"16", " **  * ** * ** * **", "<hr>"},
 	{"17", "-     -      -      -", "<hr>"},
 	{"18", "- - - -    ", "<hr>"},
+	{"20", " *-*", "<p><em>-</em></p>"},
 	{"21", "- foo\n***\n- bar", "<ul>\n<li>foo</li>\n</ul>\n<hr>\n<ul>\n<li>bar</li>\n</ul>"},
 	{"22", "Foo\n***\nbar", "<p>Foo</p><hr><p>bar</p>"},
 	{"23", "Foo\n---\nbar", "<h2>Foo</h2><p>bar</p>"},
@@ -195,6 +196,11 @@ var CMCases = []CommonMarkSpec{
 <h2>foo</h2>
 <h1>foo</h1>`},
 	{"33", "    # foo", "<pre><code># foo</code></pre>"},
+	{"34", `
+foo
+    # bar`, `
+<p>foo
+# bar</p>`},
 	{"35", `## foo ##
   ###   bar    ###`, `<h2>foo</h2>
 <h3>bar</h3>`},
@@ -241,6 +247,11 @@ Foo
 <hr>`},
 	{"48", `Foo
    ----      `, "<h2>Foo</h2>"},
+	{"49", `
+ Foo
+    ---`, `
+<p>Foo
+---</p>`},
 	{"50", `Foo
 = =
 
@@ -284,6 +295,16 @@ Baz`, `<hr>
       indented code block`, `<pre><code>a simple
   indented code block
 </code></pre>`},
+	{"65", `
+  - foo
+
+    bar`, `
+<ul>
+<li>
+<p>foo</p>
+<p>bar</p>
+</li>
+</ul>`},
 	{"66", `1.  foo
 
     - bar`, `<ol>
