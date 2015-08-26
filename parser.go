@@ -155,6 +155,13 @@ func (p *parse) parseText(input string) (nodes []Node) {
 			break
 		}
 	}
+	// Removing initial and final whitespace.
+	input = regexp.MustCompile(`(?m)^ +| +(\n|$)`).ReplaceAllStringFunc(input, func(s string) string {
+		if span[itemBr].MatchString(s) {
+			return s
+		}
+		return ""
+	})
 	l := lexInline(input)
 	for token := range l.items {
 		var node Node
