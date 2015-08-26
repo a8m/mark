@@ -1078,6 +1078,12 @@ Foo
 </li>
 </ul>`},
 	{"268", "`hi`lo`", "<p><code>hi</code>lo`</p>"},
+	{"273", `
+foo\
+bar
+`, `
+<p>foo<br>
+bar</p>`},
 	{"275", `    \[\]`, `<pre><code>\[\]
 </code></pre>`},
 	{"276", `
@@ -1309,6 +1315,51 @@ Foo
 	{"542", `<MAILTO:FOO@BAR.BAZ>`, `<p><a href="MAILTO:FOO@BAR.BAZ">MAILTO:FOO@BAR.BAZ</a></p>`},
 	{"548", "<>", "<p>&lt;&gt;</p>"},
 	{"554", `foo@bar.example.com`, `<p>foo@bar.example.com</p>`},
+	{"555", "<a><bab><c2c>", "<p><a><bab><c2c></p>"},
+	{"556", "<a/><b2/>", "<p><a/><b2/></p>"},
+	{"557", `
+<a  /><b2
+data="foo" >`, `
+<p><a  /><b2
+data="foo" ></p>`},
+	{"558", `
+<a foo="bar" bam = 'baz <em>"</em>'
+_boolean zoop:33=zoop:33 />`, `
+<p><a foo="bar" bam = 'baz <em>"</em>'
+_boolean zoop:33=zoop:33 /></p>`},
+	{"576", `
+foo  
+baz`, `
+<p>foo<br>
+baz</p>`},
+	{"577", `
+foo\
+baz`, `
+<p>foo<br>
+baz</p>`},
+	{"578", `
+foo       
+baz`, `<p>foo<br>baz</p>`},
+	{"581", `
+*foo  
+bar*`, `
+<p><em>foo<br>
+bar</em></p>`},
+	{"582", `
+*foo\
+bar*`, `
+<p><em>foo<br>
+bar</em></p>`},
+	{"587", `foo\`, `<p>foo\</p>`},
+	{"589", `### foo\`, `<h3>foo\</h3>`},
+	{"590", `### foo  `, `<h3>foo</h3>`},
+	{"591", `
+foo
+baz`, `
+<p>foo
+baz</p>`},
+	{"594", `Foo χρῆν`, `<p>Foo χρῆν</p>`},
+	{"595", `Multiple     spaces`, `<p>Multiple     spaces</p>`},
 }
 
 func TestCommonMark(t *testing.T) {

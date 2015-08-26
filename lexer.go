@@ -88,7 +88,7 @@ var span = map[itemType]*regexp.Regexp{
 	itemStrong:   regexp.MustCompile(fmt.Sprintf(reEmphasise, 2)),
 	itemStrike:   regexp.MustCompile(`(?s)^~{2}(.+?)~{2}`),
 	itemCode:     regexp.MustCompile("(?s)^`{1,2}\\s*(.*?[^`])\\s*`{1,2}"),
-	itemBr:       regexp.MustCompile(`^ {2,}\n`),
+	itemBr:       regexp.MustCompile(`^(?: {2,}|\\)\n`),
 	itemLink:     regexp.MustCompile(fmt.Sprintf(`^!?\[(%s)\]\(%s\)`, reLinkText, reLinkHref)),
 	itemRefLink:  regexp.MustCompile(`^!?\[((?:\[[^\]]*\]|[^\[\]]|\])*)\](?:\s*\[([^\]]*)\])?`),
 	itemAutoLink: regexp.MustCompile(`^<([^ >]+(@|:\/)[^ >]+)>`),
@@ -326,6 +326,17 @@ Loop:
 				l.emit(itemText)
 			}
 			break Loop
+			// backslash escaping
+		case '\\':
+			if m := escape.FindStringSubmatch(l.input[l.pos:]); len(m) != 0 {
+				if l.pos > l.start {
+					l.emit(itemText)
+				}
+				l.pos += Pos(len(m[0]))
+				l.emit(itemText, m[1])
+				break
+			}
+			fallthrough
 		case ' ':
 			if m := span[itemBr].FindString(l.input[l.pos:]); m != "" {
 				// pos - length of new-line
@@ -383,17 +394,6 @@ Loop:
 		case '<':
 			if m := span[itemAutoLink].FindString(l.input[l.pos:]); m != "" {
 				emit(itemAutoLink, len(m))
-				break
-			}
-			l.next()
-		// backslash escaping
-		case '\\':
-			if m := escape.FindStringSubmatch(l.input[l.pos:]); len(m) != 0 {
-				if l.pos > l.start {
-					l.emit(itemText)
-				}
-				l.pos += Pos(len(m[0]))
-				l.emit(itemText, m[1])
 				break
 			}
 			l.next()
