@@ -71,7 +71,7 @@ var block = map[itemType]*regexp.Regexp{
 	itemHeading:      regexp.MustCompile(`^ *(#{1,6}) +([^\n]+?) *#* *(?:\n+|$)`),
 	itemLHeading:     regexp.MustCompile(`^([^\n]+?) *\n {0,3}(=|-){1,} *(?:\n+|$)`),
 	itemHr:           regexp.MustCompile(`^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *(?:\n+|$)`),
-	itemCodeBlock:    regexp.MustCompile(`^( {4}[^\n]+\n*)+`),
+	itemCodeBlock:    regexp.MustCompile(`^( {4}[^\n]+(?: *\n)*)+`),
 	itemGfmCodeBlock: regexp.MustCompile(fmt.Sprintf(reGfmCode, "`") + "|" + fmt.Sprintf(reGfmCode, "~")),
 	itemList:         regexp.MustCompile(`^( *)(?:[*+-]|\d{1,9}\.) (.*)(?:\n|)`),
 	itemListItem:     regexp.MustCompile(`^ *([*+-]|\d+\.) +`),

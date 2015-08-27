@@ -250,7 +250,7 @@ func (p *parse) parseCodeBlock() *CodeNode {
 			lang = match[3]
 		}
 	} else {
-		text = regexp.MustCompile("(?m)^( {4})").ReplaceAllLiteralString(token.val, "")
+		text = regexp.MustCompile("(?m)^( {0,4})").ReplaceAllLiteralString(token.val, "")
 	}
 	return p.newCode(token.pos, lang, text)
 }
