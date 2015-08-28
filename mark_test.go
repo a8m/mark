@@ -323,12 +323,35 @@ Baz`, `<hr>
 
 - one
 </code></pre>`},
-	{"69", `    chunk1
+	{"68", `
+    chunk1
+
+    chunk2
+  
+ 
+ 
+    chunk3`, `
+<pre><code>chunk1
+
+chunk2
+
+
+
+chunk3
+</code></pre>`},
+	{"69", `
+    chunk1
       
-      chunk2`, `<pre><code>chunk1
+      chunk2`, `
+<pre><code>chunk1
   
   chunk2
 </code></pre>`},
+	{"70", `
+Foo
+    bar`, `
+<p>Foo
+bar</p>`},
 	{"71", `    foo
 bar`, `<pre><code>foo
 </code></pre>
@@ -1372,6 +1395,7 @@ bar*`, `
 <p><em>foo<br>
 bar</em></p>`},
 	{"587", `foo\`, `<p>foo\</p>`},
+	{"588", `foo  `, `<p>foo</p>`},
 	{"589", `### foo\`, `<h3>foo\</h3>`},
 	{"590", `### foo  `, `<h3>foo</h3>`},
 	{"591", `
