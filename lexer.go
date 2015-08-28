@@ -61,8 +61,8 @@ var (
 	reEmphasise = `(?s)^_{%[1]d}(.+?(?:_{0,}))_{%[1]d}|^\*{%[1]d}(.+?(?:\*{0,}))\*{%[1]d}`
 	reGfmCode   = `(?s)^%[1]s{3,} *(\S+)? *\n(.*?)\s*%[1]s{3,}$*(?:\n+|$)`
 	reLinkText  = `(?:\[[^\]]*\]|[^\[\]]|\])*`
-	reLinkHref  = `(?s)\s*<?(.*?)>?(?:\s+['"\(](.*?)['"\)])?\s*`
-	reDefLink   = `(?s)^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["'(](.+)['")])? *(?:\n+|$)`
+	reLinkHref  = `\s*<?(.*?)>?(?:\s+['"\(](.*?)['"\)])?\s*`
+	reDefLink   = `(?s)^ *\[([^\]]+)\]: *\n? *<?([^\s>]+)>?(?: *\n? *["'(](.+)['")])? *(?:\n+|$)`
 )
 
 // Block Grammer
@@ -89,11 +89,11 @@ var span = map[itemType]*regexp.Regexp{
 	itemStrike:   regexp.MustCompile(`(?s)^~{2}(.+?)~{2}`),
 	itemCode:     regexp.MustCompile("(?s)^`{1,2}\\s*(.*?[^`])\\s*`{1,2}"),
 	itemBr:       regexp.MustCompile(`^(?: {2,}|\\)\n`),
-	itemLink:     regexp.MustCompile(fmt.Sprintf(`^!?\[(%s)\]\(%s\)`, reLinkText, reLinkHref)),
+	itemLink:     regexp.MustCompile(fmt.Sprintf(`(?s)^!?\[(%s)\]\(%s\)`, reLinkText, reLinkHref)),
 	itemRefLink:  regexp.MustCompile(`^!?\[((?:\[[^\]]*\]|[^\[\]]|\])*)\](?:\s*\[([^\]]*)\])?`),
 	itemAutoLink: regexp.MustCompile(`^<([^ >]+(@|:\/)[^ >]+)>`),
 	itemGfmLink:  regexp.MustCompile(`^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])`),
-	itemImage:    regexp.MustCompile(fmt.Sprintf(`^!?\[(%s)\]\(%s\)`, reLinkText, reLinkHref)),
+	itemImage:    regexp.MustCompile(fmt.Sprintf(`(?s)^!?\[(%s)\]\(%s\)`, reLinkText, reLinkHref)),
 }
 
 // stateFn represents the state of the scanner as a function that returns the next state.

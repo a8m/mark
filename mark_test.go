@@ -554,6 +554,12 @@ Hi
 [foo]: /url "title"
 
 [foo]`, `<p><a href="/url" title="title">foo</a></p>`},
+	{"145", `
+   [foo]: 
+      /url  
+           'the title'  
+
+[foo]`, `<p><a href="/url" title="the title">foo</a></p>`},
 	{"148", `
 [foo]: /url '
 title
