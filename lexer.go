@@ -68,7 +68,7 @@ var (
 // Block Grammer
 var block = map[itemType]*regexp.Regexp{
 	itemDefLink:      regexp.MustCompile(reDefLink),
-	itemHeading:      regexp.MustCompile(`^ *(#{1,6}) +([^\n]+?) *#* *(?:\n+|$)`),
+	itemHeading:      regexp.MustCompile(`^ *(#{1,6}) +([^\n]+?) *#* *(?:\n|$)`),
 	itemLHeading:     regexp.MustCompile(`^([^\n]+?) *\n {0,3}(=|-){1,} *(?:\n+|$)`),
 	itemHr:           regexp.MustCompile(`^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *(?:\n+|$)`),
 	itemCodeBlock:    regexp.MustCompile(`^( {4}[^\n]+(?: *\n)*)+`),
@@ -200,12 +200,7 @@ func lexAny(l *lexer) stateFn {
 // lexHeading scans heading items.
 func lexHeading(l *lexer) stateFn {
 	if m := block[itemHeading].FindString(l.input[l.pos:]); m != "" {
-		// Emit without the newline(\n)
 		l.pos += Pos(len(m))
-		// TODO(Ariel): hack, fix regexp
-		if strings.HasSuffix(m, "\n") {
-			l.pos--
-		}
 		l.emit(itemHeading)
 		return lexAny
 	}

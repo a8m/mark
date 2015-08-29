@@ -304,8 +304,7 @@ var lexPosTests = []lexTest{
 		{itemEOF, 11, ""},
 	}},
 	{"heading", "# hello\nworld", []item{
-		{itemHeading, 0, "# hello"},
-		{itemNewLine, 7, "\n"},
+		{itemHeading, 0, "# hello\n"},
 		{itemText, 8, "world"},
 		{itemEOF, 13, ""},
 	}},
