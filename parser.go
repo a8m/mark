@@ -142,10 +142,10 @@ func (p *parse) parseText(input string) (nodes []Node) {
 	// HACK: if there's more 'itemText' in the way, make it one.
 	for {
 		tkn := p.next()
-		if tkn.typ == itemText {
+		if tkn.typ == itemText || tkn.typ == itemIndent {
 			input += tkn.val
 		} else if tkn.typ == itemNewLine {
-			if p.peek().typ != itemText {
+			if t := p.peek().typ; t != itemText && t != itemIndent {
 				p.backup2(tkn)
 				break
 			}

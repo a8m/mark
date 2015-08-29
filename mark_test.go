@@ -573,6 +573,11 @@ title
 line1
 line2
 ">foo</a></p>`},
+	{"150", `
+[foo]:
+/url
+
+[foo]`, `<p><a href="/url">foo</a></p>`},
 	{"151", `
 [foo]:
 
@@ -643,12 +648,34 @@ aaa
 bbb`, `
 <p>aaa</p>
 <p>bbb</p>`},
+	{"170", `
+  aaa
+ bbb`, `
+<p>aaa
+bbb</p>`},
+	{"171", `
+aaa
+             bbb
+                                       ccc`, `
+<p>aaa
+bbb
+ccc</p>`},
+	{"172", `
+   aaa
+bbb`, `
+<p>aaa
+bbb</p>`},
 	{"173", `
     aaa
 bbb`, `
 <pre><code>aaa
 </code></pre>
 <p>bbb</p>`},
+	{"174", `
+aaa     
+bbb     `, `
+<p>aaa<br>
+bbb</p>`},
 	{"175", `
   
 
