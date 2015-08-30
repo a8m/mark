@@ -321,7 +321,7 @@ Loop:
 				l.emit(itemText)
 			}
 			break Loop
-			// backslash escaping
+		// backslash escaping
 		case '\\':
 			if m := escape.FindStringSubmatch(l.input[l.pos:]); len(m) != 0 {
 				if l.pos > l.start {

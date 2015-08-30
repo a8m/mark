@@ -905,6 +905,12 @@ paragraph
 <p>paragraph</p>
 <pre><code>more code
 </code></pre>`},
+	{"221", `
+   foo
+
+bar`, `
+<p>foo</p>
+<p>bar</p>`},
 	{"223", `
 -  foo
 
@@ -1031,6 +1037,19 @@ Foo
 <p>bar</p>
 </li>
 </ul>
+<ul>
+<li>baz</li>
+</ul>`},
+	{"249", `
+- foo
+
+
+  bar
+- baz`, `
+<ul>
+<li>foo</li>
+</ul>
+<p>bar</p>
 <ul>
 <li>baz</li>
 </ul>`},
