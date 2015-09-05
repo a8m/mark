@@ -508,7 +508,7 @@ func wrap(tag, body string) string {
 	return fmt.Sprintf("<%[1]s>%s</%[1]s>", tag, body)
 }
 
-// group all text configuration in one place(escaping, smartypants, etc..)
+// Group all text configuration in one place(escaping, smartypants, etc..)
 func (p *parse) text(input string) string {
 	opts := p.root().options
 	if opts.Smartypants {
@@ -520,7 +520,7 @@ func (p *parse) text(input string) string {
 	return escape(input)
 }
 
-// helper escaper
+// Helper escaper
 func escape(str string) (cpy string) {
 	tag := regexp.MustCompile(`^<!--.*?-->|^<\/?\w+(?:"[^"]*"|'[^']*'|[^'">])*?>`)
 	emp := regexp.MustCompile(`&\w+;`)
