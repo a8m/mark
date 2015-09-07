@@ -400,11 +400,42 @@ aaa
 <pre><code>aaa
 ~~~
 </code></pre>`},
+	{"82", "```", "<pre><code></code></pre>"},
+	{"83", "`````\n\n```\naaa", "<pre><code>\n```\naaa\n</code></pre>"},
+	{"84", "> ```\n> aaa\n\nbbb", `
+<blockquote>
+<pre><code>aaa
+</code></pre>
+</blockquote>
+<p>bbb</p>`},
+	{"85", "```\n\n  \n```", "<pre><code>\n  \n</code></pre>"},
 	{"86", "```\n```", `<pre><code></code></pre>`},
+	{"87", " ```\n aaa\naaa\n```", `
+<pre><code>aaa
+aaa
+</code></pre>`},
+	{"88", "  ```\naaa\n  aaa\naaa\n  ```", `
+<pre><code>aaa
+aaa
+aaa
+</code></pre>`},
+	{"89", "   ```\n   aaa\n    aaa\n  aaa\n   ```", `
+<pre><code>aaa
+ aaa
+aaa
+</code></pre>`},
 	{"90", "    ```\n    aaa\n    ```", "<pre><code>```\naaa\n```\n</code></pre>"},
 	{"91", "```\naaa\n  ```", `<pre><code>aaa
 </code></pre>`},
 	{"92", "   ```\naaa\n  ```", `<pre><code>aaa
+</code></pre>`},
+	{"93", "```\naaa\n    ```", "<pre><code>aaa\n    ```\n</code></pre>"},
+	{"95", `
+~~~~~~
+aaa
+~~~ ~~`, `
+<pre><code>aaa
+~~~ ~~
 </code></pre>`},
 	{"96", "foo\n```\nbar\n```\nbaz", `<p>foo</p>
 <pre><code>bar
