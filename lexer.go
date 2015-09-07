@@ -66,18 +66,10 @@ var (
 
 // Block Grammer
 var block = map[itemType]*regexp.Regexp{
-	itemDefLink:    regexp.MustCompile(reDefLink),
-	itemHeading:    regexp.MustCompile(`^ *(#{1,6}) +([^\n]+?) *#* *(?:\n|$)`),
-	itemLHeading:   regexp.MustCompile(`^([^\n]+?) *\n {0,3}(=|-){1,} *(?:\n+|$)`),
-	itemHr:         regexp.MustCompile(`^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *(?:\n+|$)`),
-	itemCodeBlock:  regexp.MustCompile(`^( {4}[^\n]+(?: *\n)*)+`),
-	itemList:       regexp.MustCompile(`^( *)(?:[*+-]|\d{1,9}\.) (.*)(?:\n|)`),
-	itemListItem:   regexp.MustCompile(`^ *([*+-]|\d+\.) +`),
-	itemLooseItem:  regexp.MustCompile(`(?m)\n\n(.*)`),
-	itemLpTable:    regexp.MustCompile(`(^ *\|.+)\n( *\| *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*`),
-	itemTable:      regexp.MustCompile(`^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*`),
-	itemBlockQuote: regexp.MustCompile(`^( *>[^\n]*(\n[^\n]+)*\n*)+`),
-	itemHTML:       regexp.MustCompile(`^<(\w+)(?:"[^"]*"|'[^']*'|[^'">])*?>`),
+	itemDefLink:   regexp.MustCompile(reDefLink),
+	itemList:      regexp.MustCompile(`^( *)(?:[*+-]|\d{1,9}\.) (.*)(?:\n|)`),
+	itemListItem:  regexp.MustCompile(`^ *([*+-]|\d+\.) +`),
+	itemLooseItem: regexp.MustCompile(`(?m)\n\n(.*)`),
 }
 
 // Inline Grammer
@@ -171,9 +163,9 @@ func lexAny(l *lexer) stateFn {
 	case '`', '~':
 		return lexGfmCode
 	case ' ':
-		if block[itemCodeBlock].MatchString(l.input[l.pos:]) {
+		if reCodeBlock.MatchString(l.input[l.pos:]) {
 			return lexCode
-		} else if reGfmStart.MatchString(l.input[l.pos:]) {
+		} else if reGfmCode.MatchString(l.input[l.pos:]) {
 			return lexGfmCode
 		}
 		// Keep moving forward until we get all the indentation size
@@ -182,13 +174,13 @@ func lexAny(l *lexer) stateFn {
 		l.emit(itemIndent)
 		return lexAny
 	case '|':
-		if m := block[itemLpTable].MatchString(l.input[l.pos:]); m {
+		if m := reTable.itemLp.MatchString(l.input[l.pos:]); m {
 			l.emit(itemLpTable)
 			return lexTable
 		}
 		fallthrough
 	default:
-		if m := block[itemTable].MatchString(l.input[l.pos:]); m {
+		if m := reTable.item.MatchString(l.input[l.pos:]); m {
 			l.emit(itemTable)
 			return lexTable
 		}
@@ -198,7 +190,7 @@ func lexAny(l *lexer) stateFn {
 
 // lexHeading scans heading items.
 func lexHeading(l *lexer) stateFn {
-	if m := block[itemHeading].FindString(l.input[l.pos:]); m != "" {
+	if m := reHeading.FindString(l.input[l.pos:]); m != "" {
 		l.pos += Pos(len(m))
 		l.emit(itemHeading)
 		return lexAny
@@ -208,8 +200,7 @@ func lexHeading(l *lexer) stateFn {
 
 // lexHr scans horizontal rules items.
 func lexHr(l *lexer) stateFn {
-	if block[itemHr].MatchString(l.input[l.pos:]) {
-		match := block[itemHr].FindString(l.input[l.pos:])
+	if match := reHr.FindString(l.input[l.pos:]); match != "" {
 		l.pos += Pos(len(match))
 		l.emit(itemHr)
 		return lexAny
@@ -219,11 +210,11 @@ func lexHr(l *lexer) stateFn {
 
 // lexGfmCode scans GFM code block.
 func lexGfmCode(l *lexer) stateFn {
-	if match := reGfmStart.FindStringSubmatch(l.input[l.pos:]); len(match) != 0 {
+	if match := reGfmCode.FindStringSubmatch(l.input[l.pos:]); len(match) != 0 {
 		l.pos += Pos(len(match[0]))
 		fence := match[2]
 		// Generate Regexp based on fence type[`~] and length
-		reGfmEnd := reGfmEndGen(fence[0:1], len(fence))
+		reGfmEnd := reGfmCode.endGen(fence[0:1], len(fence))
 		infoContainer := reGfmEnd.FindStringSubmatch(l.input[l.pos:])
 		l.pos += Pos(len(infoContainer[0]))
 		infoString := infoContainer[1]
@@ -240,7 +231,7 @@ func lexGfmCode(l *lexer) stateFn {
 
 // lexCode scans code block.
 func lexCode(l *lexer) stateFn {
-	match := block[itemCodeBlock].FindString(l.input[l.pos:])
+	match := reCodeBlock.FindString(l.input[l.pos:])
 	l.pos += Pos(len(match))
 	l.emit(itemCodeBlock)
 	return lexAny
@@ -272,7 +263,7 @@ Loop:
 			break Loop
 		default:
 			// Test for Setext-style headers
-			if m := block[itemLHeading].FindString(l.input[l.pos:]); m != "" {
+			if m := reLHeading.FindString(l.input[l.pos:]); m != "" {
 				emit(itemLHeading, Pos(len(m)))
 				break Loop
 			}
@@ -423,30 +414,21 @@ func lexHTML(l *lexer) stateFn {
 
 // Test if the given input is match the HTML pattern(blocks only)
 func (l *lexer) matchHTML(input string) (bool, string) {
-	// TODO: DRY regexp - multiline comment
-	comment := regexp.MustCompile(`(?s)<!--.*?-->`)
-	if m := comment.FindString(input); m != "" {
+	if m := reHTML.comment.FindString(input); m != "" {
 		return true, m
 	}
-	reStart := block[itemHTML]
-	// TODO: Add all span-tags and move to config.
-	reSpan := regexp.MustCompile(`^(a|em|strong|small|s|q|data|time|code|sub|sup|i|b|u|span|br|del|img)$`)
-	if m := reStart.FindStringSubmatch(input); len(m) != 0 {
+	if m := reHTML.item.FindStringSubmatch(input); len(m) != 0 {
 		el, name := m[0], m[1]
 		// if name is a span... is a text
-		if reSpan.MatchString(name) {
+		if reHTML.span.MatchString(name) {
 			return false, ""
 		}
 		// if it's a self-closed html element, but not a itemAutoLink
 		if strings.HasSuffix(el, "/>") && !span[itemAutoLink].MatchString(el) {
 			return true, el
 		}
-		reStr := fmt.Sprintf(`(?s)(.)+?<\/%s> *(?:\n{2,}|\s*$)`, name)
-		reMatch, err := regexp.Compile(reStr)
-		if err != nil {
-			return false, ""
-		}
-		if m := reMatch.FindString(input); m != "" {
+		reEndTag := reHTML.endTagGen(name)
+		if m := reEndTag.FindString(input); m != "" {
 			return true, m
 		}
 	}
@@ -528,7 +510,7 @@ func (l *lexer) matchList(input string) (bool, []string) {
 			}
 		}
 		// DefLink or hr
-		if block[itemDefLink].MatchString(input) || block[itemHr].MatchString(input) {
+		if block[itemDefLink].MatchString(input) || reHr.MatchString(input) {
 			break
 		}
 		// It's list in the same depth
@@ -553,7 +535,7 @@ func (l *lexer) matchList(input string) (bool, []string) {
 
 // Test if the given input match blockquote
 func (l *lexer) matchBlockQuote(input string) (bool, string) {
-	match := block[itemBlockQuote].FindString(input)
+	match := reBlockQuote.FindString(input)
 	if match == "" {
 		return false, match
 	}
@@ -580,25 +562,23 @@ func lexBlockQuote(l *lexer) stateFn {
 
 // lexTable
 func lexTable(l *lexer) stateFn {
-	re := block[itemTable]
+	re := reTable.item
 	if l.peek() == '|' {
-		re = block[itemLpTable]
+		re = reTable.itemLp
 	}
 	table := re.FindStringSubmatch(l.input[l.pos:])
 	l.pos += Pos(len(table[0]))
 	l.start = l.pos
 	// Ignore the first match, and flat all rows(by splitting \n)
 	rows := append(table[1:3], strings.Split(table[3], "\n")...)
-	trim := regexp.MustCompile(`^ *\| *| *\| *$`)
-	split := regexp.MustCompile(` *\| *`)
 	// Loop over the rows
 	for _, row := range rows {
 		if row == "" {
 			continue
 		}
 		l.emit(itemTableRow)
-		rawCells := trim.ReplaceAllString(row, "")
-		cells := split.Split(rawCells, -1)
+		rawCells := reTable.trim(row, "")
+		cells := reTable.split(rawCells, -1)
 		// Emit cells in the current row
 		for _, cell := range cells {
 			l.emit(itemTableCell, cell)

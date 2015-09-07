@@ -209,10 +209,12 @@ func (p *parse) parseEmphasis(typ itemType, pos Pos, val string) *EmphasisNode {
 // parse heading block
 func (p *parse) parseHeading() (node *HeadingNode) {
 	token := p.next()
-	match := block[token.typ].FindStringSubmatch(token.val)
+	var match []string
 	if token.typ == itemHeading {
+		match = reHeading.FindStringSubmatch(token.val)
 		node = p.newHeading(token.pos, len(match[1]), match[2])
 	} else {
+		match = reLHeading.FindStringSubmatch(token.val)
 		// using equal signs for first-level, and dashes for second-level.
 		level := 1
 		if match[2] == "-" {
@@ -242,11 +244,11 @@ func (p *parse) parseCodeBlock() *CodeNode {
 	var lang, text string
 	token := p.next()
 	if token.typ == itemGfmCodeBlock {
-		codeStart := reGfmStart.FindStringSubmatch(token.val)
+		codeStart := reGfmCode.FindStringSubmatch(token.val)
 		lang = codeStart[3]
 		text = token.val[len(codeStart[0]):]
 	} else {
-		text = regexp.MustCompile("(?m)^( {0,4})").ReplaceAllLiteralString(token.val, "")
+		text = reCodeBlock.trim(token.val, "")
 	}
 	return p.newCode(token.pos, lang, text)
 }
