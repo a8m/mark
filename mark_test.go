@@ -391,6 +391,15 @@ bar
 ~~~
 </code></pre>`},
 	{"79", "~~~\naaa\n```\n~~~", "<pre><code>aaa\n```\n</code></pre>"},
+	{"80", "````\naaa\n```\n``````", "<pre><code>aaa\n```\n</code></pre>"},
+	{"81", `
+~~~~
+aaa
+~~~
+~~~~`, `
+<pre><code>aaa
+~~~
+</code></pre>`},
 	{"86", "```\n```", `<pre><code></code></pre>`},
 	{"90", "    ```\n    aaa\n    ```", "<pre><code>```\naaa\n```\n</code></pre>"},
 	{"91", "```\naaa\n  ```", `<pre><code>aaa
