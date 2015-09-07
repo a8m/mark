@@ -59,29 +59,25 @@ const (
 
 var (
 	reEmphasise = `(?s)^_{%[1]d}(.+?(?:_{0,}))_{%[1]d}|^\*{%[1]d}(.+?(?:\*{0,}))\*{%[1]d}`
-	// reGfmStart: ^([`~]{3,}) *(\S*)?(?:.*)(?:\n|$)
-	// reGfmEnd:
-	reGfmCode  = `(?s)^%[1]s{3,} *(\S+)? *\n(.*?)\s*%[1]s{3,}$*(?:\n+|$)`
-	reLinkText = `(?:\[[^\]]*\]|[^\[\]]|\])*`
-	reLinkHref = `\s*<?(.*?)>?(?:\s+['"\(](.*?)['"\)])?\s*`
-	reDefLink  = `(?s)^ *\[([^\]]+)\]: *\n? *<?([^\s>]+)>?(?: *\n? *["'(](.+)['")])? *(?:\n+|$)`
+	reLinkText  = `(?:\[[^\]]*\]|[^\[\]]|\])*`
+	reLinkHref  = `\s*<?(.*?)>?(?:\s+['"\(](.*?)['"\)])?\s*`
+	reDefLink   = `(?s)^ *\[([^\]]+)\]: *\n? *<?([^\s>]+)>?(?: *\n? *["'(](.+)['")])? *(?:\n+|$)`
 )
 
 // Block Grammer
 var block = map[itemType]*regexp.Regexp{
-	itemDefLink:      regexp.MustCompile(reDefLink),
-	itemHeading:      regexp.MustCompile(`^ *(#{1,6}) +([^\n]+?) *#* *(?:\n|$)`),
-	itemLHeading:     regexp.MustCompile(`^([^\n]+?) *\n {0,3}(=|-){1,} *(?:\n+|$)`),
-	itemHr:           regexp.MustCompile(`^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *(?:\n+|$)`),
-	itemCodeBlock:    regexp.MustCompile(`^( {4}[^\n]+(?: *\n)*)+`),
-	itemGfmCodeBlock: regexp.MustCompile(fmt.Sprintf(reGfmCode, "`") + "|" + fmt.Sprintf(reGfmCode, "~")),
-	itemList:         regexp.MustCompile(`^( *)(?:[*+-]|\d{1,9}\.) (.*)(?:\n|)`),
-	itemListItem:     regexp.MustCompile(`^ *([*+-]|\d+\.) +`),
-	itemLooseItem:    regexp.MustCompile(`(?m)\n\n(.*)`),
-	itemLpTable:      regexp.MustCompile(`(^ *\|.+)\n( *\| *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*`),
-	itemTable:        regexp.MustCompile(`^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*`),
-	itemBlockQuote:   regexp.MustCompile(`^( *>[^\n]*(\n[^\n]+)*\n*)+`),
-	itemHTML:         regexp.MustCompile(`^<(\w+)(?:"[^"]*"|'[^']*'|[^'">])*?>`),
+	itemDefLink:    regexp.MustCompile(reDefLink),
+	itemHeading:    regexp.MustCompile(`^ *(#{1,6}) +([^\n]+?) *#* *(?:\n|$)`),
+	itemLHeading:   regexp.MustCompile(`^([^\n]+?) *\n {0,3}(=|-){1,} *(?:\n+|$)`),
+	itemHr:         regexp.MustCompile(`^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *(?:\n+|$)`),
+	itemCodeBlock:  regexp.MustCompile(`^( {4}[^\n]+(?: *\n)*)+`),
+	itemList:       regexp.MustCompile(`^( *)(?:[*+-]|\d{1,9}\.) (.*)(?:\n|)`),
+	itemListItem:   regexp.MustCompile(`^ *([*+-]|\d+\.) +`),
+	itemLooseItem:  regexp.MustCompile(`(?m)\n\n(.*)`),
+	itemLpTable:    regexp.MustCompile(`(^ *\|.+)\n( *\| *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*`),
+	itemTable:      regexp.MustCompile(`^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*`),
+	itemBlockQuote: regexp.MustCompile(`^( *>[^\n]*(\n[^\n]+)*\n*)+`),
+	itemHTML:       regexp.MustCompile(`^<(\w+)(?:"[^"]*"|'[^']*'|[^'">])*?>`),
 }
 
 // Inline Grammer
@@ -175,9 +171,10 @@ func lexAny(l *lexer) stateFn {
 	case '`', '~':
 		return lexGfmCode
 	case ' ':
-		// TODO(Ariel): Should be here ?
 		if block[itemCodeBlock].MatchString(l.input[l.pos:]) {
 			return lexCode
+		} else if reGfmStart.MatchString(l.input[l.pos:]) {
+			return lexGfmCode
 		}
 		// Keep moving forward until we get all the indentation size
 		for ; r == l.peek(); r = l.next() {
@@ -222,11 +219,20 @@ func lexHr(l *lexer) stateFn {
 
 // lexGfmCode scans GFM code block.
 func lexGfmCode(l *lexer) stateFn {
-	re := block[itemGfmCodeBlock]
-	if re.MatchString(l.input[l.pos:]) {
-		match := re.FindString(l.input[l.pos:])
-		l.pos += Pos(len(match))
-		l.emit(itemGfmCodeBlock)
+	if match := reGfmStart.FindStringSubmatch(l.input[l.pos:]); len(match) != 0 {
+		l.pos += Pos(len(match[0]))
+		fence := match[2]
+		// Generate Regexp based on fence type[`~] and length
+		reGfmEnd := reGfmEndGen(fence[0:1], len(fence))
+		infoContainer := reGfmEnd.FindStringSubmatch(l.input[l.pos:])
+		l.pos += Pos(len(infoContainer[0]))
+		infoString := infoContainer[1]
+		// Remove leading and trailing spaces
+		if indent := len(match[1]); indent > 0 {
+			reSpace := reSpaceGen(indent)
+			infoString = reSpace.ReplaceAllString(infoString, "")
+		}
+		l.emit(itemGfmCodeBlock, match[0]+infoString)
 		return lexAny
 	}
 	return lexText

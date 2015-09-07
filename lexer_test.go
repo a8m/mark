@@ -100,11 +100,11 @@ var blockTests = []lexTest{
 		tEOF,
 	}},
 	{"gfm-code-block-1", "~~~js\nfoo\n~~~", []item{
-		{itemGfmCodeBlock, 0, "~~~js\nfoo\n~~~"},
+		{itemGfmCodeBlock, 0, "~~~js\nfoo\n"},
 		tEOF,
 	}},
 	{"gfm-code-block-2", "```js\nfoo\n```", []item{
-		{itemGfmCodeBlock, 0, "```js\nfoo\n```"},
+		{itemGfmCodeBlock, 0, "```js\nfoo\n"},
 		tEOF,
 	}},
 	{"hr1", "* * *\n***", []item{

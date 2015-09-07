@@ -242,13 +242,9 @@ func (p *parse) parseCodeBlock() *CodeNode {
 	var lang, text string
 	token := p.next()
 	if token.typ == itemGfmCodeBlock {
-		match := block[itemGfmCodeBlock].FindStringSubmatch(token.val)
-		if text = match[2]; text == "" {
-			text = match[4]
-		}
-		if lang = match[1]; lang == "" {
-			lang = match[3]
-		}
+		codeStart := reGfmStart.FindStringSubmatch(token.val)
+		lang = codeStart[3]
+		text = token.val[len(codeStart[0]):]
 	} else {
 		text = regexp.MustCompile("(?m)^( {0,4})").ReplaceAllLiteralString(token.val, "")
 	}

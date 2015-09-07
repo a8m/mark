@@ -52,9 +52,9 @@ func TestRender(t *testing.T) {
 		"\tfoo\n\tbar": "<pre><code>foo\nbar</code></pre>",
 		"\tfoo\nbar":   "<pre><code>foo\n</code></pre>\n<p>bar</p>",
 		// GfmCodeBlock
-		"```js\nvar a;\n```":  "<pre><code class=\"lang-js\">var a;</code></pre>",
-		"~~~\nvar b;~~~":      "<pre><code>var b;</code></pre>",
-		"~~~js\nlet d = 1~~~": "<pre><code class=\"lang-js\">let d = 1</code></pre>",
+		"```js\nvar a;\n```":         "<pre><code class=\"lang-js\">\nvar a;\n</code></pre>",
+		"~~~\nvar b;~~let d = 1~~~~": "<pre><code>\nvar b;~~let d = 1~~~~</code></pre>",
+		"~~~js\n":                    "<pre><code class=\"lang-js\">\n</code></pre>",
 		// Hr
 		"foo\n****\nbar": "<p>foo</p>\n<hr>\n<p>bar</p>",
 		"foo\n___":       "<p>foo</p>\n<hr>",
