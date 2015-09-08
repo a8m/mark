@@ -157,7 +157,7 @@ func (p *parse) parseText(input string) (nodes []Node) {
 	}
 	// Removing initial and final whitespace.
 	input = regexp.MustCompile(`(?m)^ +| +(\n|$)`).ReplaceAllStringFunc(input, func(s string) string {
-		if span[itemBr].MatchString(s) {
+		if reBr.MatchString(s) {
 			return s
 		}
 		return ""
@@ -172,18 +172,24 @@ func (p *parse) parseText(input string) (nodes []Node) {
 			node = p.parseEmphasis(token.typ, token.pos, token.val)
 		case itemLink, itemAutoLink, itemGfmLink:
 			var title, text, href string
-			match := span[token.typ].FindStringSubmatch(token.val)
 			if token.typ == itemLink {
+				match := reLink.FindStringSubmatch(token.val)
 				text, href, title = match[1], match[2], match[3]
 			} else {
+				var match []string
+				if token.typ == itemGfmLink {
+					match = reGfmLink.FindStringSubmatch(token.val)
+				} else {
+					match = reAutoLink.FindStringSubmatch(token.val)
+				}
 				text, href = match[1], match[1]
 			}
 			node = p.newLink(token.pos, title, href, text)
 		case itemImage:
-			match := span[token.typ].FindStringSubmatch(token.val)
+			match := reImage.FindStringSubmatch(token.val)
 			node = p.newImage(token.pos, match[3], match[2], match[1])
 		case itemRefLink, itemRefImage:
-			match := span[itemRefLink].FindStringSubmatch(token.val)
+			match := reRefLink.FindStringSubmatch(token.val)
 			node = p.newRef(token.typ, token.pos, token.val, match[1], match[2])
 		// itemText
 		default:
@@ -227,7 +233,7 @@ func (p *parse) parseHeading() (node *HeadingNode) {
 
 func (p *parse) parseDefLink() *DefLinkNode {
 	token := p.next()
-	match := block[itemDefLink].FindStringSubmatch(token.val)
+	match := reDefLink.FindStringSubmatch(token.val)
 	name := strings.ToLower(match[1])
 	// name(lowercase), href, title
 	n := p.newDefLink(token.pos, name, match[2], match[3])

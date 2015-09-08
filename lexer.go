@@ -59,31 +59,14 @@ const (
 
 var (
 	reEmphasise = `(?s)^_{%[1]d}(.+?(?:_{0,}))_{%[1]d}|^\*{%[1]d}(.+?(?:\*{0,}))\*{%[1]d}`
-	reLinkText  = `(?:\[[^\]]*\]|[^\[\]]|\])*`
-	reLinkHref  = `\s*<?(.*?)>?(?:\s+['"\(](.*?)['"\)])?\s*`
-	reDefLink   = `(?s)^ *\[([^\]]+)\]: *\n? *<?([^\s>]+)>?(?: *\n? *["'(](.+)['")])? *(?:\n+|$)`
 )
-
-// Block Grammer
-var block = map[itemType]*regexp.Regexp{
-	itemDefLink:   regexp.MustCompile(reDefLink),
-	itemList:      regexp.MustCompile(`^( *)(?:[*+-]|\d{1,9}\.) (.*)(?:\n|)`),
-	itemListItem:  regexp.MustCompile(`^ *([*+-]|\d+\.) +`),
-	itemLooseItem: regexp.MustCompile(`(?m)\n\n(.*)`),
-}
 
 // Inline Grammer
 var span = map[itemType]*regexp.Regexp{
-	itemItalic:   regexp.MustCompile(fmt.Sprintf(reEmphasise, 1)),
-	itemStrong:   regexp.MustCompile(fmt.Sprintf(reEmphasise, 2)),
-	itemStrike:   regexp.MustCompile(`(?s)^~{2}(.+?)~{2}`),
-	itemCode:     regexp.MustCompile("(?s)^`{1,2}\\s*(.*?[^`])\\s*`{1,2}"),
-	itemBr:       regexp.MustCompile(`^(?: {2,}|\\)\n`),
-	itemLink:     regexp.MustCompile(fmt.Sprintf(`(?s)^!?\[(%s)\]\(%s\)`, reLinkText, reLinkHref)),
-	itemRefLink:  regexp.MustCompile(`^!?\[((?:\[[^\]]*\]|[^\[\]]|\])*)\](?:\s*\[([^\]]*)\])?`),
-	itemAutoLink: regexp.MustCompile(`^<([^ >]+(@|:\/)[^ >]+)>`),
-	itemGfmLink:  regexp.MustCompile(`^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])`),
-	itemImage:    regexp.MustCompile(fmt.Sprintf(`(?s)^!?\[(%s)\]\(%s\)`, reLinkText, reLinkHref)),
+	itemItalic: regexp.MustCompile(fmt.Sprintf(reEmphasise, 1)),
+	itemStrong: regexp.MustCompile(fmt.Sprintf(reEmphasise, 2)),
+	itemStrike: regexp.MustCompile(`(?s)^~{2}(.+?)~{2}`),
+	itemCode:   regexp.MustCompile("(?s)^`{1,2}\\s*(.*?[^`])\\s*`{1,2}"),
 }
 
 // stateFn represents the state of the scanner as a function that returns the next state.
@@ -332,7 +315,7 @@ Loop:
 			}
 			fallthrough
 		case ' ':
-			if m := span[itemBr].FindString(l.input[l.pos:]); m != "" {
+			if m := reBr.FindString(l.input[l.pos:]); m != "" {
 				// pos - length of new-line
 				emit(itemBr, len(m))
 				break
@@ -365,7 +348,7 @@ Loop:
 		// itemLink, itemImage, itemRefLink, itemRefImage
 		case '[', '!':
 			input := l.input[l.pos:]
-			if m := span[itemLink].FindString(input); m != "" {
+			if m := reLink.FindString(input); m != "" {
 				pos := len(m)
 				if r == '[' {
 					emit(itemLink, pos)
@@ -374,7 +357,7 @@ Loop:
 				}
 				break
 			}
-			if m := span[itemRefLink].FindString(input); m != "" {
+			if m := reRefLink.FindString(input); m != "" {
 				pos := len(m)
 				if r == '[' {
 					emit(itemRefLink, pos)
@@ -386,13 +369,13 @@ Loop:
 			l.next()
 		// itemAutoLink,
 		case '<':
-			if m := span[itemAutoLink].FindString(l.input[l.pos:]); m != "" {
+			if m := reAutoLink.FindString(l.input[l.pos:]); m != "" {
 				emit(itemAutoLink, len(m))
 				break
 			}
 			l.next()
 		default:
-			if m := span[itemGfmLink].FindString(l.input[l.pos:]); m != "" {
+			if m := reGfmLink.FindString(l.input[l.pos:]); m != "" {
 				emit(itemGfmLink, len(m))
 				break
 			}
@@ -424,7 +407,7 @@ func (l *lexer) matchHTML(input string) (bool, string) {
 			return false, ""
 		}
 		// if it's a self-closed html element, but not a itemAutoLink
-		if strings.HasSuffix(el, "/>") && !span[itemAutoLink].MatchString(el) {
+		if strings.HasSuffix(el, "/>") && !reAutoLink.MatchString(el) {
 			return true, el
 		}
 		reEndTag := reHTML.endTagGen(name)
@@ -437,7 +420,7 @@ func (l *lexer) matchHTML(input string) (bool, string) {
 
 // lexDefLink scans link definition
 func lexDefLink(l *lexer) stateFn {
-	if m := block[itemDefLink].FindString(l.input[l.pos:]); m != "" {
+	if m := reDefLink.FindString(l.input[l.pos:]); m != "" {
 		l.pos += Pos(len(m))
 		l.emit(itemDefLink)
 		return lexAny
@@ -453,26 +436,24 @@ func lexList(l *lexer) stateFn {
 	}
 	var space int
 	var typ itemType
-	reItem := block[itemListItem]
-	reLoose := block[itemLooseItem]
 	for i, item := range items {
 		// Emit itemList on the first loop
 		if i == 0 {
-			l.emit(itemList, reItem.FindStringSubmatch(item)[1])
+			l.emit(itemList, reList.marker.FindStringSubmatch(item)[1])
 		}
 		// Initialize each loop
 		typ = itemListItem
 		space = len(item)
 		l.pos += Pos(space)
-		item = reItem.ReplaceAllString(item, "")
+		item = reList.marker.ReplaceAllString(item, "")
 		// Indented
 		if strings.Contains(item, "\n ") {
 			space -= len(item)
-			reSpace := regexp.MustCompile(fmt.Sprintf(`(?m)^ {1,%d}`, space))
+			reSpace := reSpaceGen(space)
 			item = reSpace.ReplaceAllString(item, "")
 		}
 		// If current is loose
-		for _, l := range reLoose.FindAllString(item, -1) {
+		for _, l := range reList.loose.FindAllString(item, -1) {
 			if len(strings.TrimSpace(l)) > 0 || i != len(items)-1 {
 				typ = itemLooseItem
 				break
@@ -489,9 +470,7 @@ func lexList(l *lexer) stateFn {
 
 func (l *lexer) matchList(input string) (bool, []string) {
 	var res []string
-	reItem := block[itemList]
-	reScan := regexp.MustCompile(`^(.*)(?:\n|)`)
-	reLine := regexp.MustCompile(`^\n{1,}`)
+	reItem := reList.item
 	if !reItem.MatchString(input) {
 		return false, res
 	}
@@ -502,7 +481,7 @@ func (l *lexer) matchList(input string) (bool, []string) {
 	// Loop over the input
 	for len(input) > 0 {
 		// Count new-lines('\n')
-		if m := reLine.FindString(input); m != "" {
+		if m := reList.scanNewLine(input); m != "" {
 			item += m
 			input = input[len(m):]
 			if len(m) >= 2 || !reItem.MatchString(input) && !strings.HasPrefix(input, " ") {
@@ -510,7 +489,7 @@ func (l *lexer) matchList(input string) (bool, []string) {
 			}
 		}
 		// DefLink or hr
-		if block[itemDefLink].MatchString(input) || reHr.MatchString(input) {
+		if reDefLink.MatchString(input) || reHr.MatchString(input) {
 			break
 		}
 		// It's list in the same depth
@@ -521,7 +500,7 @@ func (l *lexer) matchList(input string) (bool, []string) {
 			item = m[0]
 			input = input[len(item):]
 		} else {
-			m := reScan.FindString(input)
+			m := reList.scanLine(input)
 			item += m
 			input = input[len(m):]
 		}
@@ -542,7 +521,7 @@ func (l *lexer) matchBlockQuote(input string) (bool, string) {
 	lines := strings.Split(match, "\n")
 	for i, line := range lines {
 		// if line is a link-definition we cut the match until this point
-		if isDef := block[itemDefLink].MatchString(line); isDef {
+		if isDef := reDefLink.MatchString(line); isDef {
 			match = strings.Join(lines[0:i], "\n")
 			break
 		}

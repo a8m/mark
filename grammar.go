@@ -5,15 +5,28 @@ import (
 	"regexp"
 )
 
+// Block Grammar
 var (
 	reHr         = regexp.MustCompile(`^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *(?:\n+|$)`)
 	reHeading    = regexp.MustCompile(`^ *(#{1,6}) +([^\n]+?) *#* *(?:\n|$)`)
 	reLHeading   = regexp.MustCompile(`^([^\n]+?) *\n {0,3}(=|-){1,} *(?:\n+|$)`)
 	reBlockQuote = regexp.MustCompile(`^( *>[^\n]*(\n[^\n]+)*\n*)+`)
+	reDefLink    = regexp.MustCompile(`(?s)^ *\[([^\]]+)\]: *\n? *<?([^\s>]+)>?(?: *\n? *["'(](.+)['")])? *(?:\n+|$)`)
 	reSpaceGen   = func(i int) *regexp.Regexp {
 		return regexp.MustCompile(fmt.Sprintf(`(?m)^ {1,%d}`, i))
 	}
 )
+
+var reList = struct {
+	item, marker, loose   *regexp.Regexp
+	scanLine, scanNewLine func(src string) string
+}{
+	regexp.MustCompile(`^( *)(?:[*+-]|\d{1,9}\.) (.*)(?:\n|)`),
+	regexp.MustCompile(`^ *([*+-]|\d+\.) +`),
+	regexp.MustCompile(`(?m)\n\n(.*)`),
+	regexp.MustCompile(`^(.*)(?:\n|)`).FindString,
+	regexp.MustCompile(`^\n{1,}`).FindString,
+}
 
 var reCodeBlock = struct {
 	*regexp.Regexp
@@ -57,3 +70,15 @@ var reHTML = struct {
 		return regexp.MustCompile(fmt.Sprintf(`(?s)(.)+?<\/%s> *(?:\n{2,}|\s*$)`, tag))
 	},
 }
+
+// Inline Grammar
+var (
+	reBr       = regexp.MustCompile(`^(?: {2,}|\\)\n`)
+	reLinkText = `(?:\[[^\]]*\]|[^\[\]]|\])*`
+	reLinkHref = `\s*<?(.*?)>?(?:\s+['"\(](.*?)['"\)])?\s*`
+	reGfmLink  = regexp.MustCompile(`^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])`)
+	reLink     = regexp.MustCompile(fmt.Sprintf(`(?s)^!?\[(%s)\]\(%s\)`, reLinkText, reLinkHref))
+	reAutoLink = regexp.MustCompile(`^<([^ >]+(@|:\/)[^ >]+)>`)
+	reRefLink  = regexp.MustCompile(`^!?\[((?:\[[^\]]*\]|[^\[\]]|\])*)\](?:\s*\[([^\]]*)\])?`)
+	reImage    = regexp.MustCompile(fmt.Sprintf(`(?s)^!?\[(%s)\]\(%s\)`, reLinkText, reLinkHref))
+)
