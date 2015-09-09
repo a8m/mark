@@ -522,7 +522,6 @@ func (p *parse) text(input string) string {
 
 // Helper escaper
 func escape(str string) (cpy string) {
-	tag := regexp.MustCompile(`^<!--.*?-->|^<\/?\w+(?:"[^"]*"|'[^']*'|[^'">])*?>`)
 	emp := regexp.MustCompile(`&\w+;`)
 	for i := 0; i < len(str); i++ {
 		switch s := str[i]; s {
@@ -533,7 +532,7 @@ func escape(str string) (cpy string) {
 		case '\'':
 			cpy += "&#39;"
 		case '<':
-			if res := tag.FindString(str[i:]); res != "" {
+			if res := reHTML.tag.FindString(str[i:]); res != "" {
 				cpy += res
 				i += len(res) - 1
 			} else {
