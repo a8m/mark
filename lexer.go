@@ -1,7 +1,6 @@
 package mark
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 	"unicode/utf8"
@@ -56,18 +55,6 @@ const (
 	itemPipe
 	itemIndent
 )
-
-var (
-	reEmphasise = `(?s)^_{%[1]d}(.+?(?:_{0,}))_{%[1]d}|^\*{%[1]d}(.+?(?:\*{0,}))\*{%[1]d}`
-)
-
-// Inline Grammer
-var span = map[itemType]*regexp.Regexp{
-	itemItalic: regexp.MustCompile(fmt.Sprintf(reEmphasise, 1)),
-	itemStrong: regexp.MustCompile(fmt.Sprintf(reEmphasise, 2)),
-	itemStrike: regexp.MustCompile(`(?s)^~{2}(.+?)~{2}`),
-	itemCode:   regexp.MustCompile("(?s)^`{1,2}\\s*(.*?[^`])\\s*`{1,2}"),
-}
 
 // stateFn represents the state of the scanner as a function that returns the next state.
 type stateFn func(*lexer) stateFn
@@ -325,22 +312,22 @@ Loop:
 		case '_', '*', '~', '`':
 			input := l.input[l.pos:]
 			// Strong
-			if m := span[itemStrong].FindString(input); m != "" {
+			if m := reStrong.FindString(input); m != "" {
 				emit(itemStrong, len(m))
 				break
 			}
 			// Italic
-			if m := span[itemItalic].FindString(input); m != "" {
+			if m := reItalic.FindString(input); m != "" {
 				emit(itemItalic, len(m))
 				break
 			}
 			// Strike
-			if m := span[itemStrike].FindString(input); m != "" {
+			if m := reStrike.FindString(input); m != "" {
 				emit(itemStrike, len(m))
 				break
 			}
 			// InlineCode
-			if m := span[itemCode].FindString(input); m != "" {
+			if m := reCode.FindString(input); m != "" {
 				emit(itemCode, len(m))
 				break
 			}

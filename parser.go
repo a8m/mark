@@ -202,8 +202,19 @@ func (p *parse) parseText(input string) (nodes []Node) {
 
 // parse inline emphasis
 func (p *parse) parseEmphasis(typ itemType, pos Pos, val string) *EmphasisNode {
+	var re *regexp.Regexp
+	switch typ {
+	case itemStrike:
+		re = reStrike
+	case itemStrong:
+		re = reStrong
+	case itemCode:
+		re = reCode
+	case itemItalic:
+		re = reItalic
+	}
 	node := p.newEmphasis(pos, typ)
-	match := span[typ].FindStringSubmatch(val)
+	match := re.FindStringSubmatch(val)
 	text := match[len(match)-1]
 	if text == "" {
 		text = match[1]

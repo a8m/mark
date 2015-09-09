@@ -73,12 +73,17 @@ var reHTML = struct {
 
 // Inline Grammar
 var (
-	reBr       = regexp.MustCompile(`^(?: {2,}|\\)\n`)
-	reLinkText = `(?:\[[^\]]*\]|[^\[\]]|\])*`
-	reLinkHref = `\s*<?(.*?)>?(?:\s+['"\(](.*?)['"\)])?\s*`
-	reGfmLink  = regexp.MustCompile(`^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])`)
-	reLink     = regexp.MustCompile(fmt.Sprintf(`(?s)^!?\[(%s)\]\(%s\)`, reLinkText, reLinkHref))
-	reAutoLink = regexp.MustCompile(`^<([^ >]+(@|:\/)[^ >]+)>`)
-	reRefLink  = regexp.MustCompile(`^!?\[((?:\[[^\]]*\]|[^\[\]]|\])*)\](?:\s*\[([^\]]*)\])?`)
-	reImage    = regexp.MustCompile(fmt.Sprintf(`(?s)^!?\[(%s)\]\(%s\)`, reLinkText, reLinkHref))
+	reBr        = regexp.MustCompile(`^(?: {2,}|\\)\n`)
+	reLinkText  = `(?:\[[^\]]*\]|[^\[\]]|\])*`
+	reLinkHref  = `\s*<?(.*?)>?(?:\s+['"\(](.*?)['"\)])?\s*`
+	reGfmLink   = regexp.MustCompile(`^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])`)
+	reLink      = regexp.MustCompile(fmt.Sprintf(`(?s)^!?\[(%s)\]\(%s\)`, reLinkText, reLinkHref))
+	reAutoLink  = regexp.MustCompile(`^<([^ >]+(@|:\/)[^ >]+)>`)
+	reRefLink   = regexp.MustCompile(`^!?\[((?:\[[^\]]*\]|[^\[\]]|\])*)\](?:\s*\[([^\]]*)\])?`)
+	reImage     = regexp.MustCompile(fmt.Sprintf(`(?s)^!?\[(%s)\]\(%s\)`, reLinkText, reLinkHref))
+	reCode      = regexp.MustCompile("(?s)^`{1,2}\\s*(.*?[^`])\\s*`{1,2}")
+	reStrike    = regexp.MustCompile(`(?s)^~{2}(.+?)~{2}`)
+	reEmphasise = `(?s)^_{%[1]d}(.+?(?:_{0,}))_{%[1]d}|^\*{%[1]d}(.+?(?:\*{0,}))\*{%[1]d}`
+	reItalic    = regexp.MustCompile(fmt.Sprintf(reEmphasise, 1))
+	reStrong    = regexp.MustCompile(fmt.Sprintf(reEmphasise, 2))
 )
