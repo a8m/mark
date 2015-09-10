@@ -507,8 +507,8 @@ func (l *lexer) matchBlockQuote(input string) (bool, string) {
 	}
 	lines := strings.Split(match, "\n")
 	for i, line := range lines {
-		// if line is a link-definition we cut the match until this point
-		if isDef := reDefLink.MatchString(line); isDef {
+		// if line is a link-definition or horizontal role, we cut the match until this point
+		if reDefLink.MatchString(line) || reHr.MatchString(line) {
 			match = strings.Join(lines[0:i], "\n")
 			break
 		}

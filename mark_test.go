@@ -265,6 +265,13 @@ Foo
 	{"52", `Foo\
 ----`, "<h2>Foo\\</h2>"},
 	{"53", "`Foo\n----\n`\n\n<a title=\"a lot\n---\nof dashes\"/>", "<h2>`Foo</h2>\n<p>`</p>\n<h2>&lt;a title=&quot;a lot</h2>\n<p>of dashes&quot;/&gt;</p>"},
+	{"54", `
+> Foo
+---`, `
+<blockquote>
+<p>Foo</p>
+</blockquote>
+<hr>`},
 	{"55", `- Foo
 ---`, `<ul>
 <li>Foo</li>
