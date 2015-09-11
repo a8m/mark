@@ -10,7 +10,7 @@ var (
 	reHr         = regexp.MustCompile(`^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *(?:\n+|$)`)
 	reHeading    = regexp.MustCompile(`^ *(#{1,6}) +([^\n]+?) *#* *(?:\n|$)`)
 	reLHeading   = regexp.MustCompile(`^([^\n]+?) *\n {0,3}(=|-){1,} *(?:\n+|$)`)
-	reBlockQuote = regexp.MustCompile(`^( *>[^\n]*(\n[^\n]+)*\n*)+`)
+	reBlockQuote = regexp.MustCompile(`^ *>[^\n]*(\n[^\n]+)*\n*`)
 	reDefLink    = regexp.MustCompile(`(?s)^ *\[([^\]]+)\]: *\n? *<?([^\s>]+)>?(?: *\n? *["'(](.+)['")])? *(?:\n+|$)`)
 	reSpaceGen   = func(i int) *regexp.Regexp {
 		return regexp.MustCompile(fmt.Sprintf(`(?m)^ {1,%d}`, i))
