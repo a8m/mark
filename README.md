@@ -3,7 +3,7 @@
 
 Mark it's a markdown processor that support all the features of GFM, smartypants and smart-fractions rendering.  
 It was built with a nice-ish concurrency model that fully inspired from [Rob Pike - Lexical Scanning talk](https://www.youtube.com/watch?v=HxaD_trXwRE) and [marked](https://github.com/chjj/marked) project.  
-Please note any contribution is welcomed and appreciated, so feel free to take some task [here](#todo).
+Please note that any contribution is welcomed and appreciated, so feel free to take some task [here](#todo).
 
 ## Table of contents:
 - [Get Started](#get-started)
