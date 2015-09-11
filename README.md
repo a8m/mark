@@ -3,8 +3,7 @@
 
 Mark it's a markdown processor that support all the features of GFM, smartypants and smart-fractions rendering.  
 It was built with a nice-ish concurrency model that fully inspired from [Rob Pike - Lexical Scanning talk](https://www.youtube.com/watch?v=HxaD_trXwRE) and [marked](https://github.com/chjj/marked) project.  
-Please note that this is a WIP project and any contribution is welcomed and appreciated,
-so feel free to take some task here.
+Please note any contribution is welcomed and appreciated, so feel free to take some task [here](#todo).
 
 ## Table of contents:
 - [Get Started](#get-started)
@@ -120,13 +119,11 @@ func main() {
 ```
 
 ### Todo
-- Backslash escaping
-	- should ignore inside code spans
+- Commonmark support v0.2
 - Expand documentation
 - Configuration options
 	- gfm, table
 	- heading(auto hashing)
-- Commonmark support v0.2
 
 ### License
 MIT
