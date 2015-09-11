@@ -752,6 +752,15 @@ baz</p>
 <p>bar
 baz</p>
 </blockquote>`},
+	{"178", `
+   > # Foo
+   > bar
+ > baz`, `
+<blockquote>
+<h1>Foo</h1>
+<p>bar
+baz</p>
+</blockquote>`},
 	{"179", `
     > # Foo
     > bar
@@ -778,12 +787,39 @@ baz
 baz
 foo</p>
 </blockquote>`},
+	{"182", `
+> foo
+---`, `
+<blockquote>
+<p>foo</p>
+</blockquote>
+<hr>`},
+	{"186", `
+>`, `
+<blockquote>
+</blockquote>`},
+	{"187", `
+>
+>  
+> `, `
+<blockquote>
+</blockquote>`},
 	{"188", `
 >
 > foo
 >  `, `
 <blockquote>
 <p>foo</p>
+</blockquote>`},
+	{"189", `
+> foo
+
+> bar`, `
+<blockquote>
+<p>foo</p>
+</blockquote>
+<blockquote>
+<p>bar</p>
 </blockquote>`},
 	{"190", `
 > foo
@@ -806,6 +842,17 @@ foo
 <p>foo</p>
 <blockquote>
 <p>bar</p>
+</blockquote>`},
+	{"193", `
+> aaa
+***
+> bbb`, `
+<blockquote>
+<p>aaa</p>
+</blockquote>
+<hr>
+<blockquote>
+<p>bbb</p>
 </blockquote>`},
 	{"194", `
 > bar
@@ -845,6 +892,17 @@ bar
 baz</p>
 </blockquote>
 </blockquote>
+</blockquote>`},
+	{"199", `
+>     code
+
+>    not code`, `
+<blockquote>
+<pre><code>code
+</code></pre>
+</blockquote>
+<blockquote>
+<p>not code</p>
 </blockquote>`},
 	{"200", `
 A paragraph
