@@ -273,7 +273,7 @@ func (p *parse) parseCodeBlock() *CodeNode {
 func (p *parse) parseBlockQuote() (n *BlockQuoteNode) {
 	token := p.next()
 	// replacer
-	re := regexp.MustCompile(`(?m)^> ?`)
+	re := regexp.MustCompile(`(?m)^ *> ?`)
 	raw := re.ReplaceAllString(token.val, "")
 	// TODO(Ariel): not work right now with defLink(inside the blockQuote)
 	tr := &parse{lex: lex(raw), tr: p}
