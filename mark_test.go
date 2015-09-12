@@ -1561,6 +1561,11 @@ foo
 baz`, `
 <p>foo
 baz</p>`},
+	{"592", `
+foo 
+ baz`, `
+<p>foo
+baz</p>`},
 	{"594", `Foo χρῆν`, `<p>Foo χρῆν</p>`},
 	{"595", `Multiple     spaces`, `<p>Multiple     spaces</p>`},
 }
