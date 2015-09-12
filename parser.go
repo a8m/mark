@@ -160,7 +160,7 @@ func (p *parse) parseText(input string) (nodes []Node) {
 		if reBr.MatchString(s) {
 			return s
 		}
-		return ""
+		return strings.Replace(s, " ", "", -1)
 	})
 	l := lexInline(input)
 	for token := range l.items {
