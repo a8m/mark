@@ -169,7 +169,7 @@ func (p *parse) newEmphasis(pos Pos, style itemType) *EmphasisNode {
 	return &EmphasisNode{NodeType: NodeEmphasis, Pos: pos, Style: style}
 }
 
-// Heading holds heaing element with specific level(1-6).
+// HeadingNode holds heaing element with specific level(1-6).
 type HeadingNode struct {
 	NodeType
 	Pos
@@ -342,13 +342,13 @@ type ListItemNode struct {
 	Nodes []Node
 }
 
-func (t *ListItemNode) append(n Node) {
-	t.Nodes = append(t.Nodes, n)
+func (l *ListItemNode) append(n Node) {
+	l.Nodes = append(l.Nodes, n)
 }
 
 // Render return the html representation of list-item
-func (n *ListItemNode) Render() (s string) {
-	for _, node := range n.Nodes {
+func (l *ListItemNode) Render() (s string) {
+	for _, node := range l.Nodes {
 		s += node.Render()
 	}
 	return wrap("li", s)
