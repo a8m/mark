@@ -314,8 +314,8 @@ type ListNode struct {
 	Items   []*ListItemNode
 }
 
-func (t *ListNode) append(item *ListItemNode) {
-	t.Items = append(t.Items, item)
+func (n *ListNode) append(item *ListItemNode) {
+	n.Items = append(n.Items, item)
 }
 
 // Render return the html representation of orderd(ol) or unordered(ul) list.
