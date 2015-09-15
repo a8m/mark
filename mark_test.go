@@ -1571,10 +1571,10 @@ baz</p>`},
 }
 
 func TestCommonMark(t *testing.T) {
-	reId := regexp.MustCompile(` +?id=".*"`)
+	reID := regexp.MustCompile(` +?id=".*"`)
 	for _, c := range CMCases {
 		// Remove the auto-hashing until it'll be in the configuration
-		actual := reId.ReplaceAllString(Render(c.input), "")
+		actual := reID.ReplaceAllString(Render(c.input), "")
 		if strings.Replace(actual, "\n", "", -1) != strings.Replace(c.expected, "\n", "", -1) {
 			t.Errorf("\ninput:%s\ngot:\n%s\nexpected:\n%s\nlink: http://spec.commonmark.org/0.21/#example-%s\n",
 				c.input, actual, c.expected, c.name)
