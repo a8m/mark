@@ -175,15 +175,19 @@ type HeadingNode struct {
 	Pos
 	Level int
 	Text  string
+	Nodes []Node
 }
 
 // Render return the html representation based on heading level.
-func (n *HeadingNode) Render() string {
+func (n *HeadingNode) Render() (s string) {
+	for _, node := range n.Nodes {
+		s += node.Render()
+	}
 	re := regexp.MustCompile(`[^\w]+`)
 	id := re.ReplaceAllString(n.Text, "-")
 	// ToLowerCase
 	id = strings.ToLower(id)
-	return fmt.Sprintf("<%[1]s id=\"%s\">%s</%[1]s>", "h"+strconv.Itoa(n.Level), id, n.Text)
+	return fmt.Sprintf("<%[1]s id=\"%s\">%s</%[1]s>", "h"+strconv.Itoa(n.Level), id, s)
 }
 
 func (p *parse) newHeading(pos Pos, level int, text string) *HeadingNode {
