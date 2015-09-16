@@ -68,7 +68,7 @@ Loop:
 		// itemText
 		default:
 			tmp := p.newParagraph(t.pos)
-			tmp.Nodes = p.parseText(p.next().val)
+			tmp.Nodes = p.parseText(p.next().val + p.scanLines())
 			n = tmp
 		}
 		if n != nil {
@@ -139,23 +139,7 @@ func (p *parse) backup2(t1 item) {
 
 // parseText
 func (p *parse) parseText(input string) (nodes []Node) {
-	// HACK: if there's more 'itemText' in the way, make it one.
-	for {
-		tkn := p.next()
-		if tkn.typ == itemText || tkn.typ == itemIndent {
-			input += tkn.val
-		} else if tkn.typ == itemNewLine {
-			if t := p.peek().typ; t != itemText && t != itemIndent {
-				p.backup2(tkn)
-				break
-			}
-			input += tkn.val
-		} else {
-			p.backup()
-			break
-		}
-	}
-	// Removing initial and final whitespace.
+	// Trim whitespaces that not a line-break
 	input = regexp.MustCompile(`(?m)^ +| +(\n|$)`).ReplaceAllStringFunc(input, func(s string) string {
 		if reBr.MatchString(s) {
 			return s
@@ -226,19 +210,21 @@ func (p *parse) parseEmphasis(typ itemType, pos Pos, val string) *EmphasisNode {
 // parse heading block
 func (p *parse) parseHeading() (node *HeadingNode) {
 	token := p.next()
-	var match []string
+	level := 1
+	var text string
 	if token.typ == itemHeading {
-		match = reHeading.FindStringSubmatch(token.val)
-		node = p.newHeading(token.pos, len(match[1]), match[2])
+		match := reHeading.FindStringSubmatch(token.val)
+		level, text = len(match[1]), match[2]
 	} else {
-		match = reLHeading.FindStringSubmatch(token.val)
+		match := reLHeading.FindStringSubmatch(token.val)
 		// using equal signs for first-level, and dashes for second-level.
-		level := 1
+		text = match[1]
 		if match[2] == "-" {
 			level = 2
 		}
-		node = p.newHeading(token.pos, level, match[1])
 	}
+	node = p.newHeading(token.pos, level, text)
+	node.Nodes = p.parseText(text)
 	return
 }
 
@@ -374,6 +360,26 @@ func (p *parse) parseCells(kind int, items []item, align []AlignType) *RowNode {
 		row.append(cell)
 	}
 	return row
+}
+
+// Used to consume lines(itemText) for a continues paragraphs
+func (p *parse) scanLines() (s string) {
+	for {
+		tkn := p.next()
+		if tkn.typ == itemText || tkn.typ == itemIndent {
+			s += tkn.val
+		} else if tkn.typ == itemNewLine {
+			if t := p.peek().typ; t != itemText && t != itemIndent {
+				p.backup2(tkn)
+				break
+			}
+			s += tkn.val
+		} else {
+			p.backup()
+			break
+		}
+	}
+	return
 }
 
 // get align-string and return the align type of it
