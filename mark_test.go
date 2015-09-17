@@ -189,6 +189,7 @@ var CMCases = []CommonMarkSpec{
 	{"27", "####### foo", "<p>####### foo</p>"},
 	{"28", "#5 bolt\n\n#foobar", "<p>#5 bolt</p>\n<p>#foobar</p>"},
 	{"29", "\\## foo", "<p>## foo</p>"},
+	{"30", "# foo *bar* \\*baz\\*", "<h1>foo <em>bar</em> *baz*</h1>"},
 	{"31", "#                  foo                     ", "<h1>foo</h1>"},
 	{"32", ` ### foo
   ## foo
