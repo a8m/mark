@@ -383,7 +383,6 @@ func (p *parse) scanLines() (s string) {
 }
 
 // get align-string and return the align type of it
-// e.g: ":---", "---:", ":---:", "---"
 func parseAlign(s string) (typ AlignType) {
 	sfx, pfx := strings.HasSuffix(s, ":"), strings.HasPrefix(s, ":")
 	switch {
