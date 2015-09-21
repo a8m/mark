@@ -221,20 +221,24 @@ func (p *parse) newCode(pos Pos, lang, text string) *CodeNode {
 type LinkNode struct {
 	NodeType
 	Pos
-	Title, Href, Text string
+	Title, Href string
+	Nodes       []Node
 }
 
 // Return the html representation of link node
-func (n *LinkNode) Render() string {
+func (n *LinkNode) Render() (s string) {
+	for _, node := range n.Nodes {
+		s += node.Render()
+	}
 	attrs := fmt.Sprintf("href=\"%s\"", n.Href)
 	if n.Title != "" {
 		attrs += fmt.Sprintf(" title=\"%s\"", n.Title)
 	}
-	return fmt.Sprintf("<a %s>%s</a>", attrs, n.Text)
+	return fmt.Sprintf("<a %s>%s</a>", attrs, s)
 }
 
-func (p *parse) newLink(pos Pos, title, href, text string) *LinkNode {
-	return &LinkNode{NodeType: NodeLink, Pos: pos, Title: p.text(title), Href: p.text(href), Text: p.text(text)}
+func (p *parse) newLink(pos Pos, title, href string, nodes ...Node) *LinkNode {
+	return &LinkNode{NodeType: NodeLink, Pos: pos, Title: p.text(title), Href: p.text(href), Nodes: nodes}
 }
 
 // RefLink holds link with refrence to link definition
@@ -243,6 +247,7 @@ type RefNode struct {
 	Pos
 	tr             *parse
 	Text, Ref, Raw string
+	Nodes          []Node
 }
 
 // rendering based type
@@ -251,7 +256,7 @@ func (n *RefNode) Render() string {
 	ref := strings.ToLower(n.Ref)
 	if l, ok := n.tr.links[ref]; ok {
 		if n.Type() == NodeRefLink {
-			node = n.tr.newLink(n.Pos, l.Title, l.Href, n.Text)
+			node = n.tr.newLink(n.Pos, l.Title, l.Href, n.Nodes...)
 		} else {
 			node = n.tr.newImage(n.Pos, l.Title, l.Href, n.Text)
 		}
@@ -261,17 +266,14 @@ func (n *RefNode) Render() string {
 	return node.Render()
 }
 
-// create newReferenceNode(Image/Link)
-func (p *parse) newRef(typ itemType, pos Pos, raw, text, ref string) *RefNode {
-	nType := NodeRefLink
-	if typ == itemRefImage {
-		nType = NodeRefImage
-	}
-	// If it's implicit link
-	if ref == "" {
-		ref = text
-	}
-	return &RefNode{NodeType: nType, Pos: pos, tr: p.root(), Raw: raw, Text: p.text(text), Ref: ref}
+// newRefLink create new RefLink that suitable for link
+func (p *parse) newRefLink(typ itemType, pos Pos, raw, ref string, text []Node) *RefNode {
+	return &RefNode{NodeType: NodeRefLink, Pos: pos, tr: p.root(), Raw: raw, Ref: ref, Nodes: text}
+}
+
+// newRefImage create new RefLink that suitable for image
+func (p *parse) newRefImage(typ itemType, pos Pos, raw, ref, text string) *RefNode {
+	return &RefNode{NodeType: NodeRefImage, Pos: pos, tr: p.root(), Raw: raw, Ref: ref, Text: text}
 }
 
 // DefLinkNode refresent single reference to link-definition
