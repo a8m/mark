@@ -155,10 +155,12 @@ func (p *parse) parseText(input string) (nodes []Node) {
 		case itemStrong, itemItalic, itemStrike, itemCode:
 			node = p.parseEmphasis(token.typ, token.pos, token.val)
 		case itemLink, itemAutoLink, itemGfmLink:
-			var title, text, href string
+			var title, href string
+			var text []Node
 			if token.typ == itemLink {
 				match := reLink.FindStringSubmatch(token.val)
-				text, href, title = match[1], match[2], match[3]
+				text = p.parseText(match[1])
+				href, title = match[2], match[3]
 			} else {
 				var match []string
 				if token.typ == itemGfmLink {
@@ -166,15 +168,24 @@ func (p *parse) parseText(input string) (nodes []Node) {
 				} else {
 					match = reAutoLink.FindStringSubmatch(token.val)
 				}
-				text, href = match[1], match[1]
+				href = match[1]
+				text = append(text, p.newText(token.pos, match[1]))
 			}
-			node = p.newLink(token.pos, title, href, text)
+			node = p.newLink(token.pos, title, href, text...)
 		case itemImage:
 			match := reImage.FindStringSubmatch(token.val)
 			node = p.newImage(token.pos, match[3], match[2], match[1])
 		case itemRefLink, itemRefImage:
 			match := reRefLink.FindStringSubmatch(token.val)
-			node = p.newRef(token.typ, token.pos, token.val, match[1], match[2])
+			text, ref := match[1], match[2]
+			if ref == "" {
+				ref = text
+			}
+			if token.typ == itemRefLink {
+				node = p.newRefLink(token.typ, token.pos, token.val, ref, p.parseText(text))
+			} else {
+				node = p.newRefImage(token.typ, token.pos, token.val, ref, text)
+			}
 		// itemText
 		default:
 			node = p.newText(token.pos, token.val)
