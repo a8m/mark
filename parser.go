@@ -87,14 +87,16 @@ func (p *parse) root() *parse {
 
 // Render parse nodes to the wanted output
 func (p *parse) render() {
+	var output string
 	for i, node := range p.Nodes {
 		// If there's a custom render function, use it instead.
 		if fn, ok := p.renderFn[node.Type()]; ok {
-			p.output += fn(node)
+			output = fn(node)
 		} else {
-			p.output += node.Render()
+			output = node.Render()
 		}
-		if i != len(p.Nodes)-1 {
+		p.output += output
+		if output != "" && i != len(p.Nodes)-1 {
 			p.output += "\n"
 		}
 	}
