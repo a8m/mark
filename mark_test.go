@@ -972,6 +972,16 @@ with two lines.</p>
 <p>two</p>
 </li>
 </ul>`},
+	{"205", `
+ -    one
+
+      two`, `
+<ul>
+<li>
+<p>one</p>
+<p>two</p>
+</li>
+</ul>`},
 	{"206", `
    > > 1.  one
 >>
@@ -984,6 +994,18 @@ with two lines.</p>
 <p>two</p>
 </li>
 </ol>
+</blockquote>
+</blockquote>`},
+	{"207", `
+>>- one
+>>
+  >  > two`, `
+<blockquote>
+<blockquote>
+<ul>
+<li>one</li>
+</ul>
+<p>two</p>
 </blockquote>
 </blockquote>`},
 	{"208", `-one
