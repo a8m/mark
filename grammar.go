@@ -67,7 +67,7 @@ var reHTML = struct {
 	// TODO: Add all span-tags and move to config.
 	regexp.MustCompile(`^(a|em|strong|small|s|q|data|time|code|sub|sup|i|b|u|span|br|del|img)$`),
 	func(tag string) *regexp.Regexp {
-		return regexp.MustCompile(fmt.Sprintf(`(?s)(.)+?<\/%s> *(?:\n{2,}|\s*$)`, tag))
+		return regexp.MustCompile(fmt.Sprintf(`(?s)(.+?)<\/%s> *`, tag))
 	},
 }
 
