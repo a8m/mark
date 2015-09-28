@@ -537,7 +537,6 @@ func lexTable(l *lexer) stateFn {
 	l.start = l.pos
 	// Ignore the first match, and flat all rows(by splitting \n)
 	rows := append(table[1:3], strings.Split(table[3], "\n")...)
-	// Loop over the rows
 	for _, row := range rows {
 		if row == "" {
 			continue
