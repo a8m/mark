@@ -1288,6 +1288,14 @@ Foo
 </ul>
 </li>
 </ul>`},
+	{"265", "\n1. ```\n   foo\n   ```\n\n   bar", `
+<ol>
+<li>
+<pre><code>foo
+</code></pre>
+<p>bar</p>
+</li>
+</ol>`},
 	{"266", `
 * foo
   * bar
