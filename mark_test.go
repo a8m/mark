@@ -324,6 +324,17 @@ Baz`, `<hr>
 ---`, `<pre><code>foo
 </code></pre>
 <hr>`},
+	{"62", `
+> foo
+-----`, `
+<blockquote>
+<p>foo</p>
+</blockquote>
+<hr>`},
+	{"63", `
+\> foo
+------`, `
+<h2>&gt; foo</h2>`},
 	{"64", `    a simple
       indented code block`, `<pre><code>a simple
   indented code block
