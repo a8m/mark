@@ -1611,6 +1611,7 @@ data="foo" ></p>`},
 _boolean zoop:33=zoop:33 />`, `
 <p><a foo="bar" bam = 'baz <em>"</em>'
 _boolean zoop:33=zoop:33 /></p>`},
+	{"572", "foo <![CDATA[>&<]]>", "<p>foo <![CDATA[>&<]]></p>"},
 	{"576", `
 foo  
 baz`, `
