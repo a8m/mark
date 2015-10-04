@@ -308,7 +308,6 @@ Loop:
 				break
 			}
 			l.next()
-		// if it's start as an emphasis
 		case '_', '*', '~', '`':
 			input := l.input[l.pos:]
 			// Strong
@@ -354,10 +353,14 @@ Loop:
 				break
 			}
 			l.next()
-		// itemAutoLink,
+		// itemAutoLink, htmlBlock
 		case '<':
 			if m := reAutoLink.FindString(l.input[l.pos:]); m != "" {
 				emit(itemAutoLink, len(m))
+				break
+			}
+			if match, res := l.matchHTML(l.input[l.pos:]); match {
+				emit(itemHTML, len(res))
 				break
 			}
 			l.next()
@@ -396,6 +399,9 @@ func (l *lexer) matchHTML(input string) (bool, string) {
 		// if it's a self-closed html element, but not a itemAutoLink
 		if strings.HasSuffix(el, "/>") && !reAutoLink.MatchString(el) {
 			return true, el
+		}
+		if name == reHTML.CDATA_OPEN {
+			name = reHTML.CDATA_CLOSE
 		}
 		reEndTag := reHTML.endTagGen(name)
 		if m := reEndTag.FindString(input); m != "" {

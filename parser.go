@@ -188,7 +188,8 @@ func (p *parse) parseText(input string) (nodes []Node) {
 			} else {
 				node = p.newRefImage(token.typ, token.pos, token.val, ref, text)
 			}
-		// itemText
+		case itemHTML:
+			node = p.newHTML(token.pos, token.val)
 		default:
 			node = p.newText(token.pos, token.val)
 		}

@@ -58,10 +58,13 @@ var reTable = struct {
 }
 
 var reHTML = struct {
+	CDATA_OPEN, CDATA_CLOSE  string
 	item, comment, tag, span *regexp.Regexp
 	endTagGen                func(tag string) *regexp.Regexp
 }{
-	regexp.MustCompile(`^<(\w+)(?:"[^"]*"|'[^']*'|[^'">])*?>`),
+	`![CDATA[`,
+	"?\\]\\]",
+	regexp.MustCompile(`^<(\w+|!\[CDATA\[)(?:"[^"]*"|'[^']*'|[^'">])*?>`),
 	regexp.MustCompile(`(?sm)<!--.*?-->`),
 	regexp.MustCompile(`^<!--.*?-->|^<\/?\w+(?:"[^"]*"|'[^']*'|[^'">])*?>`),
 	// TODO: Add all span-tags and move to config.

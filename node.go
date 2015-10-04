@@ -96,9 +96,6 @@ func (n *HTMLNode) Render() string {
 }
 
 func (p *parse) newHTML(pos Pos, src string) *HTMLNode {
-	if !strings.HasSuffix(src, "</script>") {
-		src = p.text(src)
-	}
 	return &HTMLNode{NodeType: NodeHTML, Pos: pos, Src: src}
 }
 
