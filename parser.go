@@ -59,7 +59,7 @@ Loop:
 			n = p.parseBlockQuote()
 		case itemIndent:
 			space := p.next()
-			// If it isn't followed by
+			// If it isn't followed by itemText
 			if p.peek().typ != itemText {
 				continue
 			}
@@ -300,7 +300,6 @@ Loop:
 }
 
 // parse listItem
-// Add ignore list(e.g: table should parse as a text)
 func (p *parse) parseListItem() *ListItemNode {
 	token := p.next()
 	item := p.newListItem(token.pos)
