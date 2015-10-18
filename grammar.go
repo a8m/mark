@@ -86,7 +86,7 @@ var (
 	reImage     = regexp.MustCompile(fmt.Sprintf(`(?s)^!?\[(%s)\]\(%s\)`, reLinkText, reLinkHref))
 	reCode      = regexp.MustCompile("(?s)^`{1,2}\\s*(.*?[^`])\\s*`{1,2}")
 	reStrike    = regexp.MustCompile(`(?s)^~{2}(.+?)~{2}`)
-	reEmphasise = `(?s)^_{%[1]d}(\S.*?(?:_{0,}))_{%[1]d}|^\*{%[1]d}(\S.*?(?:\*{0,}))\*{%[1]d}`
+	reEmphasise = `(?s)^_{%[1]d}(\S.*?_*)_{%[1]d}|^\*{%[1]d}(\S.*?\**)\*{%[1]d}`
 	reItalic    = regexp.MustCompile(fmt.Sprintf(reEmphasise, 1))
 	reStrong    = regexp.MustCompile(fmt.Sprintf(reEmphasise, 2))
 )
