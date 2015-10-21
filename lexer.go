@@ -85,7 +85,7 @@ func lex(input string) *lexer {
 	return l
 }
 
-// One phase lexing(inline reason)
+// lexInline create a new lexer for one phase lexing(inline blocks).
 func lexInline(input string) *lexer {
 	l := &lexer{
 		input: input,
@@ -115,7 +115,8 @@ func (l *lexer) next() rune {
 	return r
 }
 
-// lexAny scans non-space items.
+// lexAny scanner is kind of forwarder, it get the current char in the text
+// and forward it to the appropriate scanner based on some conditions.
 func lexAny(l *lexer) stateFn {
 	switch r := l.peek(); r {
 	case '*', '-', '_':
@@ -158,7 +159,9 @@ func lexAny(l *lexer) stateFn {
 	}
 }
 
-// lexHeading scans heading items.
+// lexHeading test if the current text position is an heading item.
+// is so, it will emit an item and return back to lenAny function
+// else, lex it as a simple text value
 func lexHeading(l *lexer) stateFn {
 	if m := reHeading.FindString(l.input[l.pos:]); m != "" {
 		l.pos += Pos(len(m))
@@ -168,7 +171,9 @@ func lexHeading(l *lexer) stateFn {
 	return lexText
 }
 
-// lexHr scans horizontal rules items.
+// lexHr test if the current text position is an horizontal rules item.
+// is so, it will emit an horizontal rule item and return back to lenAny function
+// else, forward it to lexList function
 func lexHr(l *lexer) stateFn {
 	if match := reHr.FindString(l.input[l.pos:]); match != "" {
 		l.pos += Pos(len(match))
