@@ -8,7 +8,9 @@ type Mark struct {
 	Input string
 }
 
-// Mark options
+// Mark options used to configure your Mark object
+// set `Smartypants` and `Fractions` to true to enable
+// smartypants and smartfractions rendering.
 type Options struct {
 	Gfm         bool
 	Tables      bool

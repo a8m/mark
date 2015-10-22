@@ -14,7 +14,7 @@ Please note that any contribution is welcomed and appreciated, so feel free to t
         - [New](#new)
         - [AddRenderFn](#markaddrenderfn)
         - [Render](#markrender)
-    - [smartypants and smartfractions](smartypants-and-smartfractions)
+    - [smartypants and smartfractions](##smartypants-and-smartfractions)
 - [Todo](#todo)
 
 ### Get Started
