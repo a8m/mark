@@ -183,7 +183,11 @@ func lexHr(l *lexer) stateFn {
 	return lexList
 }
 
-// lexGfmCode scans GFM code block.
+// lexGfmCode test if the current text position is start of GFM code-block item.
+// if so, it will generate regexp based on the fence type[`~] and it length.
+// it scan until the end, and then emit the code-block item and return back to the
+// lenAny forwarder.
+// else, lex it as a simple inline text.
 func lexGfmCode(l *lexer) stateFn {
 	if match := reGfmCode.FindStringSubmatch(l.input[l.pos:]); len(match) != 0 {
 		l.pos += Pos(len(match[0]))
