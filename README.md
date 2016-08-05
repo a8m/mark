@@ -1,7 +1,7 @@
 # Mark [![Test coverage][coveralls-image]][coveralls-url] [![Build status][travis-image]][travis-url] [![Go doc][doc-image]][doc-url] [![license](http://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/a8m/mark/master/LICENSE)
 > A [markdown](http://daringfireball.net/projects/markdown/) processor written in Go. built for fun.
 
-Mark it's a markdown processor that support all the features of GFM, smartypants and smart-fractions rendering.  
+Mark is a markdown processor that supports all the features of GFM, smartypants and smart-fractions rendering.  
 It was built with a nice-ish concurrency model that fully inspired from [Rob Pike - Lexical Scanning talk](https://www.youtube.com/watch?v=HxaD_trXwRE) and [marked](https://github.com/chjj/marked) project.  
 Please note that any contribution is welcomed and appreciated, so feel free to take some task [here](#todo).
 
