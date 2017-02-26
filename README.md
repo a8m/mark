@@ -37,18 +37,21 @@ func main() {
 }
 ```
 
-__or using as a command line tool:__
-1. install:
-    ```sh
-    $ go get github.com/a8m/mark/cmd/mark
-    ```
-2. usage:
-    ```sh
-    $ echo 'hello __world__...' | mark -smartypants
-    ```
-    ```sh
-    $ mark -i hello.text -o hello.html
-    ```
+__or using as a command line tool:__  
+
+1\. install:
+```sh
+$ go get github.com/a8m/mark/cmd/mark
+```
+
+2\. usage:
+```sh
+$ echo 'hello __world__...' | mark -smartypants
+```
+or: 
+```sh
+$ mark -i hello.text -o hello.html
+```
 
 #### Documentation
 ##### Render
