@@ -45,6 +45,7 @@ const (
 	NodeCode                       // A code block(wrapped with pre)
 	NodeBlockQuote                 // A blockquote
 	NodeHTML                       // An inline HTML
+	NodeCheckbox                   // A checkbox
 )
 
 // ParagraphNode hold simple paragraph node contains text
@@ -55,7 +56,7 @@ type ParagraphNode struct {
 	Nodes []Node
 }
 
-// Render return the html representation of ParagraphNode
+// Render returns the html representation of ParagraphNode
 func (n *ParagraphNode) Render() (s string) {
 	for _, node := range n.Nodes {
 		s += node.Render()
@@ -74,7 +75,7 @@ type TextNode struct {
 	Text string
 }
 
-// Render return the string representation of TexNode
+// Render returns the string representation of TexNode
 func (n *TextNode) Render() string {
 	return n.Text
 }
@@ -90,7 +91,7 @@ type HTMLNode struct {
 	Src string
 }
 
-// Render return the src of the HTMLNode
+// Render returns the src of the HTMLNode
 func (n *HTMLNode) Render() string {
 	return n.Src
 }
@@ -99,13 +100,13 @@ func (p *parse) newHTML(pos Pos, src string) *HTMLNode {
 	return &HTMLNode{NodeType: NodeHTML, Pos: pos, Src: src}
 }
 
-// HrNode represent horizontal rule
+// HrNode represents horizontal rule
 type HrNode struct {
 	NodeType
 	Pos
 }
 
-// Render return the html representation of hr.
+// Render returns the html representation of hr.
 func (n *HrNode) Render() string {
 	return "<hr>"
 }
@@ -114,13 +115,13 @@ func (p *parse) newHr(pos Pos) *HrNode {
 	return &HrNode{NodeType: NodeHr, Pos: pos}
 }
 
-// BrNode represent a link-break element.
+// BrNode represents a link-break element.
 type BrNode struct {
 	NodeType
 	Pos
 }
 
-// Render return the html representation of line-break.
+// Render returns the html representation of line-break.
 func (n *BrNode) Render() string {
 	return "<br>"
 }
@@ -175,7 +176,7 @@ type HeadingNode struct {
 	Nodes []Node
 }
 
-// Render return the html representation based on heading level.
+// Render returns the html representation based on heading level.
 func (n *HeadingNode) Render() (s string) {
 	for _, node := range n.Nodes {
 		s += node.Render()
@@ -289,14 +290,14 @@ func (p *parse) newDefLink(pos Pos, name, href, title string) *DefLinkNode {
 	return &DefLinkNode{NodeType: NodeLink, Pos: pos, Name: name, Href: href, Title: title}
 }
 
-// ImageNode represent an image element with optional alt and title attributes.
+// ImageNode represents an image element with optional alt and title attributes.
 type ImageNode struct {
 	NodeType
 	Pos
 	Title, Src, Alt string
 }
 
-// Render return the html representation on image node
+// Render returns the html representation on image node
 func (n *ImageNode) Render() string {
 	attrs := fmt.Sprintf("src=\"%s\" alt=\"%s\"", n.Src, n.Alt)
 	if n.Title != "" {
@@ -321,7 +322,7 @@ func (n *ListNode) append(item *ListItemNode) {
 	n.Items = append(n.Items, item)
 }
 
-// Render return the html representation of orderd(ol) or unordered(ul) list.
+// Render returns the html representation of orderd(ol) or unordered(ul) list.
 func (n *ListNode) Render() (s string) {
 	tag := "ul"
 	if n.Ordered {
@@ -338,7 +339,7 @@ func (p *parse) newList(pos Pos, ordered bool) *ListNode {
 	return &ListNode{NodeType: NodeList, Pos: pos, Ordered: ordered}
 }
 
-// ListItem represent single item in ListNode that may contains nested nodes.
+// ListItem represents single item in ListNode that may contains nested nodes.
 type ListItemNode struct {
 	NodeType
 	Pos
@@ -349,7 +350,7 @@ func (l *ListItemNode) append(n Node) {
 	l.Nodes = append(l.Nodes, n)
 }
 
-// Render return the html representation of list-item
+// Render returns the html representation of list-item
 func (l *ListItemNode) Render() (s string) {
 	for _, node := range l.Nodes {
 		s += node.Render()
@@ -361,7 +362,7 @@ func (p *parse) newListItem(pos Pos) *ListItemNode {
 	return &ListItemNode{NodeType: NodeListItem, Pos: pos}
 }
 
-// TableNode represent table element contains head and body
+// TableNode represents table element contains head and body
 type TableNode struct {
 	NodeType
 	Pos
@@ -372,7 +373,7 @@ func (n *TableNode) append(row *RowNode) {
 	n.Rows = append(n.Rows, row)
 }
 
-// Render return the html representation of a table
+// Render returns the html representation of a table
 func (n *TableNode) Render() string {
 	var s string
 	for i, row := range n.Rows {
@@ -406,7 +407,7 @@ func (r *RowNode) append(cell *CellNode) {
 	r.Cells = append(r.Cells, cell)
 }
 
-// Render return the html representation of table-row
+// Render returns the html representation of table-row
 func (r *RowNode) Render() string {
 	var s string
 	for _, cell := range r.Cells {
@@ -443,7 +444,7 @@ const (
 	Data
 )
 
-// CellNode represent table-data/cell that holds simple text(may be emphasis)
+// CellNode represents table-data/cell that holds simple text(may be emphasis)
 // Note: the text in <th> elements are bold and centered by default.
 type CellNode struct {
 	NodeType
@@ -453,7 +454,7 @@ type CellNode struct {
 	Nodes []Node
 }
 
-// Render return the html reprenestation of table-cell
+// Render returns the html reprenestation of table-cell
 func (c *CellNode) Render() string {
 	var s string
 	tag := "td"
@@ -486,14 +487,14 @@ func (p *parse) newCell(pos Pos, kind int, align AlignType) *CellNode {
 	return &CellNode{NodeType: NodeCell, Pos: pos, Kind: kind, AlignType: align}
 }
 
-// BlockQuote represent
+// BlockQuote represents block-quote tag.
 type BlockQuoteNode struct {
 	NodeType
 	Pos
 	Nodes []Node
 }
 
-// Render return the html representation of BlockQuote
+// Render returns the html representation of BlockQuote
 func (n *BlockQuoteNode) Render() string {
 	var s string
 	for _, node := range n.Nodes {
@@ -504,6 +505,27 @@ func (n *BlockQuoteNode) Render() string {
 
 func (p *parse) newBlockQuote(pos Pos) *BlockQuoteNode {
 	return &BlockQuoteNode{NodeType: NodeBlockQuote, Pos: pos}
+}
+
+// CheckboxNode represents checked and unchecked checkbox tag.
+// Used in task lists.
+type CheckboxNode struct {
+	NodeType
+	Pos
+	Checked bool
+}
+
+// Render returns the html representation of checked and unchecked CheckBox.
+func (n *CheckboxNode) Render() string {
+	s := "<inbox type=\"checkbox\""
+	if n.Checked {
+		s += " checked"
+	}
+	return s + ">"
+}
+
+func (p *parse) newCheckbox(pos Pos, checked bool) *CheckboxNode {
+	return &CheckboxNode{NodeType: NodeCheckbox, Pos: pos, Checked: checked}
 }
 
 // Wrap text with specific tag.
