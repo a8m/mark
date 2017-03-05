@@ -517,7 +517,7 @@ type CheckboxNode struct {
 
 // Render returns the html representation of checked and unchecked CheckBox.
 func (n *CheckboxNode) Render() string {
-	s := "<inbox type=\"checkbox\""
+	s := "<input type=\"checkbox\""
 	if n.Checked {
 		s += " checked"
 	}
