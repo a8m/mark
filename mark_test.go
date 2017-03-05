@@ -72,6 +72,10 @@ func TestRender(t *testing.T) {
 		"1. one\n2. two\n3. three": "<ol>\n<li>one</li>\n<li>two</li>\n<li>three</li>\n</ol>",
 		"1. one\n 1. one of one":   "<ol>\n<li>one<ol>\n<li>one of one</li>\n</ol></li>\n</ol>",
 		"2. two\n 3. three":        "<ol>\n<li>two<ol>\n<li>three</li>\n</ol></li>\n</ol>",
+		// Task list
+		"- [ ] foo\n- [ ] bar": "<ul>\n<li><input type=\"checkbox\">foo</li>\n<li><input type=\"checkbox\">bar</li>\n</ul>",
+		"- [x] foo\n- [x] bar": "<ul>\n<li><input type=\"checkbox\" checked>foo</li>\n<li><input type=\"checkbox\" checked>bar</li>\n</ul>",
+		"- [ ] foo\n- [x] bar": "<ul>\n<li><input type=\"checkbox\">foo</li>\n<li><input type=\"checkbox\" checked>bar</li>\n</ul>",
 		// Special characters escaping
 		"< hello":   "<p>&lt; hello</p>",
 		"hello >":   "<p>hello &gt;</p>",
