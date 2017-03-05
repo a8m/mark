@@ -275,7 +275,7 @@ func (p *parse) parseBlockQuote() (n *BlockQuoteNode) {
 	// replacer
 	re := regexp.MustCompile(`(?m)^ *> ?`)
 	raw := re.ReplaceAllString(token.val, "")
-	// TODO(Ariel): not work right now with defLink(inside the blockQuote)
+	// TODO(a8m): doesn't work right now with defLink(inside the blockQuote)
 	tr := &parse{lex: lex(raw), tr: p}
 	tr.parse()
 	n = p.newBlockQuote(token.pos)
@@ -303,10 +303,15 @@ Loop:
 func (p *parse) parseListItem() *ListItemNode {
 	token := p.next()
 	item := p.newListItem(token.pos)
-	tr := &parse{lex: lex(strings.TrimSpace(token.val)), tr: p}
+	token.val = strings.TrimSpace(token.val)
+	if p.isTaskItem(token.val) {
+		item.Nodes = p.parseTaskItem(token)
+		return item
+	}
+	tr := &parse{lex: lex(token.val), tr: p}
 	tr.parse()
 	for _, node := range tr.Nodes {
-		// wrap with paragraph only when it's loose item
+		// wrap with paragraph only when it's a loose item
 		if n, ok := node.(*ParagraphNode); ok && token.typ == itemListItem {
 			item.Nodes = append(item.Nodes, n.Nodes...)
 		} else {
@@ -314,6 +319,21 @@ func (p *parse) parseListItem() *ListItemNode {
 		}
 	}
 	return item
+}
+
+// parseTaskItem parses list item as a task item.
+func (p *parse) parseTaskItem(token item) []Node {
+	checkbox := p.newCheckbox(token.pos, token.val[1] == 'x')
+	token.val = strings.TrimSpace(token.val[3:])
+	return append([]Node{checkbox}, p.parseText(token.val)...)
+}
+
+// isTaskItem tests if the given string is list task item.
+func (p *parse) isTaskItem(s string) bool {
+	if len(s) < 5 || s[0] != '[' || (s[1] != 'x' && s[1] != ' ') || s[2] != ']' {
+		return false
+	}
+	return "" != strings.TrimSpace(s[3:])
 }
 
 // parse table
