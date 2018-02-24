@@ -14,6 +14,8 @@ import (
 var (
 	input     = flag.String("i", "", "")
 	output    = flag.String("o", "", "")
+	browser   = flag.Bool("b", false, "")
+	port      = flag.String("port", "8080", "")
 	smarty    = flag.Bool("smartypants", false, "")
 	fractions = flag.Bool("fractions", false, "")
 )
@@ -24,6 +26,9 @@ Options:
   -i  Specify file input, otherwise use last argument as input file. 
       If no input file is specified, read from stdin.
   -o  Specify file output. If none is specified, write to stdout.
+
+  -b     Open output in the browser.
+  -port  Port for browser flag. default to 8080.
 
   -smartypants  Use "smart" typograhic punctuation for things like 
                 quotes and dashes.
