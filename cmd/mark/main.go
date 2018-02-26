@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"os"
 
 	"github.com/a8m/mark"
@@ -14,7 +15,7 @@ import (
 var (
 	input     = flag.String("i", "", "")
 	output    = flag.String("o", "", "")
-	browser   = flag.Bool("b", false, "")
+	bwsr      = flag.Bool("b", false, "")
 	port      = flag.String("port", "8080", "")
 	smarty    = flag.Bool("smartypants", false, "")
 	fractions = flag.Bool("fractions", false, "")
@@ -73,16 +74,24 @@ func main() {
 		err  error
 		file = os.Stdout
 	)
-	if *output != "" {
-		if file, err = os.Create(*output); err != nil {
-			usageAndExit("error to create the wanted output file.")
-		}
-	}
 	// mark rendering
 	opts := mark.DefaultOptions()
 	opts.Smartypants = *smarty
 	opts.Fractions = *fractions
 	m := mark.New(data, opts)
+	if *bwsr {
+		b := &browser{
+			port:      *port,
+			parseFunc: m.Render,
+		}
+		go b.watch()
+		b.Serve()
+	}
+	if *output != "" {
+		if file, err = os.Create(*output); err != nil {
+			usageAndExit("error to create the wanted output file.")
+		}
+	}
 	if _, err := file.WriteString(m.Render()); err != nil {
 		usageAndExit(fmt.Sprintf("error writing output to: %s.", file.Name()))
 	}
@@ -96,4 +105,10 @@ func usageAndExit(msg string) {
 	flag.Usage()
 	fmt.Fprintf(os.Stderr, "\n")
 	os.Exit(1)
+}
+
+func failOnErr(err error, msg string) {
+	if err != nil {
+		log.Fatalf("mark: %v: %s", err, msg)
+	}
 }
