@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -18,8 +19,8 @@ import (
 // the new changes, once there's a new activity in the working file.
 type browser struct {
 	port      string
-	file      string
-	parseFunc func() string
+	path      string
+	parseFunc func(string) string
 	sync.RWMutex
 	listeners []chan []byte
 }
@@ -27,19 +28,23 @@ type browser struct {
 func (b *browser) watch() {
 	watcher, err := fsnotify.NewWatcher()
 	failOnErr(err, "create file watcher")
-	failOnErr(watcher.Add(b.file), "watch file")
+	failOnErr(watcher.Add(b.path), "watch file")
 	for {
 		select {
 		case event := <-watcher.Events:
 			if event.Op&fsnotify.Write != fsnotify.Write {
 				continue
 			}
-			buf := []byte(b.parseFunc())
+			buf, err := ioutil.ReadFile(b.path)
+			failOnErr(err, "read watched file")
+			// this double is a bit ugly. we definitely need to add
+			// support for bytes as a valid input for mark.
+			s := b.parseFunc(string(buf))
 			b.RLock()
 			for _, l := range b.listeners {
 				go func() {
 					fmt.Println("new change")
-					l <- buf
+					l <- []byte(s)
 				}()
 			}
 			b.RUnlock()
@@ -116,11 +121,15 @@ func (b *browser) page(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	fmt.Println("here", b.path)
+	buf, err := ioutil.ReadFile(b.path)
+	failOnErr(err, "read watched file")
+	s := b.parseFunc(string(buf))
 	page.Execute(w, struct {
 		Data string
 		Port string
 	}{
-		b.parseFunc(),
+		s,
 		b.port,
 	})
 }
@@ -139,7 +148,7 @@ var (
 			<title>WebSocket Example</title>
 		</head>
 		<body>
-			<pre id="fileData">{{.Data}}</pre>
+			<div id="fileData">{{.Data}}</div>
 			<script type="text/javascript">
 				(function() {
 					var data = document.getElementById("fileData");
@@ -147,9 +156,9 @@ var (
 					conn.onclose = function(evt) {
 						data.textContent = 'Connection closed';
 					}
-					conn.onmessage = function(evt) {
-						console.log('file updated');
-						data.textContent = evt.data;
+					conn.onmessage = function(ev) {
+						console.log('file updated', ev);
+						data.innerHTML = ev.data;
 					}
 				})();
 			</script>

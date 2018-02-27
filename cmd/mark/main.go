@@ -78,23 +78,24 @@ func main() {
 	opts := mark.DefaultOptions()
 	opts.Smartypants = *smarty
 	opts.Fractions = *fractions
-	m := mark.New(data, opts)
 	if *bwsr {
 		b := &browser{
-			port:      *port,
-			parseFunc: m.Render,
+			port: *port,
+			path: *input,
+			parseFunc: func(s string) string {
+				return mark.New(s, opts).Render()
+			},
 		}
 		go b.watch()
 		b.Serve()
 	}
+	m := mark.New(data, opts)
 	if *output != "" {
-		if file, err = os.Create(*output); err != nil {
-			usageAndExit("error to create the wanted output file.")
-		}
+		file, err = os.Create(*output)
+		failOnErr(err, "create the output faile")
 	}
-	if _, err := file.WriteString(m.Render()); err != nil {
-		usageAndExit(fmt.Sprintf("error writing output to: %s.", file.Name()))
-	}
+	_, err = file.WriteString(m.Render())
+	failOnErr(err, fmt.Sprintf("write output to: %s", file.Name()))
 }
 
 func usageAndExit(msg string) {
@@ -109,6 +110,6 @@ func usageAndExit(msg string) {
 
 func failOnErr(err error, msg string) {
 	if err != nil {
-		log.Fatalf("mark: %v: %s", err, msg)
+		log.Fatalf("mark: failed to %s: %s", msg, err)
 	}
 }
