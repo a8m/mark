@@ -14,9 +14,11 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// bowser serves the html output in the browser.
+// browser serves the html output in the browser.
 // client open an websocket connection, and the server push
 // the new changes, once there's a new activity in the working file.
+// TODO: when "--interactive" flag passed, create the the file if not exists
+// and add <textarea> for edit purpose.
 type browser struct {
 	port      string
 	path      string
@@ -37,7 +39,7 @@ func (b *browser) watch() {
 			}
 			buf, err := ioutil.ReadFile(b.path)
 			failOnErr(err, "read watched file")
-			// this double is a bit ugly. we definitely need to add
+			// this double conversion is a bit ugly. we definitely need to add
 			// support for bytes as a valid input for mark.
 			s := b.parseFunc(string(buf))
 			b.RLock()
@@ -48,7 +50,6 @@ func (b *browser) watch() {
 				}()
 			}
 			b.RUnlock()
-			// listen for changes.
 		}
 	}
 }
@@ -68,7 +69,7 @@ func (b *browser) ws(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	// register.
+	// register client.
 	b.Lock()
 	l := make(chan []byte)
 	b.listeners = append(b.listeners, l)
@@ -157,7 +158,6 @@ var (
 						data.textContent = 'Connection closed';
 					}
 					conn.onmessage = function(ev) {
-						console.log('file updated', ev);
 						data.innerHTML = ev.data;
 					}
 				})();
@@ -166,3 +166,7 @@ var (
 	</html>
 	`))
 )
+
+// HTML/JS comments:
+// - example doesn't work on start.
+// - textArea.addEventListener('input', ev => { ... })
