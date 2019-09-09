@@ -1,3 +1,5 @@
+Archived. use https://github.com/russross/blackfriday instead 
+
 # Mark [![Test coverage][coveralls-image]][coveralls-url] [![Build status][travis-image]][travis-url] [![Go doc][doc-image]][doc-url] [![license](http://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/a8m/mark/master/LICENSE)
 > A [markdown](http://daringfireball.net/projects/markdown/) processor written in Go. built for fun.
 
